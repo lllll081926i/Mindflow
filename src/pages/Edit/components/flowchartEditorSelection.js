@@ -99,12 +99,44 @@ export const flowchartSelectionMethods = {
     }
     if (event.key === 'Escape') {
       event.preventDefault()
+      if (this.commandPaletteVisible) {
+        this.closeCommandPalette()
+        return
+      }
+      if (this.flowchartAiPreviewVisible) {
+        this.discardFlowchartAiPreview()
+        return
+      }
       this.discardInlineTextEditor()
       this.closeInspector()
       this.clearSelection()
       return
     }
     const isMetaKey = event.ctrlKey || event.metaKey
+    if (isMetaKey && event.key.toLowerCase() === 'k') {
+      event.preventDefault()
+      if (this.commandPaletteVisible) this.closeCommandPalette()
+      else this.openCommandPalette()
+      return
+    }
+    if (isMetaKey && event.key.toLowerCase() === 's') {
+      event.preventDefault()
+      // Shift keeps a quiet write path for rapid save loops.
+      void this.saveCurrentFile({
+        silent: !!event.shiftKey
+      })
+      return
+    }
+    if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === '0') {
+      event.preventDefault()
+      this.fitCanvasToView()
+      return
+    }
+    if (isMetaKey && event.key.toLowerCase() === '1') {
+      event.preventDefault()
+      this.resetViewport()
+      return
+    }
     if (isMetaKey && event.key.toLowerCase() === 'z') {
       event.preventDefault()
       if (event.shiftKey) {
@@ -161,6 +193,7 @@ export const flowchartSelectionMethods = {
         event.preventDefault()
         this.removeSelection()
       }
+      return
     }
     if (event.key.startsWith('Arrow') && this.selectedNodeIds.length) {
       event.preventDefault()

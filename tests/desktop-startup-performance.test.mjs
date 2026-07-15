@@ -35,10 +35,20 @@ const toolbarSource = fs.readFileSync(
   path.resolve('src/pages/Edit/components/Toolbar.vue'),
   'utf8'
 )
-const flowchartDocumentSource = fs.readFileSync(
-  path.resolve('src/services/flowchartDocument.js'),
+const editorLocalFileSessionSource = fs.readFileSync(
+  path.resolve('src/pages/Edit/components/editorLocalFileSession.js'),
   'utf8'
 )
+const flowchartDocumentSource = [
+  path.resolve('src/services/flowchartDocument.js'),
+  ...fs
+    .readdirSync(path.resolve('src/services/flowchart'))
+    .filter(name => name.endsWith('.js') && !name.includes('backup'))
+    .map(name => path.resolve('src/services/flowchart', name))
+]
+  .map(filePath => fs.readFileSync(filePath, 'utf8'))
+  .join('\n')
+
 const importSource = fs.readFileSync(
   path.resolve('src/pages/Edit/components/Import.vue'),
   'utf8'
@@ -91,7 +101,7 @@ test('工作台文件动作服务不再直接依赖 simple-mind-map 示例数据
 
 test('JSON 解析入口改为直接依赖轻量 json 工具，避免误拉取 DOMPurify', () => {
   assert.match(workspaceActionsSource, /from '@\/utils\/json'/)
-  assert.match(toolbarSource, /from '@\/services\/flowchartDocument'/)
+  assert.match(editorLocalFileSessionSource, /flowchartDocument/)
   assert.match(flowchartDocumentSource, /from '@\/utils\/json'/)
   assert.match(importSource, /from '@\/utils\/json'/)
   assert.match(clipboardSource, /from '@\/utils\/json'/)

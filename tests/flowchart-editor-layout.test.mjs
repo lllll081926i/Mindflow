@@ -9,10 +9,16 @@ const editIndexSource = fs.readFileSync(
 )
 const homeSource = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
 const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
-const flowchartDocumentSource = fs.readFileSync(
+const flowchartDocumentSource = [
   path.resolve('src/services/flowchartDocument.js'),
-  'utf8'
-)
+  ...fs
+    .readdirSync(path.resolve('src/services/flowchart'))
+    .filter(name => name.endsWith('.js') && !name.includes('backup'))
+    .map(name => path.resolve('src/services/flowchart', name))
+]
+  .map(filePath => fs.readFileSync(filePath, 'utf8'))
+  .join('\n')
+
 const exportPageSource = fs.readFileSync(path.resolve('src/pages/Export/Index.vue'), 'utf8')
 const flowchartEditorPath = path.resolve('src/pages/Edit/components/FlowchartEditor.vue')
 const flowchartEditorSource = fs.readFileSync(flowchartEditorPath, 'utf8')
@@ -303,8 +309,8 @@ test('流程图返回首页前会处理未保存风险，不直接跳转丢失�
   assert.match(source, /this\.recoveryTimer/)
 })
 
-test('流程图模式会按每分钟一次的节奏自动保存，并在手动保存时清理旧定时器', () => {
-  assert.match(flowchartLogicSource, /FLOWCHART_AUTO_SAVE_INTERVAL = 60 \* 1000/)
+test('流程图模式会按更短的防抖节奏自动保存，并在手动保存时清理旧定时器', () => {
+  assert.match(flowchartLogicSource, /FLOWCHART_AUTO_SAVE_INTERVAL = 15 \* 1000/)
   assert.match(flowchartLogicSource, /window\.setTimeout\([\s\S]*FLOWCHART_AUTO_SAVE_INTERVAL\)/)
   assert.match(
     flowchartLogicSource,
@@ -519,8 +525,8 @@ test('流程图支持完整主题系统，主题会作用到编辑器变量，�
   assert.match(flowchartInspectorSource, /getTemplateNodeStyle\(/)
   assert.match(flowchartInspectorSource, /getTemplateEdgeStyle\(/)
   assert.match(flowchartInspectorSource, /backgroundColor:\s*'#ffffff'/)
-  assert.match(flowchartInspectorSource, /fill:\s*'#ffffff'/)
-  assert.match(flowchartInspectorSource, /stroke:\s*'#111111'/)
+  assert.match(fs.readFileSync(path.resolve('src/pages/Edit/components/flowchartStructurePreview.js'), 'utf8'), /fill: '#ffffff'/)
+  assert.match(fs.readFileSync(path.resolve('src/pages/Edit/components/flowchartStructurePreview.js'), 'utf8'), /stroke: '#111111'/)
   assert.match(langSource, /"themeBlueprint": "纸白"/)
   assert.match(langSource, /"themeIncidentDark": "应急暗色"/)
   assert.match(langSource, /"themeGraphite": "石墨"/)
@@ -884,6 +890,12 @@ test('流程图编辑器提供键盘快捷操作，覆盖复制粘贴和删除�
   assert.match(source, /event\.key\.toLowerCase\(\) === 'c'/)
   assert.match(source, /event\.key\.toLowerCase\(\) === 'v'/)
   assert.match(source, /event\.key === 'Delete'/)
+  assert.match(source, /event\.key\.toLowerCase\(\) === 's'/)
+  assert.match(source, /event\.key\.toLowerCase\(\) === '0'/)
+  assert.match(source, /event\.key\.toLowerCase\(\) === '1'/)
+  assert.match(source, /this\.saveCurrentFile\(\{[\s\S]*silent:\s*!!event\.shiftKey/)
+  assert.match(source, /this\.fitCanvasToView\(\)/)
+  assert.match(source, /this\.resetViewport\(\)/)
 })
 
 test('流程图拖拽节点时提供轻量对齐吸附与辅助线', () => {
@@ -967,7 +979,7 @@ test('流程图支持曲线连线类型，并贯通编辑态与模版预览', ()
   assert.match(flowchartDocumentSource, /style\.pathType === 'curved'/)
   assert.match(flowchartDocumentSource, /C \$\{sourceControl\.x\}/)
   assert.match(flowchartEditorSource, /value:\s*'curved'/)
-  assert.match(flowchartInspectorSource, /getFlowchartEdgeLayout\(/)
+  assert.match(fs.readFileSync(path.resolve('src/pages/Edit/components/flowchartStructurePreview.js'), 'utf8'), /getFlowchartEdgeLayout/)
   assert.match(langSource, /"edgeTypeCurved": "曲线"/)
 })
 
@@ -1067,7 +1079,10 @@ test('套用模板与 AI 导入不会再偷偷覆盖当前主题', () => {
 
   assert.ok(applyTemplateBlock)
   assert.doesNotMatch(applyTemplateBlock, /themeId:/)
-  assert.match(flowchartDocumentLogicSource, /applyGeneratedFlowchart\(result\)[\s\S]*themeId:\s*this\.flowchartConfig\?\.themeId \|\| 'blueprint'/)
+  assert.match(
+    flowchartDocumentLogicSource,
+    /applyGeneratedFlowchart\(result\)[\s\S]*themeId:\s*this\.flowchartConfig\?\.themeId \|\| 'blueprint'/
+  )
   assert.match(
     flowchartDocumentLogicSource,
     /applyGeneratedFlowchart\(result\)[\s\S]*nextFlowchartConfig\.themeId = this\.flowchartConfig\?\.themeId \|\| 'blueprint'/
@@ -1535,8 +1550,14 @@ test('流程图套用模板只提交一次最终视图状态，避免撤销历�
 test('流程图生成或导入后会适配视口并只提交最终状态', () => {
   const source = flowchartLogicSource
 
-  assert.match(source, /applyGeneratedFlowchart\(result\) \{[\s\S]*?\$nextTick\(\(\) => \{[\s\S]*?fitCanvasToView\(\{\s*persist:\s*false\s*\}\)/)
-  assert.match(source, /applyGeneratedFlowchart\(result\) \{[\s\S]*?\$nextTick\(\(\) => \{[\s\S]*?persistFlowchartState\(\)/)
+  assert.match(
+    source,
+    /applyGeneratedFlowchart\(result\) \{[\s\S]*?\$nextTick\(\(\) => \{[\s\S]*?fitCanvasToView\(\{\s*persist:\s*false\s*\}\)/
+  )
+  assert.match(
+    source,
+    /applyGeneratedFlowchart\(result\) \{[\s\S]*?\$nextTick\(\(\) => \{[\s\S]*?persistFlowchartState\(\)/
+  )
 })
 
 test('流程图节点缩放使用 requestAnimationFrame 节流，与其他拖拽处理器一致', () => {
@@ -1614,4 +1635,121 @@ test('流程图新增节点有出现动画', () => {
     /flowchartNodeAppear|nodeAppear|@keyframes.*[Aa]ppear/,
     '应有节点出现动画定义'
   )
+})
+
+
+
+test('流程图工具栏展示保存与生成状态，避免用户不知道是否落盘', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const toolbarSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartToolbar.vue'),
+    'utf8'
+  )
+  assert.match(editorSource, /flowchartSaveStatusType/)
+  assert.match(editorSource, /flowchartSaveStatusText/)
+  assert.match(editorSource, /save-status-type/)
+  assert.match(toolbarSource, /saveStatusType/)
+  assert.match(toolbarSource, /flowchartSaveStatus/)
+  assert.match(toolbarSource, /saveStatusType/)
+})
+
+
+test('流程图 AI 生成会先打开画布级结构预览，不再直接覆盖画布', () => {
+  const aiSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorAi.js'),
+    'utf8'
+  )
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(aiSource, /openFlowchartAiPreview\(result\)/)
+  assert.match(aiSource, /pendingFlowchartAiResult/)
+  assert.doesNotMatch(aiSource, /applyGeneratedFlowchart\(result\)/)
+  assert.match(editorSource, /flowchartAiPreviewVisible/)
+  assert.match(editorSource, /flowchartAiPreviewCanvas/)
+  assert.match(editorSource, /applyFlowchartAiPreview/)
+  assert.match(editorSource, /discardFlowchartAiPreview/)
+  assert.match(langSource, /"aiPreviewTitle"/)
+  assert.match(langSource, /"aiPreviewMessage"/)
+})
+
+test('流程图提供命令面板并支持 Ctrl/Cmd+K 打开', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const toolbarSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartToolbar.vue'),
+    'utf8'
+  )
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.match(editorSource, /FlowchartCommandPalette/)
+  assert.match(editorSource, /flowchartCommandPaletteItems/)
+  assert.match(editorSource, /openCommandPalette/)
+  assert.match(toolbarSource, /open-command-palette/)
+  assert.match(toolbarSource, /labels\.commandPalette/)
+  assert.match(selectionSource, /event\.key\.toLowerCase\(\) === 'k'/)
+  assert.match(selectionSource, /openCommandPalette\(\)/)
+})
+
+test('流程图模板预设与工厂键一致，且文案键完整', () => {
+  const templateSource = fs.readFileSync(
+    path.resolve('src/services/flowchart/parts/10-templates.js'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  const factories = [
+    ...templateSource.matchAll(/^[ ]{2}([A-Za-z0-9_]+):\s*title\s*=>/gm)
+  ].map(match => match[1])
+  const presetBlock = templateSource.slice(
+    templateSource.indexOf('FLOWCHART_TEMPLATE_PRESETS'),
+    templateSource.indexOf('export const getFlowchartTemplateMeta')
+  )
+  const presetIds = [...presetBlock.matchAll(/id:\s*'([^']+)'/g)].map(match => match[1])
+  assert.ok(presetIds.length > 0)
+  presetIds.forEach(id => {
+    assert.equal(
+      factories.includes(id),
+      true,
+      'missing factory for preset ' + id
+    )
+  })
+  const labelKeys = [...presetBlock.matchAll(/labelKey:\s*'([^']+)'/g)].map(
+    match => match[1]
+  )
+  labelKeys.forEach(key => {
+    const leaf = key.split('.').pop()
+    assert.match(langSource, new RegExp('"' + leaf + '"'))
+  })
+})
+
+
+test('流程图提供命令面板并支持 Ctrl/Cmd+K 打开', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const toolbarSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartToolbar.vue'),
+    'utf8'
+  )
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.match(editorSource, /FlowchartCommandPalette/)
+  assert.match(editorSource, /flowchartCommandPaletteItems/)
+  assert.match(editorSource, /openCommandPalette/)
+  assert.match(toolbarSource, /open-command-palette/)
+  assert.match(toolbarSource, /labels.commandPalette/)
+  assert.match(selectionSource, /event\.key\.toLowerCase\(\) === 'k'/)
+  assert.match(selectionSource, /openCommandPalette\(\)/)
 })

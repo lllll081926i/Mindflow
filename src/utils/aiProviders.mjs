@@ -6,6 +6,7 @@
  *   adapter: string
  *   defaultBaseUrl: string
  *   defaultApiPath: string
+ *   defaultModel?: string
  *   defaultMethod: string
  * }} AiProviderMeta
  */
@@ -29,6 +30,9 @@ import { parseExternalJsonSafely } from './json.js'
 const DEFAULT_PORT = 3456
 const DEFAULT_METHOD = 'POST'
 const DEFAULT_PROTOCOL = 'openai-compatible'
+const ANTHROPIC_PROTOCOL = 'anthropic'
+const DEFAULT_ANTHROPIC_VERSION = '2023-06-01'
+const DEFAULT_ANTHROPIC_MAX_TOKENS = 4096
 const DEFAULT_PROVIDER = 'volcanoArk'
 export const AI_PROXY_AUTH_HEADER_NAME = 'x-ai-proxy-token'
 const AI_STORAGE_KEY_PREFIX = 'b64:'
@@ -50,6 +54,17 @@ export const AI_PROVIDER_LIST = [
     adapter: DEFAULT_PROTOCOL,
     defaultBaseUrl: 'https://api.openai.com',
     defaultApiPath: '/v1/chat/completions',
+    defaultModel: 'gpt-4.1-mini',
+    defaultMethod: DEFAULT_METHOD
+  },
+  {
+    value: 'anthropic',
+    labelKey: 'ai.providerAnthropic',
+    protocol: ANTHROPIC_PROTOCOL,
+    adapter: ANTHROPIC_PROTOCOL,
+    defaultBaseUrl: 'https://api.anthropic.com',
+    defaultApiPath: '/v1/messages',
+    defaultModel: 'claude-sonnet-4-5',
     defaultMethod: DEFAULT_METHOD
   },
   {
@@ -77,6 +92,15 @@ export const AI_PROVIDER_LIST = [
     adapter: DEFAULT_PROTOCOL,
     defaultBaseUrl: '',
     defaultApiPath: '/v1/chat/completions',
+    defaultMethod: DEFAULT_METHOD
+  },
+  {
+    value: 'customAnthropic',
+    labelKey: 'ai.providerCustomAnthropic',
+    protocol: ANTHROPIC_PROTOCOL,
+    adapter: ANTHROPIC_PROTOCOL,
+    defaultBaseUrl: '',
+    defaultApiPath: '/v1/messages',
     defaultMethod: DEFAULT_METHOD
   }
 ]
@@ -257,6 +281,7 @@ const detectProviderByApi = api => {
   if (!url) return 'volcanoArk'
   if (url.includes('ark.cn-beijing.volces.com')) return 'volcanoArk'
   if (url.includes('api.openai.com')) return 'openai'
+  if (url.includes('api.anthropic.com')) return 'anthropic'
   if (url.includes('api.deepseek.com')) return 'deepseek'
   if (url.includes('api.siliconflow.cn')) return 'siliconFlow'
   return 'customOpenAI'
@@ -297,7 +322,7 @@ export const getDefaultAiConfig = provider => {
     apiPath: meta.defaultApiPath,
     api: buildApiUrl(meta.defaultBaseUrl, meta.defaultApiPath),
     key: '',
-    model: '',
+    model: meta.defaultModel || '',
     port: DEFAULT_PORT,
     method: meta.defaultMethod || DEFAULT_METHOD
   }
@@ -324,16 +349,17 @@ export const normalizeAiConfig = config => {
       ? parsedPort.value
       : String(input.port).trim()
   const method = String(input.method || defaults.method || DEFAULT_METHOD).toUpperCase()
+  const protocol = input.protocol || meta.protocol || defaults.protocol || DEFAULT_PROTOCOL
 
   /** @type {AiConfig} */
   return {
     provider: meta.value,
-    protocol: input.protocol || meta.protocol || defaults.protocol || DEFAULT_PROTOCOL,
+    protocol,
     baseUrl,
     apiPath,
     api: buildApiUrl(baseUrl, apiPath),
     key: String(input.key || ''),
-    model: String(input.model || ''),
+    model: String(input.model || defaults.model || ''),
     port,
     method
   }
@@ -370,19 +396,74 @@ export const validateAiConfig = config => {
 /** @param {Record<string, unknown> | null | undefined} config */
 export const buildAiRequestConfig = config => {
   const normalized = normalizeAiConfig(config)
+  const headers =
+    normalized.protocol === ANTHROPIC_PROTOCOL
+      ? {
+          'x-api-key': normalized.key,
+          'anthropic-version': DEFAULT_ANTHROPIC_VERSION
+        }
+      : {
+          Authorization: `Bearer ${normalized.key}`
+        }
   return {
     provider: normalized.provider,
     protocol: normalized.protocol,
     api: normalized.api,
     method: normalized.method,
-    headers: {
-      Authorization: `Bearer ${normalized.key}`
-    },
+    headers,
     data: {
       model: normalized.model,
-      stream: true
+      stream: true,
+      ...(normalized.protocol === ANTHROPIC_PROTOCOL
+        ? { max_tokens: DEFAULT_ANTHROPIC_MAX_TOKENS }
+        : {})
     }
   }
+}
+
+/** @param {unknown} role */
+const normalizeAnthropicRole = role => {
+  return role === 'assistant' ? 'assistant' : 'user'
+}
+
+/**
+ * @param {unknown} protocol
+ * @param {Record<string, unknown>} data
+ */
+export const buildAiProtocolRequestData = (protocol, data = {}) => {
+  if (protocol !== ANTHROPIC_PROTOCOL) {
+    return data
+  }
+  const messages = Array.isArray(data.messages) ? data.messages : []
+  /** @type {string[]} */
+  const systemMessages = []
+  /** @type {Array<{ role: string, content: string }>} */
+  const nextMessages = []
+  messages.forEach(message => {
+    const item =
+      message && typeof message === 'object'
+        ? /** @type {{ role?: unknown, content?: unknown }} */ (message)
+        : {}
+    const content = String(item.content || '').trim()
+    if (!content) return
+    if (item.role === 'system') {
+      systemMessages.push(content)
+      return
+    }
+    nextMessages.push({
+      role: normalizeAnthropicRole(item.role),
+      content
+    })
+  })
+  /** @type {Record<string, unknown>} */
+  const nextData = {
+    ...data,
+    messages: nextMessages
+  }
+  if (systemMessages.length) {
+    nextData.system = systemMessages.join('\n\n')
+  }
+  return nextData
 }
 
 /**
@@ -396,6 +477,15 @@ export const parseOpenAICompatibleStreamChunk = item => {
       return delta && typeof delta.content === 'string' ? delta.content : ''
     })
     .join('')
+}
+
+/** @param {any} item */
+export const parseAnthropicStreamChunk = item => {
+  if (!item || item.type !== 'content_block_delta') return ''
+  const delta = item.delta
+  return delta && delta.type === 'text_delta' && typeof delta.text === 'string'
+    ? delta.text
+    : ''
 }
 
 /**
@@ -445,4 +535,82 @@ export const consumeOpenAICompatibleStreamText = (pending, chunk) => {
     pending: done ? '' : nextPending,
     done
   }
+}
+
+/**
+ * @param {string} pending
+ * @param {string} chunk
+ */
+export const consumeAnthropicStreamText = (pending, chunk) => {
+  const source = `${String(pending || '')}${String(chunk || '')}`
+  if (!source) {
+    return {
+      items: [],
+      pending: '',
+      done: false
+    }
+  }
+
+  const hasTerminator = /(?:\r?\n){2}$/.test(source)
+  const segments = source.split(/\r?\n\r?\n/)
+  const nextPending = hasTerminator ? '' : segments.pop() || ''
+  const items = []
+  let done = false
+
+  for (const segment of segments) {
+    const lines = String(segment)
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean)
+    if (!lines.length) continue
+    const eventName = lines
+      .find(line => line.startsWith('event:'))
+      ?.slice(6)
+      .trim()
+    const data = lines
+      .filter(line => line.startsWith('data:'))
+      .map(line => line.slice(5).trimStart())
+      .join('\n')
+    if (eventName === 'message_stop') {
+      done = true
+    }
+    if (!data) continue
+    try {
+      const item = parseExternalJsonSafely(data)
+      if (item?.type === 'message_stop') {
+        done = true
+      } else if (item?.type === 'content_block_delta') {
+        items.push(item)
+      }
+    } catch (error) {
+      console.error('consumeAnthropicStreamText parse failed', error)
+    }
+  }
+
+  return {
+    items,
+    pending: done ? '' : nextPending,
+    done
+  }
+}
+
+/**
+ * @param {unknown} protocol
+ * @param {any} item
+ */
+export const parseAiStreamChunk = (protocol, item) => {
+  return protocol === ANTHROPIC_PROTOCOL
+    ? parseAnthropicStreamChunk(item)
+    : parseOpenAICompatibleStreamChunk(item)
+}
+
+/**
+ * @param {unknown} protocol
+ * @param {string} pending
+ * @param {string} chunk
+ */
+export const consumeAiStreamText = (protocol, pending, chunk) => {
+  return protocol === ANTHROPIC_PROTOCOL
+    ? consumeAnthropicStreamText(pending, chunk)
+    : consumeOpenAICompatibleStreamText(pending, chunk)
 }

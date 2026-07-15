@@ -16,7 +16,8 @@ export const MAX_VIEWPORT_ZOOM = 2.5
 export const FLOWCHART_ALIGNMENT_THRESHOLD = 8
 export const FLOWCHART_STRAIGHT_EDGE_SNAP_THRESHOLD = 12
 export const FLOWCHART_HISTORY_LIMIT = 60
-export const FLOWCHART_AUTO_SAVE_INTERVAL = 60 * 1000
+// Keep autosave responsive without thrashing disk on every drag frame.
+export const FLOWCHART_AUTO_SAVE_INTERVAL = 15 * 1000
 export const FLOWCHART_INTERACTION_CLICK_GUARD_MS = 160
 export const FLOWCHART_NODE_HIT_PADDING = 28
 export const FLOWCHART_SELECTION_BOX_MIN_SIZE = 10

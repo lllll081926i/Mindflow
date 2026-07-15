@@ -157,3 +157,19 @@ test('发布日期格式化不再直接截取 UTC ISO 字符串', () => {
 
   assert.doesNotMatch(coreSource, /toISOString\(\)\.slice\(0,\s*10\)/)
 })
+
+
+test('设置页更新检查会保留最近一次结果摘要，便于用户确认闭环', () => {
+  const settingSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/Setting.vue'),
+    'utf8'
+  )
+  const workspaceSettingsSource = fs.readFileSync(
+    path.resolve('src/pages/Home/components/WorkspaceSettings.vue'),
+    'utf8'
+  )
+  assert.match(settingSource, /lastUpdateCheckSummary/)
+  assert.match(settingSource, /updateCheckSummary/)
+  assert.match(workspaceSettingsSource, /lastUpdateCheckSummary/)
+  assert.match(workspaceSettingsSource, /updateCheckSummary/)
+})

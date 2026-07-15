@@ -20,7 +20,8 @@ module.exports = [
       'simple-mind-map/node_modules/**',
       'simple-mind-map-plugin-themes/node_modules/**',
       'src/config/icon.js',
-      'src/config/image.js'
+      'src/config/image.js',
+      'src/services/flowchart/parts/**'
     ]
   },
   {

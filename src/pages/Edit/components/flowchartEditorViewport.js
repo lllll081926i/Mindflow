@@ -139,14 +139,28 @@ export const flowchartViewportMethods = {
     })
   },
 
+  getViewportZoomStep(zoom = 1) {
+    const value = Number(zoom)
+    if (!Number.isFinite(value) || value < 0.5) return 0.05
+    if (value < 1) return 0.1
+    return 0.15
+  },
+
+  getViewportWheelZoomStep(zoom = 1) {
+    const value = Number(zoom)
+    const baseStep = 0.08
+    const zoomFactor = !Number.isFinite(value) || value < 0.5 ? 0.6 : value < 1 ? 0.8 : 1.2
+    return baseStep * zoomFactor
+  },
+
   zoomIn() {
     const viewport = this.getViewport()
-    this.setViewportZoom(viewport.zoom + 0.1)
+    this.setViewportZoom(viewport.zoom + this.getViewportZoomStep(viewport.zoom))
   },
 
   zoomOut() {
     const viewport = this.getViewport()
-    this.setViewportZoom(viewport.zoom - 0.1)
+    this.setViewportZoom(viewport.zoom - this.getViewportZoomStep(viewport.zoom))
   },
 
   fitCanvasToView({ persist = true } = {}) {
@@ -204,7 +218,10 @@ export const flowchartViewportMethods = {
     }
     const viewport = this.getViewport()
     const direction = event.deltaY > 0 ? -1 : 1
-    this.setViewportZoom(viewport.zoom + direction * 0.08, event)
+    this.setViewportZoom(
+      viewport.zoom + direction * this.getViewportWheelZoomStep(viewport.zoom),
+      event
+    )
   },
 
   handleCanvasPointerDown(event) {

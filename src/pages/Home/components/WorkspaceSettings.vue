@@ -183,6 +183,9 @@
             >
               {{ $t('setting.checkUpdate') }}
             </el-button>
+            <p v-if="lastUpdateCheckSummary" class="updateCheckSummary">
+              {{ lastUpdateCheckSummary }}
+            </p>
           </div>
         </div>
         <div class="appInfoCard recoveryInfoCard">
@@ -265,22 +268,75 @@
             @change="updateLocalConfig('enableAi', $event)"
           />
         </div>
-        <div class="appInfoCard">
-          <div class="appInfoRow">
-            <span>Provider</span>
-            <strong>{{ aiConfig.provider || '未设置' }}</strong>
-          </div>
-          <div class="appInfoRow">
-            <span>Base URL</span>
-            <strong>{{ aiConfig.baseUrl || '未设置' }}</strong>
-          </div>
-          <div class="appInfoRow">
-            <span>模型</span>
-            <strong>{{ aiConfig.model || '未设置' }}</strong>
+        <div class="aiSettingsCard">
+          <div class="aiSettingsGrid">
+            <label class="aiSettingsField">
+              <span>{{ $t('ai.provider') }}</span>
+              <el-select
+                v-model="aiConfigForm.provider"
+                @change="handleAiProviderChange"
+              >
+                <el-option
+                  v-for="item in providerOptions"
+                  :key="item.value"
+                  :label="$t(item.labelKey)"
+                  :value="item.value"
+                />
+              </el-select>
+            </label>
+            <label class="aiSettingsField">
+              <span>{{ $t('ai.baseUrl') }}</span>
+              <el-input
+                v-model="aiConfigForm.baseUrl"
+                clearable
+                :placeholder="$t('ai.baseUrlPlaceholder')"
+              />
+            </label>
+            <label class="aiSettingsField">
+              <span>{{ $t('ai.apiPath') }}</span>
+              <el-input
+                v-model="aiConfigForm.apiPath"
+                clearable
+                :placeholder="$t('ai.apiPathPlaceholder')"
+              />
+            </label>
+            <label class="aiSettingsField">
+              <span>{{ $t('ai.modelName') }}</span>
+              <el-input
+                v-model="aiConfigForm.model"
+                clearable
+                :placeholder="$t('ai.modelPlaceholder')"
+              />
+            </label>
+            <label class="aiSettingsField">
+              <span>API Key</span>
+              <el-input
+                v-model="aiConfigForm.key"
+                show-password
+                clearable
+                :placeholder="$t('ai.apiKeyPlaceholder')"
+              />
+            </label>
+            <label class="aiSettingsField">
+              <span>{{ $t('ai.port') }}</span>
+              <el-input
+                v-model="aiConfigForm.port"
+                clearable
+                :placeholder="$t('ai.portPlaceholder')"
+              />
+            </label>
           </div>
           <div class="appInfoActions">
+            <el-button
+              type="primary"
+              size="small"
+              :loading="savingAiConfig"
+              @click="saveAiConfig"
+            >
+              {{ $t('ai.confirm') }}
+            </el-button>
             <el-button size="small" @click="showAiConfig = true">
-              修改 AI 配置
+              {{ $t('ai.modifyAIConfiguration') }}
             </el-button>
           </div>
         </div>
@@ -314,6 +370,12 @@ import {
   createUpdateDialogMessage
 } from '@/services/updateService'
 import { openExternalUrl } from '@/platform'
+import {
+  AI_PROVIDER_LIST,
+  getAiProviderMeta,
+  normalizeAiConfig,
+  parseAiPort
+} from '@/utils/aiProviders.mjs'
 import {
   clearAllRecoveryDrafts,
   refreshRecoveryState
@@ -355,8 +417,22 @@ export default {
       ],
       docConfig: defaultDocConfig(),
       checkingForUpdates: false,
+      lastUpdateCheckSummary: '',
+      lastUpdateCheckAt: 0,
       clearingRecoveryFiles: false,
+      savingAiConfig: false,
       showAiConfig: false,
+      aiConfigForm: {
+        provider: '',
+        protocol: '',
+        baseUrl: '',
+        apiPath: '',
+        api: '',
+        key: '',
+        model: '',
+        port: '',
+        method: ''
+      },
       recoverySummary: {
         rootPath: '',
         origin: '',
@@ -399,10 +475,22 @@ export default {
     },
     shortcutGroups() {
       return shortcutKeyList.zh || []
+    },
+    providerOptions() {
+      return AI_PROVIDER_LIST
+    }
+  },
+  watch: {
+    aiConfig: {
+      deep: true,
+      handler() {
+        this.initAiConfigForm()
+      }
     }
   },
   created() {
     this.initDocConfig()
+    this.initAiConfigForm()
   },
   mounted() {
     void this.loadRecoverySummary()
@@ -427,6 +515,59 @@ export default {
         [key]: value
       }
       storeConfig(this.docConfig)
+    },
+
+    initAiConfigForm() {
+      const config = normalizeAiConfig(this.aiConfig)
+      Object.keys(this.aiConfigForm).forEach(key => {
+        this.aiConfigForm[key] = config[key]
+      })
+    },
+
+    handleAiProviderChange(provider) {
+      const meta = getAiProviderMeta(provider)
+      const nextConfig = normalizeAiConfig({
+        ...this.aiConfigForm,
+        provider: meta.value,
+        protocol: meta.protocol,
+        baseUrl: meta.defaultBaseUrl,
+        apiPath: meta.defaultApiPath,
+        model: meta.defaultModel || this.aiConfigForm.model,
+        method: meta.defaultMethod
+      })
+      Object.keys(this.aiConfigForm).forEach(key => {
+        this.aiConfigForm[key] = nextConfig[key]
+      })
+    },
+
+    validateAiConfigForm(config) {
+      if (!config.provider) return this.$t('ai.providerValidateTip')
+      if (!config.baseUrl) return this.$t('ai.baseUrlValidateTip')
+      if (!config.apiPath) return this.$t('ai.apiPathValidateTip')
+      if (!config.key) return this.$t('ai.keyValidateTip')
+      if (!config.model) return this.$t('ai.modelValidateTip')
+      if (!parseAiPort(config.port).valid) return this.$t('ai.portValidateTip')
+      return ''
+    },
+
+    async saveAiConfig() {
+      if (this.savingAiConfig) return
+      const config = normalizeAiConfig(this.aiConfigForm)
+      const errorMessage = this.validateAiConfigForm(config)
+      if (errorMessage) {
+        this.$message.error(errorMessage)
+        return
+      }
+      this.savingAiConfig = true
+      try {
+        await applyLocalConfigPatch(config)
+        this.$message.success(this.$t('ai.configSaveSuccessTip'))
+      } catch (error) {
+        console.error('save ai config failed', error)
+        this.$message.error(error?.message || this.$t('home.actionFailed'))
+      } finally {
+        this.savingAiConfig = false
+      }
     },
 
     async loadRecoverySummary() {
@@ -473,7 +614,11 @@ export default {
       this.checkingForUpdates = true
       try {
         const result = await runUpdateCheck(this.appVersion)
+        this.lastUpdateCheckAt = Date.now()
         if (result.status === 'update-available') {
+          this.lastUpdateCheckSummary = this.$t('setting.updateFoundWithoutUrl', {
+            version: result.latestVersion
+          })
           if (result.url) {
             const action = await this.$confirm(
               createUpdateDialogMessage(result, this.$t),
@@ -560,6 +705,7 @@ export default {
 
     .settingRow,
     .appInfoCard,
+    .aiSettingsCard,
     .guideCard,
     .shortcutGroup,
     .chip {
@@ -570,7 +716,13 @@ export default {
     .sectionDesc,
     .shortcutRow span,
     .guideCard p,
-    .recoveryHint {
+    .updateCheckSummary {
+  margin: 8px 0 0;
+  color: #737373;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.recoveryHint {
       color: rgba(255, 255, 255, 0.68);
     }
   }
@@ -664,6 +816,7 @@ export default {
 }
 
 .appInfoCard,
+.aiSettingsCard,
 .guideCard,
 .shortcutGroup {
   margin-top: 20px;
@@ -671,6 +824,23 @@ export default {
   border: 1px solid rgba(31, 41, 55, 0.08);
   background: #f8fafc;
   padding: 18px;
+}
+
+.aiSettingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.aiSettingsField {
+  display: grid;
+  gap: 8px;
+
+  span {
+    font-size: 13px;
+    font-weight: 600;
+    color: inherit;
+  }
 }
 
 .guideCard {

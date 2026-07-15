@@ -281,7 +281,25 @@
         </div>
       </div>
       <div class="toolbarBlock toolbarMetaBlock" v-if="!isMobile">
+        <div
+          class="toolbarSaveStatus"
+          :class="`is-${toolbarStatusType}`"
+          :title="toolbarStatusTitle"
+          role="status"
+          :aria-label="toolbarStatusText"
+        >
+          <span class="toolbarSaveStatusDot" aria-hidden="true"></span>
+          <span class="toolbarSaveStatusText">{{ toolbarStatusText }}</span>
+        </div>
         <div class="toolbarQuickActions">
+          <EditorToolbarAction
+            tag="div"
+            action-class="toolbarBtn quickActionBtn"
+            icon-class="icon iconfont edit-icon-more"
+            text-class="text"
+            :label="$t('toolbar.commandPaletteAction')"
+            @action="openCommandPalette"
+          ></EditorToolbarAction>
           <EditorToolbarAction
             tag="div"
             action-class="toolbarBtn quickActionBtn"
@@ -331,6 +349,69 @@
         </div>
       </div>
     </div>
+    <div
+      v-if="commandPaletteVisible"
+      class="commandPaletteOverlay"
+      @mousedown.self="closeCommandPalette"
+    >
+      <section
+        class="commandPalettePanel"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="$t('toolbar.commandPaletteTitle')"
+      >
+        <div class="commandPaletteHeader">
+          <div class="commandPaletteTitle">
+            {{ $t('toolbar.commandPaletteTitle') }}
+          </div>
+          <button
+            type="button"
+            class="commandPaletteClose"
+            :aria-label="$t('dialog.close')"
+            @click="closeCommandPalette"
+          >
+            x
+          </button>
+        </div>
+        <input
+          ref="commandPaletteInputRef"
+          v-model.trim="commandPaletteKeyword"
+          class="commandPaletteInput"
+          type="search"
+          :placeholder="$t('toolbar.commandPalettePlaceholder')"
+          @keydown="onCommandPaletteInputKeydown"
+        />
+        <div class="commandPaletteList" role="listbox">
+          <button
+            v-for="(item, index) in filteredCommandPaletteItems"
+            :key="item.key"
+            type="button"
+            class="commandPaletteItem"
+            :class="{
+              isDisabled: item.disabled,
+              isActive: index === commandPaletteActiveIndex
+            }"
+            :disabled="item.disabled"
+            :aria-disabled="item.disabled ? 'true' : 'false'"
+            :aria-selected="index === commandPaletteActiveIndex ? 'true' : 'false'"
+            role="option"
+            @mouseenter="commandPaletteActiveIndex = index"
+            @click="executeCommandPaletteItem(item)"
+          >
+            <span class="commandPaletteItemLabel">{{ item.label }}</span>
+            <span v-if="item.shortcut" class="commandPaletteItemShortcut">
+              {{ item.shortcut }}
+            </span>
+          </button>
+          <div
+            v-if="filteredCommandPaletteItems.length <= 0"
+            class="commandPaletteEmpty"
+          >
+            {{ $t('toolbar.commandPaletteEmpty') }}
+          </div>
+        </div>
+      </section>
+    </div>
     <NodeImage v-if="mountedPanels.nodeImage" ref="NodeImageRef"></NodeImage>
     <NodeHyperlink
       v-if="mountedPanels.nodeHyperlink"
@@ -347,11 +428,24 @@ import { defineAsyncComponent } from 'vue'
 import { mapState } from 'pinia'
 import { getConfig, getData } from '@/api'
 import EditorToolbarAction from './EditorToolbarAction.vue'
-import ToolbarNodeBtnList from './ToolbarNodeBtnList.vue'
 import {
-  parseStoredDocumentContent,
-  serializeStoredDocumentContent
-} from '@/services/flowchartDocument'
+  filterCommandPaletteItems,
+  resolveActiveCommandPaletteItem,
+  moveCommandPaletteIndex,
+  isCommandPaletteTypingTarget
+} from './editorCommandPalette'
+import {
+  LOCAL_FILE_WRITE_DEBOUNCE_MS,
+  RECOVERY_WRITE_DEBOUNCE_MS,
+  snapshotLocalFileRef,
+  isSameLocalFileRef,
+  formatTimeLabel,
+  parseToolbarLocalFileContent,
+  createLocalWriteTaskData,
+  hasPendingLocalWriteState,
+  serializeMindMapWriteContent
+} from './editorLocalFileSession'
+import ToolbarNodeBtnList from './ToolbarNodeBtnList.vue'
 import { throttle, isMobile } from 'simple-mind-map/src/utils/index'
 import platform, {
   getRecentFiles,
@@ -400,67 +494,6 @@ const NodeHyperlink = defineAsyncComponent(() => import('./NodeHyperlink.vue'))
 const NodeNote = defineAsyncComponent(() => import('./NodeNote.vue'))
 const NodeTag = defineAsyncComponent(() => import('./NodeTag.vue'))
 const Import = defineAsyncComponent(() => import('./Import.vue'))
-const LOCAL_FILE_WRITE_DEBOUNCE_MS = 1000
-const RECOVERY_WRITE_DEBOUNCE_MS = 2500
-
-const snapshotLocalFileRef = fileRef => {
-  if (!fileRef || typeof fileRef !== 'object') return null
-  const path = String(fileRef.path || '').trim()
-  if (!path) return null
-  return {
-    ...fileRef,
-    path,
-    name: String(fileRef.name || '').trim(),
-    mode: String(fileRef.mode || 'desktop').trim() || 'desktop'
-  }
-}
-
-const isSameLocalFileRef = (left, right) => {
-  const leftRef = snapshotLocalFileRef(left)
-  const rightRef = snapshotLocalFileRef(right)
-  if (!leftRef || !rightRef) return false
-  return leftRef.path === rightRef.path && leftRef.mode === rightRef.mode
-}
-
-const formatTimeLabel = timestamp => {
-  const value = Number(timestamp || 0)
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${hours}:${minutes}`
-}
-
-const parseToolbarLocalFileContent = (str, invalidContentMessage) => {
-  let parsedDocument
-  try {
-    parsedDocument = parseStoredDocumentContent(str)
-  } catch (error) {
-    throw new Error(invalidContentMessage, {
-      cause: error
-    })
-  }
-  if (parsedDocument.documentMode === 'flowchart') {
-    return {
-      documentMode: 'flowchart',
-      data: parsedDocument.flowchartData,
-      flowchartData: parsedDocument.flowchartData,
-      flowchartConfig: parsedDocument.flowchartConfig || null,
-      isFullDataFile: true,
-      configData: parsedDocument.flowchartConfig || null
-    }
-  }
-  return {
-    documentMode: 'mindmap',
-    data: parsedDocument.mindMapData,
-    isFullDataFile: parsedDocument.isFullDataFile,
-    configData: parsedDocument.mindMapConfig || null
-  }
-}
-
 // 工具栏
 const defaultBtnList = [
   'back',
@@ -511,6 +544,10 @@ export default {
       isFullDataFile: true,
       waitingWriteToLocalFile: false,
       recoveredDraftLoaded: false,
+      commandPaletteVisible: false,
+      commandPaletteKeyword: '',
+      commandPaletteActiveIndex: 0,
+      activeNodes: [],
       lastSuccessfulSaveAt: 0,
       lastLocalSaveErrorMessage: '',
       pendingLocalFileRef: null,
@@ -649,6 +686,149 @@ export default {
       return 'saved'
     },
 
+    commandPaletteItems() {
+      return [
+        {
+          key: 'search',
+          label: this.$t('toolbar.searchAction'),
+          shortcut: 'Ctrl F',
+          action: this.showSearch
+        },
+        {
+          key: 'pasteOutline',
+          label: this.$t('toolbar.pasteOutlineAction'),
+          action: this.pasteOutlineFromClipboard
+        },
+        {
+          key: 'import',
+          label: this.$t('toolbar.import'),
+          action: this.openImportDialog
+        },
+        {
+          key: 'export',
+          label: this.$t('toolbar.exportCenter'),
+          action: this.openExportDialog
+        },
+        {
+          key: 'focus',
+          label: this.$t('toolbar.focusModeAction'),
+          action: this.toggleZenMode
+        },
+        {
+          key: 'outline',
+          label: this.$t('toolbar.outlineAction'),
+          action: this.openOutlinePanel
+        },
+        {
+          key: 'insertSiblingNode',
+          label: this.$t('toolbar.insertSiblingNode'),
+          shortcut: 'Enter',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('INSERT_NODE')
+        },
+        {
+          key: 'insertChildNode',
+          label: this.$t('toolbar.insertChildNode'),
+          shortcut: 'Tab',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('INSERT_CHILD_NODE')
+        },
+        {
+          key: 'deleteNode',
+          label: this.$t('toolbar.deleteNode'),
+          shortcut: 'Delete',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('REMOVE_NODE')
+        },
+        {
+          key: 'undo',
+          label: this.$t('toolbar.undo'),
+          shortcut: 'Ctrl Z',
+          action: () => this.emitEditorCommand('BACK')
+        },
+        {
+          key: 'redo',
+          label: this.$t('toolbar.redo'),
+          shortcut: 'Ctrl Y',
+          action: () => this.emitEditorCommand('FORWARD')
+        },
+        {
+          key: 'nodeImage',
+          label: this.$t('toolbar.image'),
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.openNodeImageDialog(this.getActiveNodesSnapshot())
+        },
+        {
+          key: 'nodeLink',
+          label: this.$t('toolbar.link'),
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.openNodeLinkDialog(this.getActiveNodesSnapshot())
+        },
+        {
+          key: 'nodeNote',
+          label: this.$t('toolbar.note'),
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.openNodeNoteDialog(this.getActiveNodesSnapshot())
+        },
+        {
+          key: 'nodeTag',
+          label: this.$t('toolbar.tag'),
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.openNodeTagDialog(this.getActiveNodesSnapshot())
+        },
+        {
+          key: 'fitCanvas',
+          label: this.$t('toolbar.fitCanvasAction'),
+          action: () => this.emitEditorCommand('FIT_CANVAS')
+        },
+        {
+          key: 'returnCenter',
+          label: this.$t('contextmenu.backToRoot'),
+          action: () => this.emitEditorCommand('RETURN_CENTER')
+        },
+        {
+          key: 'expandAll',
+          label: this.$t('toolbar.expandAllAction'),
+          action: () => this.emitEditorCommand('EXPAND_ALL')
+        },
+        {
+          key: 'collapseAll',
+          label: this.$t('toolbar.collapseAllAction'),
+          action: () => this.emitEditorCommand('UNEXPAND_ALL', true, '')
+        },
+        {
+          key: 'save',
+          label: this.$t('toolbar.save'),
+          shortcut: 'Ctrl S',
+          action: this.saveCurrentLocalFile
+        },
+        {
+          key: 'saveAs',
+          label: this.$t('toolbar.saveAs'),
+          action: this.saveLocalFile
+        },
+        {
+          key: 'returnHome',
+          label: this.$t('toolbar.returnHome'),
+          action: this.goHome
+        }
+      ]
+    },
+
+    filteredCommandPaletteItems() {
+      return filterCommandPaletteItems(
+        this.commandPaletteItems,
+        this.commandPaletteKeyword
+      )
+    },
+
+    activeCommandPaletteItem() {
+      return resolveActiveCommandPaletteItem(
+        this.filteredCommandPaletteItems,
+        this.commandPaletteActiveIndex
+      )
+    },
+
     btnLit() {
       let res = [...defaultBtnList]
       if (!this.openNodeRichText) {
@@ -678,6 +858,18 @@ export default {
     },
     showToolbarLabels() {
       this.computeToolbarShow()
+    },
+    commandPaletteKeyword() {
+      this.commandPaletteActiveIndex = 0
+    },
+    filteredCommandPaletteItems(items) {
+      if (!Array.isArray(items) || items.length <= 0) {
+        this.commandPaletteActiveIndex = 0
+        return
+      }
+      if (this.commandPaletteActiveIndex >= items.length) {
+        this.commandPaletteActiveIndex = items.length - 1
+      }
     }
   },
   created() {
@@ -689,6 +881,8 @@ export default {
     this.computeToolbarShowThrottle = throttle(this.computeToolbarShow, 300)
     window.addEventListener('resize', this.computeToolbarShowThrottle)
     window.addEventListener('beforeunload', this.onUnload)
+    window.addEventListener('keydown', this.onCommandPaletteKeydown)
+    this.$bus.$on('node_active', this.onNodeActive)
     this.$bus.$on('node_note_dblclick', this.onNodeNoteDblclick)
     this.removeBootstrapStateReadyListener = onBootstrapStateReady(
       this.handleBootstrapStateReady
@@ -700,6 +894,8 @@ export default {
       this.removeBootstrapStateReadyListener()
     window.removeEventListener('resize', this.computeToolbarShowThrottle)
     window.removeEventListener('beforeunload', this.onUnload)
+    window.removeEventListener('keydown', this.onCommandPaletteKeydown)
+    this.$bus.$off('node_active', this.onNodeActive)
     this.$bus.$off('node_note_dblclick', this.onNodeNoteDblclick)
     clearTimeout(this.timer)
     clearTimeout(this.recoveryTimer)
@@ -747,6 +943,103 @@ export default {
         return
       }
       await this.$router.push('/export')
+    },
+
+    emitEditorCommand(...args) {
+      this.$bus.$emit('execCommand', ...args)
+    },
+
+    onNodeActive(...args) {
+      this.activeNodes = [...(args[1] || [])]
+    },
+
+    getActiveNodesSnapshot() {
+      return [...this.activeNodes]
+    },
+
+    openCommandPalette() {
+      this.commandPaletteVisible = true
+      this.commandPaletteKeyword = ''
+      this.commandPaletteActiveIndex = 0
+      this.$nextTick(() => {
+        this.$refs.commandPaletteInputRef?.focus?.()
+      })
+    },
+
+    closeCommandPalette() {
+      this.commandPaletteVisible = false
+      this.commandPaletteKeyword = ''
+      this.commandPaletteActiveIndex = 0
+    },
+
+    executeCommandPaletteItem(item = this.activeCommandPaletteItem) {
+      if (!item || item.disabled || typeof item.action !== 'function') {
+        return
+      }
+      this.closeCommandPalette()
+      item.action.call(this)
+    },
+
+    moveCommandPaletteSelection(step = 1) {
+      this.commandPaletteActiveIndex = moveCommandPaletteIndex(
+        this.filteredCommandPaletteItems,
+        this.commandPaletteActiveIndex,
+        step
+      )
+    },
+
+    onCommandPaletteInputKeydown(event) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        this.moveCommandPaletteSelection(1)
+        return
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        this.moveCommandPaletteSelection(-1)
+        return
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        this.executeCommandPaletteItem(this.activeCommandPaletteItem)
+        return
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        this.closeCommandPalette()
+      }
+    },
+
+    onCommandPaletteKeydown(event) {
+      const isTypingTarget = isCommandPaletteTypingTarget(event.target)
+      if ((event.ctrlKey || event.metaKey) && event.key?.toLowerCase() === 'k') {
+        if (isTypingTarget && !this.commandPaletteVisible) {
+          return
+        }
+        event.preventDefault()
+        if (this.commandPaletteVisible) {
+          this.closeCommandPalette()
+        } else {
+          this.openCommandPalette()
+        }
+        return
+      }
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        event.key?.toLowerCase() === 's'
+      ) {
+        if (isTypingTarget) {
+          return
+        }
+        event.preventDefault()
+        void this.saveCurrentLocalFile()
+        return
+      }
+      if (event.key === 'Escape' && this.commandPaletteVisible) {
+        event.preventDefault()
+        this.closeCommandPalette()
+      }
     },
 
     showSearch() {
@@ -1349,33 +1642,26 @@ export default {
     },
 
     createLocalWriteTask(content) {
-      const fileRef = snapshotLocalFileRef(getCurrentFileRef())
-      if (!fileRef || !this.isHandleLocalFile) {
-        return null
-      }
-      const isFullDataFile =
-        typeof this.isFullDataFile === 'boolean'
-          ? this.isFullDataFile
-          : !!fileRef.isFullDataFile
-      return {
-        id: ++this.localFileWriteRequestId,
-        fileRef,
+      return createLocalWriteTaskData({
+        fileRef: getCurrentFileRef(),
         content,
-        isFullDataFile,
-        configData: getConfig()
-      }
+        isFullDataFile:
+          typeof this.isFullDataFile === 'boolean'
+            ? this.isFullDataFile
+            : !!getCurrentFileRef()?.isFullDataFile,
+        configData: getConfig(),
+        requestId: ++this.localFileWriteRequestId
+      })
     },
 
     hasPendingLocalWrite(requestId = 0) {
-      const completedRequestId = Math.max(
-        this.completedLocalFileWriteRequestId,
+      return hasPendingLocalWriteState({
+        timer: this.timer,
+        currentLocalFileWriteRequestId: this.currentLocalFileWriteRequestId,
+        localFileWriteRequestId: this.localFileWriteRequestId,
+        completedLocalFileWriteRequestId: this.completedLocalFileWriteRequestId,
         requestId
-      )
-      return (
-        !!this.timer ||
-        this.currentLocalFileWriteRequestId > completedRequestId ||
-        this.localFileWriteRequestId > completedRequestId
-      )
+      })
     },
 
     // 写入本地文件
@@ -1387,10 +1673,9 @@ export default {
       let writeSucceeded = false
       this.currentLocalFileWriteRequestId = writeTask.id
       try {
-        const string = serializeStoredDocumentContent({
-          documentMode: 'mindmap',
-          mindMapData: writeTask.content,
-          mindMapConfig: writeTask.configData,
+        const string = serializeMindMapWriteContent({
+          content: writeTask.content,
+          configData: writeTask.configData,
           isFullDataFile: writeTask.isFullDataFile
         })
         await platform.writeMindMapFile(writeTask.fileRef, string)
@@ -1453,10 +1738,9 @@ export default {
       try {
         const previousFileRef = snapshotLocalFileRef(getCurrentFileRef())
         const configData = getConfig()
-        const serializedContent = serializeStoredDocumentContent({
-          documentMode: 'mindmap',
-          mindMapData: content,
-          mindMapConfig: configData,
+        const serializedContent = serializeMindMapWriteContent({
+          content,
+          configData,
           isFullDataFile: true
         })
         const nextFileHandle = await platform.saveMindMapFileAs({
@@ -1542,6 +1826,12 @@ export default {
   --toolbar-icon-active-shadow: none;
   --toolbar-divider-color: rgba(15, 23, 42, 0.08);
   --toolbar-disabled-color: rgba(15, 23, 42, 0.24);
+  --command-palette-surface: #fff;
+  --command-palette-border: rgba(15, 23, 42, 0.12);
+  --command-palette-shadow: 0 22px 52px rgba(15, 23, 42, 0.18);
+  --command-palette-input-bg: rgba(15, 23, 42, 0.04);
+  --command-palette-hover-bg: rgba(15, 23, 42, 0.06);
+  --command-palette-shortcut-bg: rgba(15, 23, 42, 0.06);
 
   &.isDark {
     --toolbar-surface: rgba(24, 28, 34, 0.92);
@@ -1561,6 +1851,12 @@ export default {
     --toolbar-icon-active-shadow: none;
     --toolbar-divider-color: rgba(255, 255, 255, 0.1);
     --toolbar-disabled-color: rgba(255, 255, 255, 0.2);
+    --command-palette-surface: #20242b;
+    --command-palette-border: rgba(255, 255, 255, 0.1);
+    --command-palette-shadow: 0 24px 56px rgba(0, 0, 0, 0.36);
+    --command-palette-input-bg: rgba(255, 255, 255, 0.08);
+    --command-palette-hover-bg: rgba(255, 255, 255, 0.08);
+    --command-palette-shortcut-bg: rgba(255, 255, 255, 0.1);
 
     .toolbar {
       color: var(--toolbar-text-color);
@@ -1806,6 +2102,56 @@ export default {
       align-items: center;
       justify-content: flex-end;
       margin-left: 12px;
+      gap: 10px;
+
+      .toolbarSaveStatus {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 148px;
+        min-height: 28px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.04);
+        color: var(--toolbar-subtle-text-color);
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .toolbarSaveStatusDot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        flex: 0 0 auto;
+      }
+
+      .toolbarSaveStatusText {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .toolbarSaveStatus.is-saved {
+        color: #15803d;
+        background: rgba(21, 128, 61, 0.08);
+      }
+
+      .toolbarSaveStatus.is-autosaving {
+        color: #1d4ed8;
+        background: rgba(29, 78, 216, 0.08);
+      }
+
+      .toolbarSaveStatus.is-dirty,
+      .toolbarSaveStatus.is-recovered {
+        color: #b45309;
+        background: rgba(180, 83, 9, 0.1);
+      }
+
+      .toolbarSaveStatus.is-failed {
+        color: #b91c1c;
+        background: rgba(185, 28, 28, 0.1);
+      }
 
       .toolbarQuickActions {
         display: flex;
@@ -1923,6 +2269,149 @@ export default {
       visibility: hidden;
       pointer-events: none;
     }
+  }
+
+  .commandPaletteOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 82px 16px 16px;
+    background: rgba(15, 23, 42, 0.14);
+  }
+
+  .commandPalettePanel {
+    width: min(520px, 100%);
+    max-height: min(520px, calc(100vh - 110px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--command-palette-surface);
+    border: 1px solid var(--command-palette-border);
+    box-shadow: var(--command-palette-shadow);
+    color: var(--toolbar-text-hover-color);
+  }
+
+  .commandPaletteHeader {
+    height: 48px;
+    padding: 0 14px 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--toolbar-divider-color);
+  }
+
+  .commandPaletteTitle {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .commandPaletteClose {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--toolbar-subtle-text-color);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+
+    &:hover {
+      color: var(--toolbar-text-hover-color);
+      background: var(--command-palette-hover-bg);
+    }
+  }
+
+  .commandPaletteInput {
+    height: 42px;
+    margin: 14px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    outline: none;
+    background: var(--command-palette-input-bg);
+    color: var(--toolbar-text-hover-color);
+    font-size: 14px;
+    font-family:
+      "Segoe UI",
+      "PingFang SC",
+      "Microsoft YaHei",
+      sans-serif;
+
+    &:focus {
+      border-color: var(--command-palette-border);
+    }
+
+    &::placeholder {
+      color: var(--toolbar-subtle-text-color);
+    }
+  }
+
+  .commandPaletteList {
+    min-height: 72px;
+    overflow: auto;
+    padding: 0 8px 10px;
+  }
+
+  .commandPaletteItem {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+
+    &:hover,
+    &:focus-visible,
+    &.isActive {
+      outline: none;
+      background: var(--command-palette-hover-bg);
+    }
+
+    &.isDisabled,
+    &:disabled {
+      cursor: not-allowed;
+      color: var(--toolbar-disabled-color);
+      background: transparent;
+    }
+  }
+
+  .commandPaletteItemLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .commandPaletteItemShortcut {
+    flex: 0 0 auto;
+    padding: 3px 6px;
+    border-radius: 5px;
+    background: var(--command-palette-shortcut-bg);
+    color: var(--toolbar-subtle-text-color);
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .commandPaletteEmpty {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--toolbar-subtle-text-color);
+    font-size: 13px;
   }
 }
 

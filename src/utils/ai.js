@@ -1,8 +1,9 @@
 import {
+  buildAiProtocolRequestData,
   buildAiProxyAuthHeaders,
   buildAiRequestConfig,
-  consumeOpenAICompatibleStreamText,
-  parseOpenAICompatibleStreamChunk
+  consumeAiStreamText,
+  parseAiStreamChunk
 } from './aiProviders.mjs'
 import platform, { isDesktopApp } from '@/platform'
 
@@ -245,12 +246,13 @@ class Ai {
   }
 
   buildRequest(data) {
+    const mergedData = {
+      ...this.baseData.data,
+      ...data
+    }
     return {
       ...this.baseData,
-      data: {
-        ...this.baseData.data,
-        ...data
-      }
+      data: buildAiProtocolRequestData(this.baseData.protocol, mergedData)
     }
   }
 
@@ -283,12 +285,16 @@ class Ai {
       if (item && item.error) {
         throw new Error(item.error.message || '请求失败')
       }
-      this.content += parseOpenAICompatibleStreamChunk(item)
+      this.content += parseAiStreamChunk(this.baseData.protocol, item)
     })
   }
 
   handleChunkData(chunk, progress = () => {}) {
-    const result = consumeOpenAICompatibleStreamText(this.currentChunk, chunk)
+    const result = consumeAiStreamText(
+      this.baseData.protocol,
+      this.currentChunk,
+      chunk
+    )
     this.currentChunk = result.pending
     this.appendChunkContent(result.items)
     progress(this.content)
@@ -297,7 +303,11 @@ class Ai {
 
   flushPendingChunk(progress = () => {}) {
     if (!this.currentChunk) return
-    const result = consumeOpenAICompatibleStreamText(this.currentChunk, '\n\n')
+    const result = consumeAiStreamText(
+      this.baseData.protocol,
+      this.currentChunk,
+      '\n\n'
+    )
     this.currentChunk = result.pending
     this.appendChunkContent(result.items)
     progress(this.content)

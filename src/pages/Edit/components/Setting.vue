@@ -409,6 +409,9 @@
           >
             {{ $t('setting.checkUpdate') }}
           </el-button>
+          <div v-if="lastUpdateCheckSummary" class="updateCheckSummary">
+            {{ lastUpdateCheckSummary }}
+          </div>
         </div>
       </div>
     </div>
@@ -475,6 +478,8 @@ export default {
       updateWatermarkTimer: null,
       enableNodeRichText: true,
       checkingForUpdates: false,
+      lastUpdateCheckSummary: '',
+      lastUpdateCheckAt: 0,
       localConfigs: {
         isShowScrollbar: false,
         showToolbarLabels: true,
@@ -659,7 +664,11 @@ export default {
       this.checkingForUpdates = true
       try {
         const result = await runUpdateCheck(this.appVersion)
+        this.lastUpdateCheckAt = Date.now()
         if (result.status === 'update-available') {
+          this.lastUpdateCheckSummary = this.$t('setting.updateFoundWithoutUrl', {
+            version: result.latestVersion
+          })
           if (result.url) {
             const action = await this.$confirm(
               createUpdateDialogMessage(result, this.$t),
@@ -682,27 +691,23 @@ export default {
             }
             return
           }
-          this.$message.info(
-            this.$t('setting.updateFoundWithoutUrl', {
-              version: result.latestVersion
-            })
-          )
+          this.$message.info(this.lastUpdateCheckSummary)
           return
         }
         if (result.status === 'up-to-date') {
-          this.$message.success(
-            this.$t('setting.updateAlreadyLatest', {
-              version: result.latestVersion
-            })
-          )
+          this.lastUpdateCheckSummary = this.$t('setting.updateAlreadyLatest', {
+            version: result.latestVersion
+          })
+          this.$message.success(this.lastUpdateCheckSummary)
           return
         }
-        this.$message.info(this.$t('setting.updateCheckFailed'))
+        this.lastUpdateCheckSummary = this.$t('setting.updateCheckFailed')
+        this.$message.info(this.lastUpdateCheckSummary)
       } catch (error) {
         console.error('checkForUpdates failed', error)
-        this.$message.error(
+        this.lastUpdateCheckSummary =
           error?.message || this.$t('setting.updateCheckFailed')
-        )
+        this.$message.error(this.lastUpdateCheckSummary)
       } finally {
         this.checkingForUpdates = false
       }
@@ -712,6 +717,12 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.updateCheckSummary {
+  margin-top: 8px;
+  color: #737373;
+  font-size: 12px;
+  line-height: 1.4;
+}
 .sidebarContent {
   padding: 14px 16px 16px;
 

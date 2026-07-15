@@ -133,7 +133,7 @@ export const flowchartDocumentMethods = {
     this.recoveryTimer = window.setTimeout(() => {
       this.recoveryTimer = 0
       void this.writeRecoveryDraft()
-    }, 500)
+    }, 800)
   },
 
   async writeRecoveryDraft() {

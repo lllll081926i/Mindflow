@@ -1,6 +1,6 @@
 use futures_util::{future::{AbortHandle, Abortable}, StreamExt};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, sync::Arc, time::{SystemTime, UNIX_EPOCH}};
+use std::{collections::HashMap, net::IpAddr, sync::Arc, time::{SystemTime, UNIX_EPOCH}};
 use tauri::Emitter;
 use tokio::sync::Mutex;
 
@@ -26,6 +26,55 @@ const ALLOWED_AI_DOMAINS: &[&str] = &[
   "api.groq.com",
   "openrouter.ai",
 ];
+
+fn is_private_or_reserved_ai_host(host: &str) -> bool {
+  let normalized = host
+    .trim()
+    .trim_matches(|char| char == '[' || char == ']')
+    .to_ascii_lowercase();
+  if normalized.is_empty()
+    || normalized == "localhost"
+    || normalized.ends_with(".localhost")
+    || normalized.ends_with(".local")
+    || normalized.ends_with(".internal")
+  {
+    return true;
+  }
+  match normalized.parse::<IpAddr>() {
+    Ok(IpAddr::V4(addr)) => {
+      let [first, second, _, _] = addr.octets();
+      first == 0
+        || first == 10
+        || first == 127
+        || (first == 100 && (64..=127).contains(&second))
+        || (first == 169 && second == 254)
+        || (first == 172 && (16..=31).contains(&second))
+        || (first == 192 && second == 168)
+        || (first == 198 && matches!(second, 18 | 19))
+        || first >= 224
+    }
+    Ok(IpAddr::V6(addr)) => {
+      let segments = addr.segments();
+      addr.is_loopback()
+        || addr.is_unspecified()
+        || (segments[0] & 0xfe00) == 0xfc00
+        || (segments[0] & 0xffc0) == 0xfe80
+        || (segments[0] == 0x2001 && segments[1] == 0x0db8)
+        || (segments[0..5] == [0, 0, 0, 0, 0] && segments[5] == 0xffff)
+    }
+    Err(_) => false,
+  }
+}
+
+fn is_allowed_ai_host(host: &str) -> bool {
+  let normalized = host.trim().to_ascii_lowercase();
+  if ALLOWED_AI_DOMAINS.iter().any(|domain| {
+    normalized == *domain || normalized.ends_with(&format!(".{}", domain))
+  }) {
+    return true;
+  }
+  !is_private_or_reserved_ai_host(&normalized)
+}
 
 #[derive(Default)]
 pub struct AiRequestRegistry {
@@ -102,6 +151,7 @@ fn validate_proxy_request_data(data: &serde_json::Value) -> Result<(), String> {
       "model"
       | "stream"
       | "messages"
+      | "system"
       | "temperature"
       | "max_tokens"
       | "top_p"
@@ -267,10 +317,7 @@ pub async fn start_proxy_request(
         return Err("仅支持 HTTPS 协议".into());
       }
       let host = url.host_str().unwrap_or("");
-      let is_allowed = ALLOWED_AI_DOMAINS.iter().any(|domain| {
-        host == *domain || host.ends_with(&format!(".{}", domain))
-      });
-      if !is_allowed {
+      if !is_allowed_ai_host(host) {
         return Err("不支持的 API 域名".into());
       }
 
@@ -433,5 +480,56 @@ mod tests {
     };
 
     assert!(validate_proxy_request(&request).is_ok());
+  }
+
+  #[test]
+  fn should_accept_valid_anthropic_messages_request_payload() {
+    let request = AiProxyRequest {
+      api: "https://api.anthropic.com/v1/messages".into(),
+      method: Some("POST".into()),
+      headers: Some(HashMap::from([
+        ("x-api-key".into(), "test".into()),
+        ("anthropic-version".into(), "2023-06-01".into()),
+      ])),
+      data: serde_json::json!({
+        "model": "claude-sonnet-4-5",
+        "stream": true,
+        "max_tokens": 4096,
+        "system": "只返回 JSON",
+        "messages": [
+          {
+            "role": "user",
+            "content": "hello"
+          }
+        ]
+      }),
+      timeout: Some(1000),
+    };
+
+    assert!(validate_proxy_request(&request).is_ok());
+  }
+
+  #[test]
+  fn should_allow_custom_public_ai_domain_for_configurable_providers() {
+    assert!(is_allowed_ai_host("api.custom-ai.example"));
+  }
+
+  #[test]
+  fn should_reject_private_or_reserved_custom_ai_domain() {
+    for host in [
+      "localhost",
+      "127.0.0.1",
+      "10.0.0.1",
+      "172.16.0.1",
+      "192.168.1.2",
+      "169.254.169.254",
+      "100.64.0.1",
+      "::1",
+      "fc00::1",
+      "fe80::1",
+      "2001:db8::1",
+    ] {
+      assert!(!is_allowed_ai_host(host), "{host}");
+    }
   }
 }

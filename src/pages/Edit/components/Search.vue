@@ -8,6 +8,8 @@
         v-model="searchText"
         @keyup.enter.stop.prevent="onSearchEnter"
         @keydown.shift.enter.stop.prevent="jumpToPrevResult()"
+        @keydown.down.stop.prevent="jumpToNextResult()"
+        @keydown.up.stop.prevent="jumpToPrevResult()"
         @keyup.esc.stop="close"
         @keydown.stop
         @focus="onFocus"
@@ -345,14 +347,24 @@ export default {
       })
       if (this.searchResultList.length <= 0) {
         this.activeResultIndex = -1
+        this.currentIndex = 0
+        this.total = 0
+        this.showSearchInfo = false
         return
       }
-      if (
+      const nextIndex =
         this.activeResultIndex < 0 ||
         this.activeResultIndex >= this.searchResultList.length
-      ) {
-        this.activeResultIndex = 0
-      }
+          ? 0
+          : this.activeResultIndex
+      this.syncActiveSearchResult(nextIndex)
+    },
+
+    syncActiveSearchResult(index) {
+      this.activeResultIndex = index
+      this.currentIndex = index + 1
+      this.total = this.searchResultList.length
+      this.showSearchInfo = this.searchResultList.length > 0
     },
 
     setSearchResultListHeight() {
@@ -367,7 +379,7 @@ export default {
         this.activeResultIndex <= 0
           ? this.searchResultList.length - 1
           : this.activeResultIndex - 1
-      this.activeResultIndex = nextIndex
+      this.syncActiveSearchResult(nextIndex)
       this.mindMap.search.jump(nextIndex)
     },
 
@@ -382,12 +394,12 @@ export default {
         this.activeResultIndex >= this.searchResultList.length - 1
           ? 0
           : this.activeResultIndex + 1
-      this.activeResultIndex = nextIndex
+      this.syncActiveSearchResult(nextIndex)
       this.mindMap.search.jump(nextIndex)
     },
 
     onSearchResultItemClick(index) {
-      this.activeResultIndex = index
+      this.syncActiveSearchResult(index)
       this.mindMap.search.jump(index)
     }
   }

@@ -46,13 +46,91 @@ test('编辑页页面级入口合并到主工具栏，不再使用独立悬浮�
 
 test('编辑页顶部工具栏保留搜索入口并移除状态卡片与快捷键按钮', () => {
   assert.doesNotMatch(toolbarSource, /class="toolbarStatus"/)
+  assert.match(toolbarSource, /class="toolbarSaveStatus"/)
+  assert.match(toolbarSource, /toolbarStatusText/)
+  assert.match(toolbarSource, /toolbarStatusType/)
   assert.match(toolbarSource, /class="toolbarQuickActions"/)
   assert.match(toolbarSource, /toolbar\.searchAction/)
+  assert.match(toolbarSource, /toolbar\.commandPaletteAction/)
   assert.match(toolbarSource, /toolbar\.save/)
   assert.match(toolbarSource, /saveCurrentLocalFile/)
   assert.match(toolbarSource, /canDirectSave/)
   assert.match(toolbarSource, /emitShowSearch\(\)/)
   assert.doesNotMatch(toolbarSource, /toolbar\.shortcutAction/)
+})
+
+test('编辑页提供命令面板集中触发高频动作', () => {
+  assert.match(toolbarSource, /commandPaletteVisible/)
+  assert.match(toolbarSource, /commandPaletteKeyword/)
+  assert.match(toolbarSource, /commandPaletteActiveIndex/)
+  assert.match(toolbarSource, /filteredCommandPaletteItems/)
+  assert.match(toolbarSource, /openCommandPalette\(\)/)
+  assert.match(toolbarSource, /closeCommandPalette\(\)/)
+  assert.match(toolbarSource, /executeCommandPaletteItem\(/)
+  assert.match(toolbarSource, /onCommandPaletteKeydown\(/)
+  assert.match(toolbarSource, /onCommandPaletteInputKeydown\(/)
+  assert.match(toolbarSource, /moveCommandPaletteSelection\(/)
+  assert.match(toolbarSource, /window\.addEventListener\('keydown', this\.onCommandPaletteKeydown\)/)
+  assert.match(toolbarSource, /window\.removeEventListener\('keydown', this\.onCommandPaletteKeydown\)/)
+  assert.match(toolbarSource, /event\.key\?\.toLowerCase\(\) === 's'/)
+  assert.match(toolbarSource, /saveCurrentLocalFile\(\)/)
+  assert.match(toolbarSource, /toolbar\.commandPalettePlaceholder/)
+  assert.match(toolbarSource, /toolbar\.commandPaletteEmpty/)
+  assert.match(toolbarSource, /showSearch/)
+  assert.match(toolbarSource, /openImportDialog/)
+  assert.match(toolbarSource, /openExportDialog/)
+  assert.match(toolbarSource, /toggleZenMode/)
+  assert.match(toolbarSource, /openOutlinePanel/)
+  assert.match(toolbarSource, /saveCurrentLocalFile/)
+  assert.match(toolbarSource, /saveLocalFile/)
+})
+
+test('编辑页命令面板覆盖大型导图导航命令', () => {
+  assert.match(toolbarSource, /emitEditorCommand\(/)
+  assert.match(toolbarSource, /toolbar\.fitCanvasAction/)
+  assert.match(toolbarSource, /toolbar\.expandAllAction/)
+  assert.match(toolbarSource, /toolbar\.collapseAllAction/)
+  assert.match(toolbarSource, /toolbar\.pasteOutlineAction/)
+  assert.match(toolbarSource, /toolbar\.undo/)
+  assert.match(toolbarSource, /toolbar\.redo/)
+  assert.match(toolbarSource, /contextmenu\.backToRoot/)
+  assert.match(toolbarSource, /\$bus\.\$emit\('execCommand',\s*\.\.\.args\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('FIT_CANVAS'\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('RETURN_CENTER'\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('BACK'\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('FORWARD'\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('EXPAND_ALL'\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('UNEXPAND_ALL',\s*true,\s*''\)/)
+  assert.match(editSource, /case 'FIT_CANVAS':/)
+  assert.match(editSource, /this\.mindMap\.view\.fit\(\)/)
+  assert.match(editSource, /case 'RETURN_CENTER':/)
+  assert.match(editSource, /this\.mindMap\.renderer\.setRootNodeCenter\(\)/)
+})
+
+test('编辑页命令面板覆盖思维导图节点编辑动作', () => {
+  assert.match(toolbarSource, /key:\s*'insertSiblingNode'/)
+  assert.match(toolbarSource, /key:\s*'insertChildNode'/)
+  assert.match(toolbarSource, /key:\s*'deleteNode'/)
+  assert.match(toolbarSource, /key:\s*'nodeImage'/)
+  assert.match(toolbarSource, /key:\s*'nodeLink'/)
+  assert.match(toolbarSource, /key:\s*'nodeNote'/)
+  assert.match(toolbarSource, /key:\s*'nodeTag'/)
+  assert.match(toolbarSource, /toolbar\.insertSiblingNode/)
+  assert.match(toolbarSource, /toolbar\.insertChildNode/)
+  assert.match(toolbarSource, /toolbar\.deleteNode/)
+  assert.match(toolbarSource, /toolbar\.image/)
+  assert.match(toolbarSource, /toolbar\.link/)
+  assert.match(toolbarSource, /toolbar\.note/)
+  assert.match(toolbarSource, /toolbar\.tag/)
+  assert.match(toolbarSource, /emitEditorCommand\('INSERT_NODE'\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('INSERT_CHILD_NODE'\)/)
+  assert.match(toolbarSource, /emitEditorCommand\('REMOVE_NODE'\)/)
+  assert.match(toolbarSource, /openNodeImageDialog\(this\.getActiveNodesSnapshot\(\)\)/)
+  assert.match(toolbarSource, /openNodeLinkDialog\(this\.getActiveNodesSnapshot\(\)\)/)
+  assert.match(toolbarSource, /openNodeNoteDialog\(this\.getActiveNodesSnapshot\(\)\)/)
+  assert.match(toolbarSource, /openNodeTagDialog\(this\.getActiveNodesSnapshot\(\)\)/)
+  assert.match(toolbarSource, /this\.\$bus\.\$on\('node_active', this\.onNodeActive\)/)
+  assert.match(toolbarSource, /this\.\$bus\.\$off\('node_active', this\.onNodeActive\)/)
 })
 
 test('编辑页在切换上下文前会对未保存风险给出确认', () => {
@@ -72,10 +150,14 @@ test('编辑页在切换上下文前会对未保存风险给出确认', () => {
 })
 
 test('工具栏本地文件读写会保留思维导图 config，并在打开文件时回填到编辑态', () => {
-  assert.match(toolbarSource, /configData:\s*parsedDocument\.mindMapConfig \|\| null/)
+  const localFileSessionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/editorLocalFileSession.js'),
+    'utf8'
+  )
+  assert.match(localFileSessionSource, /configData:\s*parsedDocument\.mindMapConfig \|\| null/)
   assert.match(toolbarSource, /configData:\s*getConfig\(\)/)
-  assert.match(toolbarSource, /serializeStoredDocumentContent\(/)
-  assert.match(toolbarSource, /mindMapConfig:\s*writeTask\.configData/)
+  assert.match(localFileSessionSource, /serializeStoredDocumentContent/)
+  assert.match(localFileSessionSource, /mindMapConfig: configData/)
   assert.match(toolbarSource, /configData:\s*normalized\.configData \|\| null/)
   assert.match(
     toolbarSource,
@@ -86,7 +168,11 @@ test('工具栏本地文件读写会保留思维导图 config，并在打开文�
 })
 
 test('编辑页工具栏打开流程图文件时走统一文档解析并切换到流程图模式', () => {
-  assert.match(toolbarSource, /parseStoredDocumentContent/)
+  const localFileSessionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/editorLocalFileSession.js'),
+    'utf8'
+  )
+  assert.match(localFileSessionSource, /parseStoredDocumentContent/)
   assert.match(toolbarSource, /normalized\.documentMode === 'flowchart'/)
   assert.match(toolbarSource, /documentMode:\s*normalized\.documentMode/)
   assert.match(toolbarSource, /flowchartData:\s*normalized\.flowchartData/)
@@ -116,12 +202,21 @@ test('搜索面板精简说明区，并支持回车直接开始搜索', () => {
   assert.match(searchSource, /class="searchResultItem"/)
   assert.match(searchSource, /active:\s*activeResultIndex === index/)
   assert.match(searchSource, /@keyup\.enter\.stop\.prevent="onSearchEnter"/)
+  assert.match(searchSource, /@keydown\.down\.stop\.prevent="jumpToNextResult\(\)"/)
+  assert.match(searchSource, /@keydown\.up\.stop\.prevent="jumpToPrevResult\(\)"/)
   assert.match(searchSource, /executeSearch\(\{ restart = false \} = \{\}\)/)
   assert.match(searchSource, /this\.mindMap\.search\.endSearch\(\)/)
   assert.match(searchSource, /toggleSearch\(\)/)
   assert.match(searchSource, /openSearch\(\)/)
   assert.match(searchSource, /jumpToPrevResult\(\)/)
   assert.match(searchSource, /jumpToNextResult\(\)/)
+  assert.match(searchSource, /syncActiveSearchResult\(index\)/)
+  assert.match(searchSource, /this\.activeResultIndex = index/)
+  assert.match(searchSource, /this\.currentIndex = index \+ 1/)
+  assert.match(searchSource, /this\.total = this\.searchResultList\.length/)
+  assert.match(searchSource, /this\.showSearchInfo = this\.searchResultList\.length > 0/)
+  assert.match(searchSource, /this\.syncActiveSearchResult\(nextIndex\)/)
+  assert.match(searchSource, /this\.syncActiveSearchResult\(index\)/)
   assert.match(searchSource, /searchDraftText/)
   assert.match(searchSource, /replaceDraftText/)
   assert.match(searchSource, /cacheSearchDraft\(\)/)
@@ -133,4 +228,55 @@ test('搜索面板精简说明区，并支持回车直接开始搜索', () => {
   assert.match(searchSource, /width: 248px;/)
   assert.match(searchSource, /min-height: 34px;/)
   assert.match(searchSource, /flex: 1;/)
+})
+
+test('命令面板纯函数帮助方法支持过滤与键盘选中', async () => {
+  const helperPath = path.resolve('src/pages/Edit/components/editorCommandPalette.js')
+  const source = fs.readFileSync(helperPath, 'utf8')
+  assert.match(source, /export const filterCommandPaletteItems/)
+  assert.match(source, /export const resolveActiveCommandPaletteItem/)
+  assert.match(source, /export const moveCommandPaletteIndex/)
+  assert.match(source, /export const isCommandPaletteTypingTarget/)
+  assert.match(toolbarSource, /from '\.\/editorCommandPalette'/)
+  assert.match(toolbarSource, /filterCommandPaletteItems\(/)
+  assert.match(toolbarSource, /resolveActiveCommandPaletteItem\(/)
+  assert.match(toolbarSource, /moveCommandPaletteIndex\(/)
+  assert.match(toolbarSource, /isCommandPaletteTypingTarget\(/)
+})
+
+test('工具栏本地文件会话纯函数已抽到独立模块', () => {
+  const helperPath = path.resolve(
+    'src/pages/Edit/components/editorLocalFileSession.js'
+  )
+  const helperSource = fs.readFileSync(helperPath, 'utf8')
+  assert.match(helperSource, /export const snapshotLocalFileRef/)
+  assert.match(helperSource, /export const isSameLocalFileRef/)
+  assert.match(helperSource, /export const formatTimeLabel/)
+  assert.match(helperSource, /export const parseToolbarLocalFileContent/)
+  assert.match(helperSource, /parseStoredDocumentContent/)
+  assert.match(toolbarSource, /from '\.\/editorLocalFileSession'/)
+  assert.match(toolbarSource, /parseToolbarLocalFileContent/)
+  assert.match(toolbarSource, /snapshotLocalFileRef/)
+})
+
+test('工具栏本地文件写任务与排队状态判断已抽为纯函数', () => {
+  const helperSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/editorLocalFileSession.js'),
+    'utf8'
+  )
+  assert.match(helperSource, /export const createLocalWriteTaskData/)
+  assert.match(helperSource, /export const hasPendingLocalWriteState/)
+  assert.match(helperSource, /export const serializeMindMapWriteContent/)
+  assert.match(toolbarSource, /createLocalWriteTaskData/)
+  assert.match(toolbarSource, /hasPendingLocalWriteState/)
+  assert.match(toolbarSource, /serializeMindMapWriteContent/)
+})
+
+
+test('编辑页工具栏展示文档保存状态提示', () => {
+  assert.match(toolbarSource, /toolbarSaveStatus/)
+  assert.match(toolbarSource, /toolbarStatusText/)
+  assert.match(toolbarSource, /toolbarStatusDetail/)
+  assert.match(toolbarSource, /statusAutosaving/)
+  assert.match(toolbarSource, /statusUnsynced/)
 })

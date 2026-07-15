@@ -33,6 +33,20 @@ test('首页设置页提供恢复文件状态与清理入口', () => {
   assert.match(source, /clearRecoveryFiles/)
 })
 
+test('首页设置页提供独立 AI 供应商配置表单', () => {
+  const source = fs.readFileSync(settingsPagePath, 'utf8')
+
+  assert.match(source, /AI_PROVIDER_LIST/)
+  assert.match(source, /aiConfigForm/)
+  assert.match(source, /handleAiProviderChange/)
+  assert.match(source, /saveAiConfig/)
+  assert.match(source, /v-model="aiConfigForm\.provider"/)
+  assert.match(source, /v-model="aiConfigForm\.baseUrl"/)
+  assert.match(source, /v-model="aiConfigForm\.apiPath"/)
+  assert.match(source, /v-model="aiConfigForm\.model"/)
+  assert.match(source, /v-model="aiConfigForm\.key"/)
+})
+
 test('首页设置页补充工作流与效率提示卡片', () => {
   const source = fs.readFileSync(settingsPagePath, 'utf8')
 

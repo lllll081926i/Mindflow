@@ -1552,8 +1552,21 @@ export default {
     },
 
     // 执行命令
-    execCommand(...args) {
-      this.mindMap.execCommand(...args)
+    execCommand(command, ...args) {
+      if (!this.mindMap) {
+        return
+      }
+      switch (command) {
+        case 'FIT_CANVAS':
+          this.mindMap.view.fit()
+          break
+        case 'RETURN_CENTER':
+          this.mindMap.renderer.setRootNodeCenter()
+          break
+        default:
+          this.mindMap.execCommand(command, ...args)
+          break
+      }
     },
 
     // 导出

@@ -54,3 +54,17 @@ test('AI 新文案已接入国际化', () => {
   assert.match(langSource, /"requestInProgressTip": "当前已有 AI 任务在执行，请等待完成或先停止。"/)
   assert.match(langSource, /"providerVolcanoArk": "火山方舟"/)
 })
+
+
+test('思维导图整图 AI 生成会先确认替换，避免静默覆盖当前内容', () => {
+  const aiCreateSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/AiCreate.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(aiCreateSource, /async doAiCreate\(/)
+  assert.match(aiCreateSource, /createReplaceConfirmMessage/)
+  assert.match(aiCreateSource, /createReplaceConfirmTitle/)
+  assert.match(langSource, /"createReplaceConfirmTitle"/)
+  assert.match(langSource, /"createReplaceConfirmMessage"/)
+})

@@ -307,9 +307,6 @@ export default {
     numberLevelList() {
       return numberLevelList[this.$i18n.locale] || numberLevelList.zh
     },
-    hasCheckbox() {
-      return !!this.node?.getData('checkbox')
-    },
     hasNodeLink() {
       return !!this.node?.getData('nodeLink')
     }

@@ -4,6 +4,9 @@
       :labels="flowchartToolbarText"
       :is-dark="isDark"
       :is-generating="isGenerating"
+      :save-status-type="flowchartSaveStatusType"
+      :save-status-text="flowchartSaveStatusText"
+      :save-status-detail="flowchartSaveStatusDetail"
       @go-home="goHome"
       @save="saveCurrentFile()"
       @save-as="saveAsFile()"
@@ -13,7 +16,100 @@
       @toggle-dark="toggleAppearance"
       @generate-ai="generateWithAi"
       @tidy-layout="tidyFlowchartLayout"
+      @open-command-palette="openCommandPalette"
     />
+
+    <FlowchartCommandPalette
+      :visible="commandPaletteVisible"
+      :items="flowchartCommandPaletteItems"
+      :labels="flowchartCommandPaletteLabels"
+      @close="closeCommandPalette"
+      @execute="executeCommandPaletteItem"
+    />
+
+    <div
+      v-if="flowchartAiPreviewVisible"
+      class="flowchartAiPreviewOverlay"
+      @mousedown.self="discardFlowchartAiPreview"
+    >
+      <section
+        class="flowchartAiPreviewPanel"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="$t('flowchart.aiPreviewTitle')"
+      >
+        <div class="flowchartAiPreviewHeader">
+          <div class="flowchartAiPreviewTitle">
+            {{ $t('flowchart.aiPreviewTitle') }}
+          </div>
+          <button
+            type="button"
+            class="flowchartAiPreviewClose"
+            :aria-label="$t('dialog.close')"
+            @click="discardFlowchartAiPreview"
+          >
+            x
+          </button>
+        </div>
+        <div class="flowchartAiPreviewBody">
+          <div class="flowchartAiPreviewMeta">
+            <span>{{ flowchartAiPreviewSummaryText }}</span>
+            <span v-if="flowchartAiPreviewTitle">{{ flowchartAiPreviewTitle }}</span>
+          </div>
+          <div class="flowchartAiPreviewCanvas" aria-hidden="true">
+            <svg :viewBox="flowchartAiPreviewViewBox">
+              <path
+                v-for="edge in flowchartAiPreviewEdges"
+                :key="edge.id"
+                class="flowchartAiPreviewEdge"
+                :d="getAiPreviewPath(edge)"
+                :style="getAiPreviewEdgeStyle(edge)"
+              ></path>
+              <template v-for="node in flowchartAiPreviewNodes" :key="node.id">
+                <polygon
+                  v-if="node.type === 'decision'"
+                  class="flowchartAiPreviewNode"
+                  :points="getAiPreviewDecisionPolygon(node)"
+                  :style="getAiPreviewNodeStyle()"
+                ></polygon>
+                <polygon
+                  v-else-if="node.type === 'input'"
+                  class="flowchartAiPreviewNode"
+                  :points="getAiPreviewInputPolygon(node)"
+                  :style="getAiPreviewNodeStyle()"
+                ></polygon>
+                <rect
+                  v-else
+                  class="flowchartAiPreviewNode"
+                  :x="node.x"
+                  :y="node.y"
+                  :width="node.width"
+                  :height="node.height"
+                  :rx="node.type === 'start' || node.type === 'end' ? 22 : 10"
+                  :style="getAiPreviewNodeStyle()"
+                ></rect>
+              </template>
+            </svg>
+          </div>
+        </div>
+        <div class="flowchartAiPreviewFooter">
+          <button
+            type="button"
+            class="flowchartAiPreviewButton"
+            @click="discardFlowchartAiPreview"
+          >
+            {{ $t('flowchart.aiPreviewCancel') }}
+          </button>
+          <button
+            type="button"
+            class="flowchartAiPreviewButton isPrimary"
+            @click="applyFlowchartAiPreview"
+          >
+            {{ $t('flowchart.aiPreviewConfirm') }}
+          </button>
+        </div>
+      </section>
+    </div>
 
     <div class="flowchartStage">
       <FlowchartCanvas
@@ -147,6 +243,7 @@
         @update-selected-edge-style="updateSelectedEdgeStyle"
       />
     </div>
+    <AiConfigDialog v-model:visible="flowchartAiConfigDialogVisible" />
   </div>
 </template>
 
@@ -179,6 +276,8 @@ import FlowchartMinimap from './FlowchartMinimap.vue'
 import FlowchartNodeLayer from './FlowchartNodeLayer.vue'
 import FlowchartQuickAddBar from './FlowchartQuickAddBar.vue'
 import FlowchartToolbar from './FlowchartToolbar.vue'
+import FlowchartCommandPalette from './FlowchartCommandPalette.vue'
+import AiConfigDialog from './AiConfigDialog.vue'
 import './FlowchartEditor.less'
 import { flowchartHistoryMethods } from './flowchartEditorHistory'
 import { flowchartViewportMethods } from './flowchartEditorViewport'
@@ -192,6 +291,15 @@ import { flowchartAutoScrollMethods } from './flowchartEditorAutoScroll'
 import { flowchartStyleMethods } from './flowchartEditorStyle'
 import { flowchartDocumentMethods } from './flowchartEditorDocument'
 import { flowchartAiMethods } from './flowchartEditorAi'
+import {
+  getFlowchartStructurePreviewViewBox,
+  getFlowchartStructurePreviewPath,
+  getFlowchartStructureEdgeStyle,
+  getFlowchartStructureNodeStyle,
+  getFlowchartDecisionPolygon,
+  getFlowchartInputPolygon,
+  summarizeFlowchartStructure
+} from './flowchartStructurePreview'
 import {
   FLOWCHART_ALIGNMENT_THRESHOLD,
   FLOWCHART_STRAIGHT_EDGE_SNAP_THRESHOLD,
@@ -207,7 +315,9 @@ export default {
     FlowchartMinimap,
     FlowchartNodeLayer,
     FlowchartQuickAddBar,
-    FlowchartToolbar
+    FlowchartToolbar,
+    FlowchartCommandPalette,
+    AiConfigDialog
   },
   data() {
     return {
@@ -271,6 +381,8 @@ export default {
       isFlowchartUnmounted: false,
       aiBuffer: '',
       isGenerating: false,
+      pendingFlowchartAiResult: null,
+      flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
     }
@@ -552,6 +664,7 @@ export default {
         returnHome: this.$t('flowchart.returnHomeShort'),
         importMindMapFile: this.$t('flowchart.importMindMapFileShort'),
         aiGenerate: this.$t('flowchart.aiGenerateShort'),
+        commandPalette: this.$t('toolbar.commandPaletteAction'),
         exportCenter: this.$t('toolbar.exportCenter'),
         convertMindMap: this.$t('flowchart.convertMindMapShort'),
         tidyLayout: this.$t('flowchart.tidyLayout'),
@@ -586,6 +699,91 @@ export default {
         !!this.recoveryTimer ||
         !!this.isGenerating
       )
+    },
+    flowchartSaveStatusType() {
+      if (this.isGenerating) return 'generating'
+      if (this.persistTimer || this.recoveryTimer) return 'autosaving'
+      if (this.currentDocument?.dirty) return 'dirty'
+      if (this.currentDocument?.path || this.currentFileName) return 'saved'
+      return 'dirty'
+    },
+    flowchartSaveStatusText() {
+      if (this.isGenerating) return this.$t('flowchart.aiGenerating')
+      if (this.persistTimer || this.recoveryTimer) {
+        return this.$t('toolbar.statusAutosaving')
+      }
+      if (this.currentDocument?.dirty) {
+        return this.$t('toolbar.statusUnsynced')
+      }
+      if (this.currentDocument?.path || this.currentFileName) {
+        return this.$t('toolbar.statusSaved')
+      }
+      return this.$t('toolbar.statusNoFile')
+    },
+    flowchartCommandPaletteLabels() {
+      return {
+        title: this.$t('toolbar.commandPaletteTitle'),
+        placeholder: this.$t('toolbar.commandPalettePlaceholder'),
+        empty: this.$t('toolbar.commandPaletteEmpty'),
+        close: this.$t('dialog.close')
+      }
+    },
+    flowchartCommandPaletteItems() {
+      return [
+        { key: 'save', label: this.$t('flowchart.save'), shortcut: 'Ctrl S', action: () => this.saveCurrentFile() },
+        { key: 'saveAs', label: this.$t('flowchart.saveAsShort'), action: () => this.saveAsFile() },
+        { key: 'fitCanvas', label: this.$t('toolbar.fitCanvasAction'), shortcut: 'Ctrl 0', action: () => this.fitCanvasToView() },
+        { key: 'resetViewport', label: this.$t('flowchart.fitView'), shortcut: 'Ctrl 1', action: () => this.resetViewport() },
+        { key: 'tidyLayout', label: this.$t('flowchart.tidyLayout'), action: () => this.tidyFlowchartLayout() },
+        { key: 'undo', label: this.$t('toolbar.undo'), shortcut: 'Ctrl Z', action: () => this.undoFlowchartChange() },
+        { key: 'redo', label: this.$t('toolbar.redo'), shortcut: 'Ctrl Y', action: () => this.redoFlowchartChange() },
+        { key: 'importMindMap', label: this.$t('flowchart.importMindMapFileShort'), action: () => this.importMindMapFile() },
+        { key: 'export', label: this.$t('toolbar.exportCenter'), action: () => this.openExportCenter() },
+        { key: 'convertMindMap', label: this.$t('flowchart.convertMindMapShort'), action: () => this.convertCurrentMindMap() },
+        { key: 'aiGenerate', label: this.$t('flowchart.aiGenerateShort'), disabled: this.isGenerating, action: () => this.generateWithAi() },
+        { key: 'toggleInspector', label: this.$t('flowchart.settingsPanelTitle'), action: () => this.toggleInspector() },
+        { key: 'returnHome', label: this.$t('flowchart.returnHomeShort'), action: () => this.goHome() }
+      ]
+    },
+    flowchartAiPreviewSummary() {
+      return summarizeFlowchartStructure(this.pendingFlowchartAiResult?.flowchartData || null)
+    },
+    flowchartAiPreviewTitle() {
+      return this.flowchartAiPreviewSummary.title
+    },
+    flowchartAiPreviewNodes() {
+      return this.flowchartAiPreviewSummary.preview.nodes
+    },
+    flowchartAiPreviewEdges() {
+      return this.flowchartAiPreviewSummary.preview.edges
+    },
+    flowchartAiPreviewViewBox() {
+      return getFlowchartStructurePreviewViewBox(this.flowchartAiPreviewSummary.preview)
+    },
+    flowchartAiPreviewSummaryText() {
+      return this.$t('flowchart.aiPreviewMessage', {
+        nodes: this.flowchartAiPreviewSummary.nodes,
+        edges: this.flowchartAiPreviewSummary.edges
+      })
+    },
+    flowchartSaveStatusDetail() {
+      const target =
+        this.currentFileName ||
+        this.currentDocument?.name ||
+        this.$t('flowchart.fileNameFallback')
+      if (this.isGenerating) {
+        return this.$t('flowchart.aiGenerating')
+      }
+      if (this.persistTimer || this.recoveryTimer) {
+        return this.$t('toolbar.statusAutosavingDetail', { target })
+      }
+      if (this.currentDocument?.dirty) {
+        return this.$t('toolbar.statusUnsyncedDetail')
+      }
+      if (this.currentDocument?.path || this.currentFileName) {
+        return this.$t('toolbar.statusSavedDetail')
+      }
+      return this.$t('toolbar.statusNoFileDetail')
     }
   },
   created() {
@@ -649,6 +847,50 @@ export default {
     this.pendingCanvasPanPoint = null
   },
   methods: {
+    openCommandPalette() {
+      this.commandPaletteVisible = true
+    },
+    closeCommandPalette() {
+      this.commandPaletteVisible = false
+    },
+    executeCommandPaletteItem(item) {
+      if (!item || item.disabled || typeof item.action !== 'function') return
+      this.closeCommandPalette()
+      item.action.call(this)
+    },
+    openFlowchartAiPreview(result) {
+      this.pendingFlowchartAiResult = result || null
+      this.flowchartAiPreviewVisible = !!result
+    },
+    discardFlowchartAiPreview() {
+      this.flowchartAiPreviewVisible = false
+      this.pendingFlowchartAiResult = null
+    },
+    applyFlowchartAiPreview() {
+      if (!this.pendingFlowchartAiResult) {
+        this.discardFlowchartAiPreview()
+        return
+      }
+      this.applyGeneratedFlowchart(this.pendingFlowchartAiResult)
+      this.discardFlowchartAiPreview()
+      this.$message.success(this.$t('flowchart.aiGenerated'))
+    },
+    getAiPreviewPath(edge) {
+      return getFlowchartStructurePreviewPath(this.flowchartAiPreviewSummary.preview, edge)
+    },
+    getAiPreviewEdgeStyle(edge) {
+      return getFlowchartStructureEdgeStyle(edge)
+    },
+    getAiPreviewNodeStyle() {
+      return getFlowchartStructureNodeStyle()
+    },
+    getAiPreviewDecisionPolygon(node) {
+      return getFlowchartDecisionPolygon(node)
+    },
+    getAiPreviewInputPolygon(node) {
+      return getFlowchartInputPolygon(node)
+    },
+
     markNodesAsNew(nodeIds) {
       if (!nodeIds?.length) return
       this.newNodeIds = new Set(nodeIds)

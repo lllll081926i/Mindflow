@@ -27,3 +27,5 @@ docs/plans/
 .env
 .env.*
 !.env.library
+
+.repair-backup/

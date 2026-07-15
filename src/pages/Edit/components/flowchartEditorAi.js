@@ -24,6 +24,38 @@ export const flowchartAiMethods = {
     if (resetGenerating) {
       this.aiBuffer = ''
       this.isGenerating = false
+      this.pendingFlowchartAiResult = null
+      this.flowchartAiPreviewVisible = false
+    }
+  },
+
+  async confirmFlowchartAiPreview(result) {
+    const nodes = Array.isArray(result?.flowchartData?.nodes)
+      ? result.flowchartData.nodes.length
+      : 0
+    const edges = Array.isArray(result?.flowchartData?.edges)
+      ? result.flowchartData.edges.length
+      : 0
+    if (nodes <= 0) {
+      this.$message.warning(this.$t('flowchart.aiPreviewEmpty'))
+      return false
+    }
+    try {
+      await this.$confirm(
+        this.$t('flowchart.aiPreviewMessage', {
+          nodes,
+          edges
+        }),
+        this.$t('flowchart.aiPreviewTitle'),
+        {
+          type: 'info',
+          confirmButtonText: this.$t('flowchart.aiPreviewConfirm'),
+          cancelButtonText: this.$t('flowchart.aiPreviewCancel')
+        }
+      )
+      return true
+    } catch (_error) {
+      return false
     }
   },
 
@@ -52,6 +84,9 @@ export const flowchartAiMethods = {
       })
     } catch (error) {
       if (this.isFlowchartUnmounted) return
+      if (error.code === 'AI_CONFIG_INVALID') {
+        this.flowchartAiConfigDialogVisible = true
+      }
       this.$message.error(error?.message || this.$t('ai.connectFailed'))
       return
     }
@@ -59,6 +94,7 @@ export const flowchartAiMethods = {
     const requestToken = this.flowchartAiRequestToken + 1
     this.flowchartAiRequestToken = requestToken
     this.aiBuffer = ''
+    this.pendingFlowchartAiResult = null
     this.isGenerating = true
     this.$message.info(this.$t('flowchart.aiGenerating'))
     const streamRequest = requestAiStream({
@@ -73,16 +109,19 @@ export const flowchartAiMethods = {
         }
         this.aiBuffer = String(content || '')
       },
-      end: content => {
+      end: async content => {
         if (!this.isCurrentFlowchartAiRequest(requestToken)) {
           return
         }
         try {
           this.aiBuffer = String(content || this.aiBuffer || '')
           const result = normalizeFlowchartAiResult(this.aiBuffer)
-          this.applyGeneratedFlowchart(result)
-          this.$message.success(this.$t('flowchart.aiGenerated'))
+          if (!this.isCurrentFlowchartAiRequest(requestToken)) {
+            return
+          }
+          this.openFlowchartAiPreview(result)
         } catch (error) {
+          this.pendingFlowchartAiResult = null
           this.$message.error(error?.message || this.$t('ai.generationFailed'))
         } finally {
           if (this.isCurrentFlowchartAiRequest(requestToken)) {
@@ -97,6 +136,7 @@ export const flowchartAiMethods = {
         }
         this.flowchartAiClient = null
         this.isGenerating = false
+        this.pendingFlowchartAiResult = null
         this.$message.error(error?.message || this.$t('ai.generationFailed'))
       }
     })

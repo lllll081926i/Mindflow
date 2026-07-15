@@ -383,13 +383,26 @@ export default {
     },
 
     // 确认生成
-    doAiCreate() {
+    async doAiCreate() {
       const aiInputText = this.aiInput.trim()
       if (!aiInputText) {
         this.$message.warning(this.$t('ai.noInputTip'))
         return
       }
       if (this.handleAiBusy('create-all')) {
+        return
+      }
+      try {
+        await this.$confirm(
+          this.$t('ai.createReplaceConfirmMessage'),
+          this.$t('ai.createReplaceConfirmTitle'),
+          {
+            type: 'warning',
+            confirmButtonText: this.$t('ai.confirm'),
+            cancelButtonText: this.$t('ai.cancel')
+          }
+        )
+      } catch (_error) {
         return
       }
       this.closeAiCreateDialog()

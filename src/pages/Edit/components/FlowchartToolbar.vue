@@ -75,6 +75,16 @@
         </EditorToolbarAction>
       </div>
       <div class="flowchartToolbarGroup isSecondary">
+        <div
+          class="flowchartSaveStatus"
+          :class="`is-${saveStatusType}`"
+          :title="saveStatusDetail"
+          role="status"
+          :aria-label="saveStatusText"
+        >
+          <span class="flowchartSaveStatusDot" aria-hidden="true"></span>
+          <span class="flowchartSaveStatusText">{{ saveStatusText }}</span>
+        </div>
         <EditorToolbarAction
           action-class="flowchartToolbarBtn"
           icon-class="flowchartToolbarIcon"
@@ -125,6 +135,21 @@
               <path d="M19.5 12H22"></path>
               <path d="m4.9 19.1 1.8-1.8"></path>
               <path d="m17.3 6.7 1.8-1.8"></path>
+            </svg>
+          </template>
+        </EditorToolbarAction>
+        <EditorToolbarAction
+          action-class="flowchartToolbarBtn"
+          icon-class="flowchartToolbarIcon"
+          :label="labels.commandPalette"
+          @action="$emit('open-command-palette')"
+        >
+          <template #icon>
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7h16"></path>
+              <path d="M4 12h10"></path>
+              <path d="M4 17h16"></path>
+              <circle cx="18" cy="12" r="2"></circle>
             </svg>
           </template>
         </EditorToolbarAction>
@@ -185,6 +210,18 @@ export default {
     isDark: {
       type: Boolean,
       default: false
+    },
+    saveStatusType: {
+      type: String,
+      default: 'saved'
+    },
+    saveStatusText: {
+      type: String,
+      default: ''
+    },
+    saveStatusDetail: {
+      type: String,
+      default: ''
     }
   }
 }

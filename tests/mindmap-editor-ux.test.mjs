@@ -40,6 +40,10 @@ const editSource = fs.readFileSync(
   'utf8'
 )
 const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+const projectRoadmapSource = fs.readFileSync(
+  path.resolve('docs/project-roadmap.md'),
+  'utf8'
+)
 const editorToolbarActionPath = path.resolve(
   'src/pages/Edit/components/EditorToolbarAction.vue'
 )
@@ -243,4 +247,35 @@ test('思维导图支持把剪贴板多行文本作为当前节点的子主题�
   assert.match(editSource, /\$t\('toolbar\.pasteOutlineEmpty'\)/)
   assert.match(langSource, /"pasteOutlineNeedSelection": "请先选择一个主题"/)
   assert.match(langSource, /"pasteOutlineSuccess": "已从剪贴板生成子主题"/)
+})
+
+test('思维导图核心界面不出现待办或任务管理入口', () => {
+  assert.doesNotMatch(contextmenuSource, /contextmenu\.addToDo/)
+  assert.doesNotMatch(contextmenuSource, /contextmenu\.removeToDo/)
+  assert.doesNotMatch(contextmenuSource, /contextmenu\.taskPriority/)
+  assert.doesNotMatch(contextmenuSource, /contextmenu\.taskDueDate/)
+  assert.doesNotMatch(contextmenuSource, /ADD_TO_DO/)
+  assert.doesNotMatch(contextmenuSource, /REMOVE_TO_DO/)
+  assert.doesNotMatch(contextmenuSource, /SET_TASK_PRIORITY/)
+  assert.doesNotMatch(contextmenuSource, /SET_TASK_DUE_DATE/)
+
+  assert.doesNotMatch(toolbarSource, /toolbar\.taskSummaryAction/)
+  assert.doesNotMatch(toolbarSource, /key:\s*'tasks'/)
+  assert.doesNotMatch(toolbarSource, /openTaskSummaryPanel/)
+
+  assert.doesNotMatch(editSource, /taskSummary/)
+  assert.doesNotMatch(editSource, /mindMapTaskCheckbox/)
+  assert.doesNotMatch(editSource, /mindMapTaskPrefixWrap/)
+  assert.doesNotMatch(editSource, /node\.getData\('checkbox'\)/)
+
+  assert.doesNotMatch(langSource, /"addToDo": "添加待办"/)
+  assert.doesNotMatch(langSource, /"removeToDo": "删除待办"/)
+  assert.doesNotMatch(langSource, /"taskSummaryAction": "任务"/)
+  assert.doesNotMatch(langSource, /"taskSummaryEmpty": "暂无待办任务"/)
+
+  assert.doesNotMatch(projectRoadmapSource, /待办/)
+  assert.doesNotMatch(projectRoadmapSource, /任务属性/)
+  assert.doesNotMatch(projectRoadmapSource, /任务视图/)
+  assert.doesNotMatch(projectRoadmapSource, /任务汇总/)
+  assert.doesNotMatch(projectRoadmapSource, /任务系统/)
 })
