@@ -34,8 +34,29 @@ export const flowchartNodeMethods = {
       const sourceNode = this.getNodeById(this.selectedNodeIds[0])
       if (sourceNode) {
         const size = this.getDefaultNodeSizeByType(type)
+        const outgoing = (this.flowchartData?.edges || []).filter(
+          edge => edge.source === sourceNode.id
+        )
+        // Decision branches fan out: first to the right, second downward, then alternate.
+        if (sourceNode.type === 'decision') {
+          const branchIndex = outgoing.length
+          if (branchIndex === 1) {
+            return resolvePoint({
+              x: Number(sourceNode.x || 0) + Number(sourceNode.width || 0) / 2,
+              y:
+                Number(sourceNode.y || 0) +
+                Number(sourceNode.height || 0) +
+                size.height / 2 +
+                96
+            })
+          }
+        }
         return resolvePoint({
-          x: Number(sourceNode.x || 0) + Number(sourceNode.width || 0) + size.width / 2 + 96,
+          x:
+            Number(sourceNode.x || 0) +
+            Number(sourceNode.width || 0) +
+            size.width / 2 +
+            96,
           y: Number(sourceNode.y || 0) + Number(sourceNode.height || 0) / 2
         })
       }

@@ -2317,3 +2317,13 @@ test('从判断节点自动连接时会补默认是/否分支标签', () => {
   assert.ok(nodeSource.includes("edgeLabel = '是'"))
   assert.ok(nodeSource.includes("edgeLabel = '否'"))
 })
+
+
+test('判断节点第二分支默认向下扇出', () => {
+  const nodeSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorNode.js'),
+    'utf8'
+  )
+  assert.ok(nodeSource.includes("sourceNode.type === 'decision'"))
+  assert.ok(nodeSource.includes('branchIndex === 1'))
+})
