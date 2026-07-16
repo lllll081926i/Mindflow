@@ -25,6 +25,13 @@
         >{{
           $t('markerLegend.clearSelected') || '清除所选标记'
         }}</el-button>
+        <el-button size="small" @click="openOutlineWithFilter">{{
+          $t('markerLegend.openOutline') || '大纲中查看'
+        }}</el-button>
+      </div>
+      <div class="matchStats" v-if="filterStats.token">
+        {{ $t('markerLegend.matchStats', filterStats) ||
+          ('筛选命中 ' + filterStats.matched + ' / ' + filterStats.total) }}
       </div>
       <div class="quickFilters">
         <button type="button" class="chip" :class="{ isActive: activeFilter === 'has:comment' }" @click="toggleQuick('has:comment')">批注</button>
@@ -106,7 +113,8 @@ export default {
     return {
       activeFilter: '',
       countsByKey: {},
-      activeNodes: []
+      activeNodes: [],
+      filterStats: { token: '', matched: 0, total: 0 }
     }
   },
   computed: {
@@ -185,9 +193,11 @@ export default {
   },
   created() {
     this.$bus.$on('applyMarkerFilter', this.syncFilterFromBus)
+    this.$bus.$on('markerFilterStats', this.onFilterStats)
   },
   beforeUnmount() {
     this.$bus.$off('applyMarkerFilter', this.syncFilterFromBus)
+    this.$bus.$off('markerFilterStats', this.onFilterStats)
     if (this.mindMap) {
       this.mindMap.off?.('data_change', this.refreshCounts)
       this.mindMap.off?.('node_active', this.onNodeActive)
@@ -207,6 +217,25 @@ export default {
     },
     syncFilterFromBus(marker = '') {
       this.activeFilter = String(marker || '')
+      if (!this.activeFilter) {
+        this.filterStats = { token: '', matched: 0, total: 0 }
+      }
+    },
+    onFilterStats(payload = {}) {
+      this.filterStats = {
+        token: String(payload.token || ''),
+        matched: Number(payload.matched || 0),
+        total: Number(payload.total || 0)
+      }
+    },
+    openOutlineWithFilter() {
+      setActiveSidebar('outline')
+      if (this.activeFilter) {
+        this.$bus.$emit('applyMarkerFilter', this.activeFilter)
+        if (!this.activeFilter.includes('_') && !this.activeFilter.startsWith('has:')) {
+          this.$bus.$emit('outlineSetKeyword', this.activeFilter)
+        }
+      }
     },
     refreshCounts() {
       const counts = {}

@@ -743,3 +743,16 @@ test('标记图例可联动贴纸与主题侧栏', () => {
   assert.ok(legendSource.includes('clearSelectedMarkers'))
   assert.ok(iconSource.includes('openNodeIconSidebarTab'))
 })
+
+
+test('标记筛选会同步大纲并反馈命中统计', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  const outlineSource = fs.readFileSync(path.resolve('src/pages/Edit/components/OutlineSidebar.vue'), 'utf8')
+  const legendSource = fs.readFileSync(path.resolve('src/pages/Edit/components/MarkerLegendSidebar.vue'), 'utf8')
+  assert.ok(editSource.includes('markerFilterStats'))
+  assert.ok(editSource.includes('outlineSetKeyword'))
+  assert.ok(outlineSource.includes('outlineSetKeyword'))
+  assert.ok(outlineSource.includes('markerFilterToken'))
+  assert.ok(legendSource.includes('openOutlineWithFilter'))
+  assert.ok(legendSource.includes('matchStats'))
+})

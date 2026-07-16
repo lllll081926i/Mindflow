@@ -38,4 +38,5 @@ test('多页转换服务已接入导图/流程图转换入口', () => {
   assert.ok(dialogSource.includes('previewLines') || dialogSource.includes('thumbLine'))
   assert.ok(toolbarSource.includes('previewLines'))
   assert.ok(documentSource.includes('previewLines'))
+  assert.ok(dialogSource.includes('statBadge') || dialogSource.includes('item.stats'))
 })

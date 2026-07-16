@@ -1230,8 +1230,11 @@ export default {
         return
       }
       const token = String(this.activeMarkerFilter || '').trim()
+      let matched = 0
+      let total = 0
       const walk = node => {
         if (!node) return
+        total += 1
         const icons = node.getData?.('icon') || []
         const tags = node.getData?.('tag') || []
         const tagText = (Array.isArray(tags) ? tags : [])
@@ -1260,6 +1263,7 @@ export default {
             match = hay.includes(lower)
           }
         }
+        if (match) matched += 1
         try {
           if (node.group && typeof node.group.opacity === 'function') {
             node.group.opacity(match ? 1 : 0.18)
@@ -1268,6 +1272,17 @@ export default {
         ;(node.children || []).forEach(child => walk(child))
       }
       walk(this.mindMap.renderer.root)
+      this.$bus.$emit('markerFilterStats', {
+        token,
+        matched: token ? matched : total,
+        total
+      })
+      // text-like filters also sync outline search for dual-panel review
+      if (token && !token.includes('_') && !token.startsWith('has:')) {
+        this.$bus.$emit('outlineSetKeyword', token)
+      } else if (!token) {
+        this.$bus.$emit('outlineSetKeyword', '')
+      }
     },
     handleMindmapRenameActiveSheet() {
       const active = (this.mindmapSheets || []).find(item => item.active)

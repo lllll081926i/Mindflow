@@ -333,11 +333,31 @@ const enrichNodeForXmindExport = root => {
     // outer frame / boundary-like metadata
     const outerFrame = data.outerFrame || data.frame || null
     if (outerFrame) {
-      const frameText =
-        typeof outerFrame === 'object'
-          ? stripHtmlText(outerFrame.text || outerFrame.title || outerFrame.name || '外框')
-          : stripHtmlText(outerFrame)
-      if (frameText) noteParts.push('[外框] ' + frameText)
+      if (typeof outerFrame === 'object' && outerFrame) {
+        const frameMetaParts = []
+        const frameText = stripHtmlText(
+          outerFrame.text || outerFrame.title || outerFrame.name || '外框'
+        )
+        if (frameText) frameMetaParts.push(frameText)
+        if (outerFrame.radius != null) frameMetaParts.push('圆角:' + outerFrame.radius)
+        if (outerFrame.fill || outerFrame.backgroundColor || outerFrame.stroke) {
+          frameMetaParts.push(
+            '样式:' +
+              stripHtmlText(
+                outerFrame.fill ||
+                  outerFrame.backgroundColor ||
+                  outerFrame.stroke
+              )
+          )
+        }
+        if (outerFrame.groupId) frameMetaParts.push('组:' + outerFrame.groupId)
+        if (frameMetaParts.length) {
+          noteParts.push('[外框] ' + frameMetaParts.join(' | '))
+        }
+      } else {
+        const frameText = stripHtmlText(outerFrame)
+        if (frameText) noteParts.push('[外框] ' + frameText)
+      }
     }
 
     // attachment names (url already not always portable)
@@ -354,6 +374,20 @@ const enrichNodeForXmindExport = root => {
     }
     if (data.annotation) {
       noteParts.push('[标注] ' + stripHtmlText(data.annotation))
+    }
+
+    const styleBits = []
+    if (data.color) styleBits.push('字色:' + stripHtmlText(data.color))
+    if (data.fillColor || data.backgroundColor) {
+      styleBits.push(
+        '底色:' + stripHtmlText(data.fillColor || data.backgroundColor)
+      )
+    }
+    if (data.borderColor) styleBits.push('边框:' + stripHtmlText(data.borderColor))
+    if (data.fontSize) styleBits.push('字号:' + stripHtmlText(data.fontSize))
+    if (data.fontWeight) styleBits.push('粗细:' + stripHtmlText(data.fontWeight))
+    if (styleBits.length) {
+      noteParts.push('[样式] ' + styleBits.join(' | '))
     }
 
     if (noteParts.length) {

@@ -277,6 +277,7 @@ const zh = {
     "addTip": "请按回车键添加"
   },
   "outline": {
+    "markerFilter": "标记筛选",
     "searchPlaceholder": "搜索大纲节点",
     "title": "大纲",
     "nodeDefaultText": "分支节点",
@@ -552,7 +553,9 @@ const zh = {
     "openStickers": "打开贴纸",
     "openTheme": "主题",
     "clearSelected": "清除所选标记",
-    "clearedSelected": "已清除所选主题标记"
+    "clearedSelected": "已清除所选主题标记",
+    "openOutline": "大纲中查看",
+    "matchStats": "筛选命中 {matched} / {total}"
   },
   "nodeIconSidebar": {
     "title": "图标/贴纸",

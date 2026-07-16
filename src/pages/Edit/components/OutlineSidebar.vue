@@ -36,6 +36,10 @@
         type="search"
         :placeholder="$t('outline.searchPlaceholder')"
       />
+      <div v-if="markerFilterToken" class="filterChip">
+        <span>{{ $t('outline.markerFilter') || '标记筛选' }}: {{ markerFilterToken }}</span>
+        <button type="button" class="chipClear" @click="clearMarkerFilter">×</button>
+      </div>
       <Outline
       :mindMap="mindMap"
       @scrollTo="onScrollTo"
@@ -57,13 +61,18 @@ import { setActiveSidebar, setIsOutlineEdit } from '@/stores/runtime'
 export default {
   created() {
     this.$bus.$on('printOutline', this.onPrint)
+    this.$bus.$on('outlineSetKeyword', this.onOutlineSetKeyword)
+    this.$bus.$on('applyMarkerFilter', this.onMarkerFilter)
   },
   beforeUnmount() {
     this.$bus.$off('printOutline', this.onPrint)
+    this.$bus.$off('outlineSetKeyword', this.onOutlineSetKeyword)
+    this.$bus.$off('applyMarkerFilter', this.onMarkerFilter)
   },
   data() {
     return {
-      outlineKeyword: ''
+      outlineKeyword: '',
+      markerFilterToken: ''
     }
   },
   components: {
@@ -84,6 +93,18 @@ export default {
     })
   },
   methods: {
+    onOutlineSetKeyword(keyword = '') {
+      this.outlineKeyword = String(keyword || '')
+    },
+    onMarkerFilter(token = '') {
+      this.markerFilterToken = String(token || '')
+    },
+    clearMarkerFilter() {
+      this.markerFilterToken = ''
+      this.$bus.$emit('applyMarkerFilter', '')
+      this.outlineKeyword = ''
+    },
+
     onChangeToOutlineEdit() {
       setActiveSidebar('')
       setIsOutlineEdit(true)
@@ -107,6 +128,26 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.filterChip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 12px 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: inherit;
+  font-size: 12px;
+}
+.chipClear {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: inherit;
+}
 .outlineSearch {
   width: calc(100% - 24px);
   margin: 10px 12px 8px;

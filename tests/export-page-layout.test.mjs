@@ -353,4 +353,5 @@ test('XMind 导出增强会映射批注与标记', () => {
   assert.ok(workbookSource.includes('enrichNodeForXmindExport'))
   assert.ok(workbookSource.includes('outerFrame') || workbookSource.includes('[外框]'))
   assert.ok(workbookSource.includes('attachmentName') || workbookSource.includes('[附件]'))
+  assert.ok(workbookSource.includes('[样式]') || workbookSource.includes('fillColor'))
 })

@@ -30,6 +30,11 @@
                 <span class="itemName">{{ item.name }}</span>
                 <span class="itemMeta">{{ item.meta }}</span>
               </div>
+              <div class="statRow" v-if="item.stats && item.stats.length">
+                <span class="statBadge" v-for="(stat, sIdx) in item.stats" :key="sIdx">{{
+                  stat
+                }}</span>
+              </div>
               <div class="thumb" v-if="item.previewLines && item.previewLines.length">
                 <div
                   class="thumbLine"
@@ -203,6 +208,21 @@ export default {
   .itemMeta {
     font-size: 12px;
     opacity: 0.65;
+  }
+  .statRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .statBadge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+  }
+  .isDark .statBadge {
+    background: rgba(255, 255, 255, 0.08);
   }
   .thumb {
     border-radius: 10px;

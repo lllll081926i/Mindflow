@@ -320,11 +320,15 @@ export const flowchartDocumentMethods = {
             }
             pushLine(root, 0)
             return {
-              id: sheet.id || 'sheet_' + (index + 1),
-              name: sheet.name || root?.data?.text || '画布 ' + (index + 1),
-              meta: childCount + ' 个子主题',
-              previewLines
-            }
+                  id: sheet.id || 'sheet_' + (index + 1),
+                  name: sheet.name || root?.data?.text || '画布 ' + (index + 1),
+                  meta: childCount + ' 个子主题',
+                  stats: [
+                    '深度 ' + Math.max(...previewLines.map(line => (line.level || 0) + 1), 1),
+                    '预览 ' + previewLines.length + ' 行'
+                  ],
+                  previewLines
+                }
           })
         })
         selectedSheetIds = (result.selected || []).map(item => item.id)
