@@ -367,3 +367,12 @@ test('思维导图 Space 打开备注编辑', () => {
   assert.ok(configSource.includes('编辑备注'))
   assert.ok(configSource.includes("'Space'"))
 })
+
+
+test('思维导图 Ctrl+Shift+K 打开超链接编辑', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 'k'"))
+  assert.ok(toolbarSource.includes('openNodeLinkDialog'))
+  assert.ok(configSource.includes('编辑超链接'))
+})

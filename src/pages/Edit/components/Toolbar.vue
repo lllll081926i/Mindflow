@@ -1115,7 +1115,11 @@ export default {
 
     onCommandPaletteKeydown(event) {
       const isTypingTarget = isCommandPaletteTypingTarget(event.target)
-      if ((event.ctrlKey || event.metaKey) && event.key?.toLowerCase() === 'k') {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        event.key?.toLowerCase() === 'k'
+      ) {
         if (isTypingTarget && !this.commandPaletteVisible) {
           return
         }
@@ -1159,6 +1163,22 @@ export default {
         if (activeNodes.length > 0) {
           event.preventDefault()
           void this.openNodeNoteDialog(activeNodes)
+        }
+        return
+      }
+      // Ctrl+Shift+K opens hyperlink dialog for active node.
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'k' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          void this.openNodeLinkDialog(activeNodes)
         }
       }
     },

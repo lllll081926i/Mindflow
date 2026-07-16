@@ -345,6 +345,11 @@ export const shortcutKeyList = [
         value: 'Space'
       },
       {
+        icon: 'iconlink',
+        name: '编辑超链接',
+        value: `${ctrl} + Shift + K`
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`
