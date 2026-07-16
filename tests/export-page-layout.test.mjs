@@ -243,3 +243,14 @@ test('流程图 PDF 导出支持纸张、适配与页边距选项', () => {
   assert.match(langSource, /"pdfPageSize"/)
   assert.match(langSource, /"pdfMargin"/)
 })
+
+
+test('流程图导出前会执行流程结构校验并拦截硬错误', () => {
+  const exportPageSource = fs.readFileSync(
+    path.resolve('src/pages/Export/Index.vue'),
+    'utf8'
+  )
+  assert.match(exportPageSource, /validateFlowchartStructure\(this\.getFlowchartData\(\)\)/)
+  assert.match(exportPageSource, /formatFlowchartValidationMessage/)
+  assert.match(exportPageSource, /severity === 'error'/)
+})

@@ -183,6 +183,10 @@ import {
   serializeStoredDocumentContent
 } from '@/services/flowchartDocument'
 import { buildMindMapHtmlDocument, sanitizeSvgMarkup } from '@/services/htmlExport'
+import {
+  validateFlowchartStructure,
+  formatFlowchartValidationMessage
+} from '@/pages/Edit/components/flowchartValidation'
 import { createWorkspaceTemplateData } from '@/services/workspaceActions'
 import { useEditorStore } from '@/stores/editor'
 import { useThemeStore } from '@/stores/theme'
@@ -1073,6 +1077,22 @@ export default {
       this.exporting = true
       try {
         if (this.documentMode === 'flowchart') {
+          const validation = validateFlowchartStructure(this.getFlowchartData())
+          if (validation.issues.length) {
+            const message = formatFlowchartValidationMessage(
+              validation,
+              this.$t.bind(this)
+            )
+            if (validation.ok) {
+              this.$message.warning(message)
+            } else {
+              this.$message.error(message)
+              if (validation.issues.some(item => item.severity === 'error')) {
+                this.exporting = false
+                return
+              }
+            }
+          }
           await this.handleFlowchartExport(safeFileName)
         } else if (resolvedType === 'pdf') {
           await this.ensureExportPluginsInstalled(resolvedType)
