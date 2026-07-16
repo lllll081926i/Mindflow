@@ -97,7 +97,9 @@ test('导出预览区扩大可视面积并允许拖动缩放预览', () => {
 
   assert.match(source, /readonly:\s*true/)
   assert.match(source, /mousewheelAction:\s*'zoom'/)
-  assert.doesNotMatch(source, /pointer-events:\s*none/)
+  // paper frame uses pointer-events:none intentionally
+  assert.match(source, /pdfPaperFrame/)
+  assert.match(source, /pointer-events:\s*none/)
   assert.match(source, /cursor:\s*grab/)
   assert.doesNotMatch(source, /class="previewHint"/)
 })
@@ -253,4 +255,15 @@ test('流程图导出前会执行流程结构校验并拦截硬错误', () => {
   assert.match(exportPageSource, /validateFlowchartStructure\(this\.getFlowchartData\(\)\)/)
   assert.match(exportPageSource, /formatFlowchartValidationMessage/)
   assert.match(exportPageSource, /severity === 'error'/)
+})
+
+
+test('流程图 PDF 预览显示纸张框示意', () => {
+  const exportPageSource = fs.readFileSync(
+    path.resolve('src/pages/Export/Index.vue'),
+    'utf8'
+  )
+  assert.match(exportPageSource, /pdfPaperFrame/)
+  assert.match(exportPageSource, /showFlowchartPdfPaperFrame/)
+  assert.match(exportPageSource, /flowchartPdfPaperFrameStyle/)
 })

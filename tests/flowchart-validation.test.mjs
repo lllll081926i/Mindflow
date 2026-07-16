@@ -2,7 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   validateFlowchartStructure,
-  formatFlowchartValidationMessage
+  formatFlowchartValidationMessage,
+  buildFlowchartAutofixPlan
 } from '../src/pages/Edit/components/flowchartValidation.js'
 
 test('流程校验识别空画布、缺失起止、悬空节点和无效连线', () => {
@@ -41,4 +42,19 @@ test('流程校验识别空画布、缺失起止、悬空节点和无效连线',
     return key
   })
   assert.equal(message, 'ok-3-2')
+})
+
+
+test('流程自动修复会补齐起止并连接悬空节点', () => {
+  const plan = buildFlowchartAutofixPlan({
+    nodes: [
+      { id: 'p1', type: 'process', text: '孤立处理', x: 100, y: 100, width: 160, height: 72 }
+    ],
+    edges: [{ id: 'bad', source: 'p1', target: 'missing' }]
+  })
+  assert.ok(plan.actions.length > 0)
+  assert.equal(plan.flowchartData.nodes.some(n => n.type === 'start'), true)
+  assert.equal(plan.flowchartData.nodes.some(n => n.type === 'end'), true)
+  assert.equal(plan.after.summary.danglingEdgeCount, 0)
+  assert.equal(plan.after.summary.floatingCount, 0)
 })

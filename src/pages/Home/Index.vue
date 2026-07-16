@@ -185,6 +185,33 @@
               type="button"
               class="starterCard"
               :disabled="busy"
+              @click="createMindMapScenario('weekly')"
+            >
+              <strong>{{ $t('home.starterMindMapWeekly') }}</strong>
+              <span>{{ $t('home.starterMindMapWeeklyDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapScenario('interview')"
+            >
+              <strong>{{ $t('home.starterMindMapInterview') }}</strong>
+              <span>{{ $t('home.starterMindMapInterviewDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapScenario('reading')"
+            >
+              <strong>{{ $t('home.starterMindMapReading') }}</strong>
+              <span>{{ $t('home.starterMindMapReadingDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
               <strong>{{ $t('home.starterFlowApproval') }}</strong>
@@ -661,6 +688,86 @@ export default {
             children: [
               { data: { text: 'KR1 可量化结果' }, children: [] },
               { data: { text: 'KR2 可量化结果' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'weekly') {
+        data.root.data.text = '周报'
+        data.root.children = [
+          {
+            data: { text: '本周进展' },
+            children: [
+              { data: { text: '已完成' }, children: [] },
+              { data: { text: '进行中' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '风险阻塞' },
+            children: [
+              { data: { text: '风险项' }, children: [] },
+              { data: { text: '需要支持' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '下周计划' },
+            children: [
+              { data: { text: '优先事项' }, children: [] },
+              { data: { text: '时间安排' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'interview') {
+        data.root.data.text = '面试准备'
+        data.root.children = [
+          {
+            data: { text: '岗位理解' },
+            children: [
+              { data: { text: '职责重点' }, children: [] },
+              { data: { text: '能力要求' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '项目故事' },
+            children: [
+              { data: { text: '背景与目标' }, children: [] },
+              { data: { text: '行动与结果' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '问答清单' },
+            children: [
+              { data: { text: '高频问题' }, children: [] },
+              { data: { text: '反问问题' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'reading') {
+        data.root.data.text = '读书笔记'
+        data.root.children = [
+          {
+            data: { text: '核心观点' },
+            children: [
+              { data: { text: '观点 1' }, children: [] },
+              { data: { text: '观点 2' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '金句摘录' },
+            children: [
+              { data: { text: '摘录 1' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '行动启发' },
+            children: [
+              { data: { text: '可落地行动' }, children: [] },
+              { data: { text: '关联项目' }, children: [] }
             ]
           }
         ]

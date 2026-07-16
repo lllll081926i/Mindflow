@@ -111,6 +111,10 @@ export const flowchartSelectionMethods = {
         this.closeFlowchartShortcuts()
         return
       }
+      if (this.flowchartValidationVisible) {
+        this.closeFlowchartValidationPanel()
+        return
+      }
       if (this.flowchartAiPreviewVisible) {
         this.discardFlowchartAiPreview()
         return

@@ -77,7 +77,52 @@
     </div>
 
     <div
-      v-if="flowchartShortcutVisible"
+          <div
+      v-if="flowchartValidationVisible"
+      class="flowchartValidationPanel"
+      role="dialog"
+      aria-label="validation"
+    >
+      <div class="flowchartValidationHeader">
+        <strong>{{ $t('flowchart.validateStructure') }}</strong>
+        <button type="button" class="flowchartValidationClose" @click="closeFlowchartValidationPanel">x</button>
+      </div>
+      <div class="flowchartValidationSummary" v-if="flowchartValidationResult">
+        {{
+          $t('flowchart.validateSummary', {
+            nodes: flowchartValidationResult.summary.nodes,
+            edges: flowchartValidationResult.summary.edges,
+            issues: flowchartValidationResult.issues.length
+          })
+        }}
+      </div>
+      <div class="flowchartValidationList" v-if="flowchartValidationResult?.issues?.length">
+        <button
+          v-for="(issue, index) in flowchartValidationResult.issues"
+          :key="issue.code + '-' + index"
+          type="button"
+          class="flowchartValidationItem"
+          :class="'is-' + issue.severity"
+          @click="focusFlowchartValidationIssue(issue)"
+        >
+          <span class="flowchartValidationSeverity">{{ issue.severity }}</span>
+          <span class="flowchartValidationText">{{ $t(issue.messageKey, { count: issue.count || 0 }) }}</span>
+        </button>
+      </div>
+      <div class="flowchartValidationEmpty" v-else>
+        {{ $t('flowchart.validateNoIssues') }}
+      </div>
+      <div class="flowchartValidationActions">
+        <button type="button" class="flowchartValidationAction" @click="validateCurrentFlowchart({ openPanel: true })">
+          {{ $t('flowchart.validateRefresh') }}
+        </button>
+        <button type="button" class="flowchartValidationAction isPrimary" @click="autofixCurrentFlowchart">
+          {{ $t('flowchart.autofixStructure') }}
+        </button>
+      </div>
+    </div>
+
+v-if="flowchartShortcutVisible"
       class="flowchartShortcutOverlay"
       @mousedown.self="closeFlowchartShortcuts"
     >
@@ -399,7 +444,8 @@ import {
 } from './flowchartStructurePreview'
 import {
   validateFlowchartStructure,
-  formatFlowchartValidationMessage
+  formatFlowchartValidationMessage,
+  buildFlowchartAutofixPlan
 } from './flowchartValidation'
 import {
   FLOWCHART_ALIGNMENT_THRESHOLD,
@@ -490,6 +536,8 @@ export default {
       flowchartSearchKeyword: '',
       flowchartSearchActiveIndex: 0,
       flowchartShortcutVisible: false,
+      flowchartValidationVisible: false,
+      flowchartValidationResult: null,
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
@@ -883,7 +931,8 @@ export default {
         { key: 'fitCanvas', label: this.$t('toolbar.fitCanvasAction'), shortcut: 'Ctrl 0', action: () => this.fitCanvasToView() },
         { key: 'resetViewport', label: this.$t('flowchart.fitView'), shortcut: 'Ctrl 1', action: () => this.resetViewport() },
         { key: 'tidyLayout', label: this.$t('flowchart.tidyLayout'), action: () => this.tidyFlowchartLayout() },
-        { key: 'validate', label: this.$t('flowchart.validateStructure'), action: () => this.validateCurrentFlowchart() },
+        { key: 'validate', label: this.$t('flowchart.validateStructure'), action: () => this.validateCurrentFlowchart({ openPanel: true }) },
+        { key: 'autofix', label: this.$t('flowchart.autofixStructure'), action: () => this.autofixCurrentFlowchart() },
         { key: 'undo', label: this.$t('toolbar.undo'), shortcut: 'Ctrl Z', action: () => this.undoFlowchartChange() },
         { key: 'redo', label: this.$t('toolbar.redo'), shortcut: 'Ctrl Y', action: () => this.redoFlowchartChange() },
         { key: 'addStart', label: this.$t('flowchart.addStart'), action: () => this.addNodeByType({ type: 'start', autoConnect: true }) },
@@ -1023,30 +1072,72 @@ export default {
     this.pendingCanvasPanPoint = null
   },
   methods: {
-    validateCurrentFlowchart() {
+    validateCurrentFlowchart({ openPanel = true } = {}) {
       const result = validateFlowchartStructure(this.flowchartData)
+      this.flowchartValidationResult = result
+      if (openPanel) this.flowchartValidationVisible = true
       const message = formatFlowchartValidationMessage(result, this.$t.bind(this))
       if (!result.issues.length) {
         this.$message.success(message)
         return result
       }
-      const floating = result.issues.find(item => item.code === 'floating-nodes')
-      if (floating?.nodeIds?.length) {
-        const nodeId = floating.nodeIds[0]
-        this.selectedNodeIds = [nodeId]
+      if (result.ok) this.$message.warning(message)
+      else this.$message.error(message)
+      return result
+    },
+    closeFlowchartValidationPanel() {
+      this.flowchartValidationVisible = false
+    },
+    focusFlowchartValidationIssue(issue) {
+      if (!issue) return
+      if (Array.isArray(issue.nodeIds) && issue.nodeIds.length) {
+        this.selectedNodeIds = [...issue.nodeIds]
         this.selectedEdgeId = ''
-        const node = this.flowchartNodeLookup.get(nodeId)
+        const node = this.flowchartNodeLookup.get(issue.nodeIds[0])
         if (node && typeof this.centerViewportAt === 'function') {
           this.centerViewportAt({
             x: Number(node.x || 0) + Number(node.width || 0) / 2,
             y: Number(node.y || 0) + Number(node.height || 0) / 2
           })
         }
+        return
       }
-      if (result.ok) this.$message.warning(message)
-      else this.$message.error(message)
-      return result
+      // generic missing start/end focus
+      if (issue.code === 'missing-start') {
+        const start = (this.flowchartData.nodes || []).find(n => n.type === 'start')
+        if (start) this.selectedNodeIds = [start.id]
+      }
+      if (issue.code === 'missing-end') {
+        const end = (this.flowchartData.nodes || []).find(n => n.type === 'end')
+        if (end) this.selectedNodeIds = [end.id]
+      }
     },
+    autofixCurrentFlowchart() {
+      const plan = buildFlowchartAutofixPlan(this.flowchartData)
+      if (!plan.actions.length) {
+        this.$message.success(this.$t('flowchart.autofixNoop'))
+        this.validateCurrentFlowchart({ openPanel: true })
+        return plan
+      }
+      this.flowchartData = {
+        ...this.flowchartData,
+        nodes: plan.flowchartData.nodes,
+        edges: plan.flowchartData.edges
+      }
+      this.flowchartValidationResult = plan.after
+      this.flowchartValidationVisible = true
+      void this.persistFlowchartState()
+      this.$nextTick(() => {
+        if (typeof this.fitCanvasToView === 'function') {
+          this.fitCanvasToView({ persist: false })
+        }
+      })
+      this.$message.success(
+        this.$t('flowchart.autofixDone', { count: plan.actions.length })
+      )
+      return plan
+    },
+
     openCommandPalette() {
       this.commandPaletteVisible = true
       this.flowchartSearchVisible = false

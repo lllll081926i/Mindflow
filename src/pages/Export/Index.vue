@@ -144,12 +144,21 @@
           <aside class="previewPanel" v-loading="previewLoading">
             <div class="previewTitle">{{ $t('exportPage.preview') }}</div>
             <div class="previewSurface">
-              <div
-                ref="previewRef"
-                class="previewCanvas"
-                :class="previewCanvasClass"
-                :style="flowchartPreviewStyle"
-              ></div>
+              <div class="previewStage" :class="{ hasPaperFrame: showFlowchartPdfPaperFrame }">
+                <div
+                  v-if="showFlowchartPdfPaperFrame"
+                  class="pdfPaperFrame"
+                  :style="flowchartPdfPaperFrameStyle"
+                >
+                  <span class="pdfPaperFrameLabel">{{ flowchartPdfPaperLabel }}</span>
+                </div>
+                <div
+                  ref="previewRef"
+                  class="previewCanvas"
+                  :class="previewCanvasClass"
+                  :style="flowchartPreviewStyle"
+                ></div>
+              </div>
             </div>
           </aside>
         </div>
@@ -1223,7 +1232,38 @@ export default {
       background: #171b22;
     }
 
-    .previewSurface {
+    .previewStage {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.previewStage.hasPaperFrame {
+  padding: 18px;
+}
+.pdfPaperFrame {
+  position: absolute;
+  inset: 18px;
+  margin: auto;
+  width: min(100%, 280px);
+  border: 1px dashed rgba(37, 99, 235, 0.55);
+  border-radius: 6px;
+  background: rgba(37, 99, 235, 0.04);
+  pointer-events: none;
+}
+.pdfPaperFrameLabel {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-size: 11px;
+}
+.previewSurface {
       background:
         radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.06) 1px, transparent 0)
           0 0 / 20px 20px,

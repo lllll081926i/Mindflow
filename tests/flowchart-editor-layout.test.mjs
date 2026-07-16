@@ -1945,3 +1945,22 @@ test('流程图模板关键节点带有默认备注说明', () => {
   assert.match(templateSource, /note: '流程起点：明确触发条件'/)
   assert.match(templateSource, /note: '流程终点：确认完成标准'/)
 })
+
+
+test('流程图提供校验结果面板与一键修复入口', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const styleSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.less'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /flowchartValidationPanel/)
+  assert.match(editorSource, /focusFlowchartValidationIssue/)
+  assert.match(editorSource, /autofixCurrentFlowchart/)
+  assert.match(editorSource, /key: 'autofix'/)
+  assert.match(styleSource, /.flowchartValidationPanel/)
+  assert.match(langSource, /"autofixStructure"/)
+})
