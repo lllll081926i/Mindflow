@@ -104,3 +104,11 @@ test('工作台创建流程图文件时会把流程图配置一并写入文档',
   assert.match(source, /config\s*=\s*null/)
   assert.match(source, /flowchartConfig:\s*config/)
 })
+
+
+test('工作区创建流程图支持指定模板 ID', () => {
+  const source = fs.readFileSync(path.resolve('src/services/workspaceActions.js'), 'utf8')
+  assert.match(source, /createWorkspaceFlowchartTemplateData\(/)
+  assert.match(source, /templateId = 'blank'/)
+  assert.match(source, /createDefaultFlowchartData\(title, templateId\)/)
+})

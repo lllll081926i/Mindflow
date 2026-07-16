@@ -1780,3 +1780,119 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+
+.flowchartSearchPanel {
+  position: fixed;
+  top: 92px;
+  right: 18px;
+  z-index: 1350;
+  width: min(320px, calc(100vw - 32px));
+  max-height: min(420px, calc(100vh - 120px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--flowchart-floating-bg);
+  border: 1px solid var(--flowchart-floating-border);
+  box-shadow: var(--flowchart-floating-shadow);
+  color: var(--flowchart-text);
+}
+
+.flowchartSearchHeader {
+  height: 42px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--flowchart-toolbar-border);
+  font-size: 13px;
+}
+
+.flowchartSearchClose {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--flowchart-subtle-text);
+  cursor: pointer;
+}
+
+.flowchartSearchClose:hover {
+  background: var(--flowchart-toolbar-btn-hover);
+  color: var(--flowchart-text);
+}
+
+.flowchartSearchInput {
+  height: 38px;
+  margin: 10px 12px 6px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--flowchart-text);
+  font: inherit;
+}
+
+.flowchartEditor.isDark .flowchartSearchInput {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.flowchartSearchInput:focus {
+  border-color: var(--flowchart-toolbar-border);
+}
+
+.flowchartSearchMeta,
+.flowchartSearchEmpty {
+  padding: 0 12px 8px;
+  color: var(--flowchart-subtle-text);
+  font-size: 12px;
+}
+
+.flowchartSearchList {
+  overflow: auto;
+  padding: 0 8px 10px;
+}
+
+.flowchartSearchItem {
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.flowchartSearchItem:hover,
+.flowchartSearchItem.isActive {
+  background: var(--flowchart-toolbar-btn-hover);
+}
+
+.flowchartSearchItemType {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--flowchart-subtle-text);
+  font-size: 11px;
+}
+
+.flowchartEditor.isDark .flowchartSearchItemType {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.flowchartSearchItemText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

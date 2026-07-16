@@ -104,6 +104,50 @@
           </div>
         </section>
 
+        <section class="starterSection">
+          <div class="resumeHeader">
+            <h2>{{ $t('home.starterTitle') }}</h2>
+          </div>
+          <div class="starterGrid">
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createBlankProject"
+            >
+              <strong>{{ $t('home.starterMindMapBlank') }}</strong>
+              <span>{{ $t('home.starterMindMapBlankDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('approval')"
+            >
+              <strong>{{ $t('home.starterFlowApproval') }}</strong>
+              <span>{{ $t('home.starterFlowApprovalDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('release')"
+            >
+              <strong>{{ $t('home.starterFlowRelease') }}</strong>
+              <span>{{ $t('home.starterFlowReleaseDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('enterpriseDelivery')"
+            >
+              <strong>{{ $t('home.starterFlowEnterprise') }}</strong>
+              <span>{{ $t('home.starterFlowEnterpriseDesc') }}</span>
+            </button>
+          </div>
+        </section>
+
         <header class="mainHeader">
           <h2>{{ $t('home.recentTitle') }}</h2>
           <div class="headerActions">
@@ -334,17 +378,24 @@ export default {
       })
     },
 
-    async createBlankFlowchartProject() {
+    async createBlankFlowchartProject(templateId = 'blank') {
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceFlowchartFile } = await loadWorkspaceActions()
         return createWorkspaceFlowchartFile({
-          router: this.$router
+          router: this.$router,
+          templateId,
+          suggestedName:
+            templateId === 'blank' ? '流程图' : this.$t('home.createFlowchart')
         })
       })
     },
 
     async createFlowchart() {
-      await this.createBlankFlowchartProject()
+      await this.createBlankFlowchartProject('blank')
+    },
+
+    async createFlowchartFromTemplate(templateId = 'blank') {
+      await this.createBlankFlowchartProject(templateId)
     },
 
     async openLocalFile() {
@@ -728,6 +779,53 @@ export default {
   gap: 32px;
 }
 
+.starterSection {
+  margin-bottom: 22px;
+}
+.starterGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.starterCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 92px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.starterCard:hover {
+  border-color: rgba(0, 117, 222, 0.28);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+.starterCard strong {
+  font-size: 14px;
+}
+.starterCard span {
+  color: #737373;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.homePage.isDark .starterCard {
+  background: rgba(24, 28, 34, 0.88);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.homePage.isDark .starterCard span {
+  color: rgba(255, 255, 255, 0.56);
+}
+@media (max-width: 900px) {
+  .starterGrid {
+    grid-template-columns: 1fr;
+  }
+}
 .resumeSection {
   margin-bottom: 0;
 }

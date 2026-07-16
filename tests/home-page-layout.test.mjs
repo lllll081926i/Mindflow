@@ -97,3 +97,16 @@ test('桌面工作台首页主题切换文案引用的国际化键完整存在',
   assert.match(langSource, /"dark":\s*"深色"/)
   assert.match(langSource, /"light":\s*"浅色"/)
 })
+
+
+test('首页提供思维导图与流程图快速开始模板入口', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /starterSection/)
+  assert.match(source, /createFlowchartFromTemplate\('approval'\)/)
+  assert.match(source, /createFlowchartFromTemplate\('release'\)/)
+  assert.match(source, /createFlowchartFromTemplate\('enterpriseDelivery'\)/)
+  assert.match(source, /createBlankFlowchartProject\(templateId/)
+  assert.match(langSource, /"starterTitle"/)
+  assert.match(langSource, /"starterFlowEnterprise"/)
+})

@@ -38,8 +38,10 @@ import { saveBootstrapStatePatch } from '@/platform'
 export const createWorkspaceTemplateData = (title = '思维导图') =>
   createDefaultMindMapData(title)
 
-export const createWorkspaceFlowchartTemplateData = (title = '流程图') =>
-  createDefaultFlowchartData(title)
+export const createWorkspaceFlowchartTemplateData = (
+  title = '流程图',
+  templateId = 'blank'
+) => createDefaultFlowchartData(title, templateId)
 
 const getDirectoryPath = filePath => {
   const value = String(filePath || '').trim()
@@ -214,19 +216,22 @@ export const createWorkspaceLocalFile = async ({
 
 export const createWorkspaceFlowchartFile = async ({
   router,
-  content = createWorkspaceFlowchartTemplateData(),
+  content = null,
   config = null,
-  suggestedName = '流程图'
+  suggestedName = '流程图',
+  templateId = 'blank'
 } = {}) => {
   try {
+    const flowchartData =
+      content || createWorkspaceFlowchartTemplateData(suggestedName, templateId)
     const serialized = serializeStoredDocumentContent({
       documentMode: 'flowchart',
-      data: content,
+      data: flowchartData,
       flowchartConfig: config,
       isFullDataFile: true
     })
     const projectRef =
-      suggestedName === '流程图'
+      templateId === 'blank' && suggestedName === '流程图'
         ? createBlankFlowchartProjectRef(suggestedName)
         : createFlowchartTemplateProjectRef(suggestedName)
     const fileRef = await platform.saveMindMapFileAs({

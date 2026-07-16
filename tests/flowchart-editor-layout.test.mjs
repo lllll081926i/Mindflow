@@ -1753,3 +1753,46 @@ test('流程图提供命令面板并支持 Ctrl/Cmd+K 打开', () => {
   assert.match(selectionSource, /event\.key\.toLowerCase\(\) === 'k'/)
   assert.match(selectionSource, /openCommandPalette\(\)/)
 })
+
+
+test('流程图命令面板覆盖节点编辑与搜索', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.match(editorSource, /key: 'search'/)
+  assert.match(editorSource, /openFlowchartSearch/)
+  assert.match(editorSource, /key: 'addProcess'/)
+  assert.match(editorSource, /key: 'selectAll'/)
+  assert.match(editorSource, /key: 'duplicate'/)
+  assert.match(editorSource, /key: 'templates'/)
+})
+
+test('流程图支持节点文本搜索并跳转定位', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /flowchartSearchPanel/)
+  assert.match(editorSource, /flowchartSearchResults/)
+  assert.match(editorSource, /jumpToFlowchartSearchResult/)
+  assert.match(selectionSource, /event\.key\.toLowerCase\(\) === 'f'/)
+  assert.match(selectionSource, /openFlowchartSearch\(\)/)
+  assert.match(langSource, /"searchNodesTitle"/)
+  assert.match(langSource, /"searchNodesPlaceholder"/)
+})
+
+test('企业交付模板保持无重叠并提供更舒展的行距', () => {
+  const templateSource = fs.readFileSync(
+    path.resolve('src/services/flowchart/parts/10-templates.js'),
+    'utf8'
+  )
+  assert.match(templateSource, /enterpriseDelivery:\s*title\s*=>/)
+  assert.match(templateSource, /y:\s*680/)
+  assert.match(templateSource, /node-close-delivery/)
+})

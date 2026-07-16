@@ -103,6 +103,10 @@ export const flowchartSelectionMethods = {
         this.closeCommandPalette()
         return
       }
+      if (this.flowchartSearchVisible) {
+        this.closeFlowchartSearch()
+        return
+      }
       if (this.flowchartAiPreviewVisible) {
         this.discardFlowchartAiPreview()
         return
@@ -117,6 +121,11 @@ export const flowchartSelectionMethods = {
       event.preventDefault()
       if (this.commandPaletteVisible) this.closeCommandPalette()
       else this.openCommandPalette()
+      return
+    }
+    if (isMetaKey && event.key.toLowerCase() === 'f') {
+      event.preventDefault()
+      this.openFlowchartSearch()
       return
     }
     if (isMetaKey && event.key.toLowerCase() === 's') {

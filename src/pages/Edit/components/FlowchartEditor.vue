@@ -28,6 +28,54 @@
     />
 
     <div
+      v-if="flowchartSearchVisible"
+      class="flowchartSearchPanel"
+      role="dialog"
+      aria-modal="false"
+      :aria-label="$t('flowchart.searchNodesTitle')"
+    >
+      <div class="flowchartSearchHeader">
+        <strong>{{ $t('flowchart.searchNodesTitle') }}</strong>
+        <button type="button" class="flowchartSearchClose" @click="closeFlowchartSearch">x</button>
+      </div>
+      <input
+        ref="flowchartSearchInputRef"
+        v-model.trim="flowchartSearchKeyword"
+        class="flowchartSearchInput"
+        type="search"
+        :placeholder="$t('flowchart.searchNodesPlaceholder')"
+        @keydown.enter.prevent="jumpToNextFlowchartSearchResult"
+        @keydown.down.prevent="jumpToNextFlowchartSearchResult"
+        @keydown.up.prevent="jumpToPrevFlowchartSearchResult"
+        @keydown.esc.prevent="closeFlowchartSearch"
+      />
+      <div class="flowchartSearchMeta" v-if="flowchartSearchResults.length">
+        {{
+          $t('flowchart.searchNodesCount', {
+            current: flowchartSearchActiveIndex + 1,
+            total: flowchartSearchResults.length
+          })
+        }}
+      </div>
+      <div class="flowchartSearchEmpty" v-else-if="flowchartSearchKeyword">
+        {{ $t('flowchart.searchNodesEmpty') }}
+      </div>
+      <div class="flowchartSearchList" v-if="flowchartSearchResults.length">
+        <button
+          v-for="(item, index) in flowchartSearchResults"
+          :key="item.id"
+          type="button"
+          class="flowchartSearchItem"
+          :class="{ isActive: index === flowchartSearchActiveIndex }"
+          @click="jumpToFlowchartSearchResult(index)"
+        >
+          <span class="flowchartSearchItemType">{{ item.typeLabel }}</span>
+          <span class="flowchartSearchItemText">{{ item.text }}</span>
+        </button>
+      </div>
+    </div>
+
+    <div
       v-if="flowchartAiPreviewVisible"
       class="flowchartAiPreviewOverlay"
       @mousedown.self="discardFlowchartAiPreview"
@@ -720,6 +768,25 @@ export default {
       }
       return this.$t('toolbar.statusNoFile')
     },
+    flowchartSearchResults() {
+      const keyword = String(this.flowchartSearchKeyword || '')
+        .trim()
+        .toLowerCase()
+      if (!keyword) return []
+      return (this.flowchartData.nodes || [])
+        .map(node => {
+          const text = String(node.text || '').trim()
+          const typeDef = this.flowchartNodeTypes.find(item => item.type === node.type)
+          return {
+            id: node.id,
+            text: text || typeDef?.label || node.type,
+            type: node.type,
+            typeLabel: typeDef?.label || node.type,
+            haystack: (text + ' ' + (typeDef?.label || '') + ' ' + node.type).toLowerCase()
+          }
+        })
+        .filter(item => item.haystack.includes(keyword))
+    },
     flowchartCommandPaletteLabels() {
       return {
         title: this.$t('toolbar.commandPaletteTitle'),
@@ -729,18 +796,32 @@ export default {
       }
     },
     flowchartCommandPaletteItems() {
+      const hasSelection = this.selectedNodeIds.length > 0 || !!this.selectedEdgeId
+      const hasNodeSelection = this.selectedNodeIds.length > 0
       return [
         { key: 'save', label: this.$t('flowchart.save'), shortcut: 'Ctrl S', action: () => this.saveCurrentFile() },
         { key: 'saveAs', label: this.$t('flowchart.saveAsShort'), action: () => this.saveAsFile() },
+        { key: 'search', label: this.$t('toolbar.searchAction'), shortcut: 'Ctrl F', action: () => this.openFlowchartSearch() },
         { key: 'fitCanvas', label: this.$t('toolbar.fitCanvasAction'), shortcut: 'Ctrl 0', action: () => this.fitCanvasToView() },
         { key: 'resetViewport', label: this.$t('flowchart.fitView'), shortcut: 'Ctrl 1', action: () => this.resetViewport() },
         { key: 'tidyLayout', label: this.$t('flowchart.tidyLayout'), action: () => this.tidyFlowchartLayout() },
         { key: 'undo', label: this.$t('toolbar.undo'), shortcut: 'Ctrl Z', action: () => this.undoFlowchartChange() },
         { key: 'redo', label: this.$t('toolbar.redo'), shortcut: 'Ctrl Y', action: () => this.redoFlowchartChange() },
+        { key: 'addStart', label: this.$t('flowchart.addStart'), action: () => this.addNodeByType({ type: 'start', autoConnect: true }) },
+        { key: 'addProcess', label: this.$t('flowchart.addProcess'), action: () => this.addNodeByType({ type: 'process', autoConnect: true }) },
+        { key: 'addDecision', label: this.$t('flowchart.addDecision'), action: () => this.addNodeByType({ type: 'decision', autoConnect: true }) },
+        { key: 'addInput', label: this.$t('flowchart.addInput'), action: () => this.addNodeByType({ type: 'input', autoConnect: true }) },
+        { key: 'addEnd', label: this.$t('flowchart.addEnd'), action: () => this.addNodeByType({ type: 'end', autoConnect: true }) },
+        { key: 'selectAll', label: this.$t('flowchart.selectAllNodes'), shortcut: 'Ctrl A', action: () => this.selectAllNodes() },
+        { key: 'duplicate', label: this.$t('flowchart.duplicateSelection'), shortcut: 'Ctrl D', disabled: !hasNodeSelection, action: () => this.duplicateSelectedNodes() },
+        { key: 'copy', label: this.$t('flowchart.copySelection'), shortcut: 'Ctrl C', disabled: !hasNodeSelection, action: () => this.copySelectedNodes() },
+        { key: 'paste', label: this.$t('flowchart.pasteSelection'), shortcut: 'Ctrl V', action: () => this.pasteCopiedNodes() },
+        { key: 'delete', label: this.$t('flowchart.delete'), shortcut: 'Delete', disabled: !hasSelection, action: () => this.removeSelection() },
         { key: 'importMindMap', label: this.$t('flowchart.importMindMapFileShort'), action: () => this.importMindMapFile() },
         { key: 'export', label: this.$t('toolbar.exportCenter'), action: () => this.openExportCenter() },
         { key: 'convertMindMap', label: this.$t('flowchart.convertMindMapShort'), action: () => this.convertCurrentMindMap() },
         { key: 'aiGenerate', label: this.$t('flowchart.aiGenerateShort'), disabled: this.isGenerating, action: () => this.generateWithAi() },
+        { key: 'templates', label: this.$t('flowchart.templatePanelTitle'), action: () => { this.isInspectorOpen = true; this.inspectorPanelSection = 'templates' } },
         { key: 'toggleInspector', label: this.$t('flowchart.settingsPanelTitle'), action: () => this.toggleInspector() },
         { key: 'returnHome', label: this.$t('flowchart.returnHomeShort'), action: () => this.goHome() }
       ]
@@ -784,6 +865,11 @@ export default {
         return this.$t('toolbar.statusSavedDetail')
       }
       return this.$t('toolbar.statusNoFileDetail')
+    }
+  },
+  watch: {
+    flowchartSearchKeyword() {
+      this.flowchartSearchActiveIndex = 0
     }
   },
   created() {
@@ -849,6 +935,7 @@ export default {
   methods: {
     openCommandPalette() {
       this.commandPaletteVisible = true
+      this.flowchartSearchVisible = false
     },
     closeCommandPalette() {
       this.commandPaletteVisible = false
