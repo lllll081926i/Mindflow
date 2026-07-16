@@ -706,7 +706,7 @@ const zh = {
     "arrangeBack": "置于底层",
     "emptyAddStart": "添加开始节点",
     "emptyTitle": "开始创建流程图",
-    "emptyDesc": "添加节点、套用模板，或拖入 .smm/.json/.xmind/.md/.mm 导图文件快速转换",
+    "emptyDesc": "Enter/Tab/1-5 快速建点，双击空白也可新建；可套用模板，或拖入 .smm/.json/.xmind/.md/.mm",
     "dragImportTip": "释放以导入导图并转换为流程图",
     "emptyUseTemplate": "使用审批模版",
     "emptyUseReleaseTemplate": "使用发布模版",
