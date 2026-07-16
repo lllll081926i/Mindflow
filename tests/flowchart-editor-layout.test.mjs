@@ -2100,3 +2100,16 @@ test('流程图校验面板展示最近修复动作与健康度变化', () => {
   assert.match(langSource, /"autofixResultTitle"/)
   assert.match(langSource, /"autofixScoreDelta"/)
 })
+
+
+
+test('流程图拖入 xmind 多画布时支持选择画布', () => {
+  const documentSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorDocument.js'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(documentSource.includes('xmindCanvasSelectTitle') || documentSource.includes('xmindCanvasSelectMessage'))
+  assert.ok(documentSource.includes('$prompt'))
+  assert.match(langSource, /"xmindCanvasSelectTitle"/)
+})

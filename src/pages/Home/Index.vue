@@ -116,13 +116,13 @@
           </div>
           <div class="starterCategoryChips">
             <button type="button" class="starterCategoryChip" :class="{ isActive: starterCategory === 'all' }" @click="starterCategory = 'all'">
-              {{ $t('home.starterCategoryAll') }}
+              {{ $t('home.starterCategoryAll') }} ({{ starterCategoryCounts.all }})
             </button>
             <button type="button" class="starterCategoryChip" :class="{ isActive: starterCategory === 'mindmap' }" @click="starterCategory = 'mindmap'">
-              {{ $t('home.starterCategoryMindmap') }}
+              {{ $t('home.starterCategoryMindmap') }} ({{ starterCategoryCounts.mindmap }})
             </button>
             <button type="button" class="starterCategoryChip" :class="{ isActive: starterCategory === 'flowchart' }" @click="starterCategory = 'flowchart'">
-              {{ $t('home.starterCategoryFlowchart') }}
+              {{ $t('home.starterCategoryFlowchart') }} ({{ starterCategoryCounts.flowchart }})
             </button>
           </div>
           <div class="starterGrid">
@@ -490,6 +490,13 @@ export default {
     }
   },
   computed: {
+    starterCategoryCounts() {
+      return {
+        all: 23,
+        mindmap: 17,
+        flowchart: 6
+      }
+    },
     hasVisibleStarters() {
       const labels = [
         ['mindmap', 'home.starterMindMapBlank', 'home.starterMindMapBlankDesc'],

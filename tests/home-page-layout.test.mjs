@@ -251,3 +251,10 @@ test('首页模板筛选无结果时展示空态提示', () => {
   assert.match(source, /starterEmpty/)
   assert.match(langSource, /"starterEmpty"/)
 })
+
+
+test('首页模板分类展示数量', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  assert.match(source, /starterCategoryCounts/)
+  assert.match(source, /starterCategoryCounts.all|starterCategoryCounts.mindmap/)
+})
