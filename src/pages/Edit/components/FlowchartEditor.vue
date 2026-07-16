@@ -49,7 +49,7 @@
     >
       <div class="flowchartSearchHeader">
         <strong>{{ $t('flowchart.searchNodesTitle') }}</strong>
-        <button type="button" class="flowchartSearchClose" @click="closeFlowchartSearch">x</button>
+        <button type="button" class="flowchartSearchClose" :aria-label="$t('dialog.close')" @click="closeFlowchartSearch">x</button>
       </div>
       <input
         ref="flowchartSearchInputRef"
@@ -73,12 +73,14 @@
       <div class="flowchartSearchEmpty" v-else-if="flowchartSearchKeyword">
         {{ $t('flowchart.searchNodesEmpty') }}
       </div>
-      <div class="flowchartSearchList" v-if="flowchartSearchResults.length">
+      <div class="flowchartSearchList" v-if="flowchartSearchResults.length" role="listbox">
         <button
           v-for="(item, index) in flowchartSearchResults"
           :key="item.id"
           type="button"
           class="flowchartSearchItem"
+          role="option"
+          :aria-selected="index === flowchartSearchActiveIndex ? 'true' : 'false'"
           :class="{ isActive: index === flowchartSearchActiveIndex }"
           @click="jumpToFlowchartSearchResult(index)"
         >
@@ -92,11 +94,12 @@
       v-if="flowchartValidationVisible"
       class="flowchartValidationPanel"
       role="dialog"
+      aria-modal="true"
       :aria-label="$t('flowchart.validateStructure')"
     >
       <div class="flowchartValidationHeader">
         <strong>{{ $t('flowchart.validateStructure') }}</strong>
-        <button type="button" class="flowchartValidationClose" @click="closeFlowchartValidationPanel">x</button>
+        <button type="button" class="flowchartValidationClose" :aria-label="$t('dialog.close')" @click="closeFlowchartValidationPanel">x</button>
       </div>
       <div class="flowchartValidationSummary" v-if="flowchartValidationResult">
         {{
@@ -204,14 +207,15 @@
       </div>
     </div>
 
-v-if="flowchartShortcutVisible"
+    <div
+      v-if="flowchartShortcutVisible"
       class="flowchartShortcutOverlay"
       @mousedown.self="closeFlowchartShortcuts"
     >
       <section class="flowchartShortcutPanel" role="dialog" aria-modal="true">
         <div class="flowchartShortcutHeader">
           <strong>{{ $t('shortcutKey.title') }}</strong>
-          <button type="button" class="flowchartShortcutClose" @click="closeFlowchartShortcuts">x</button>
+          <button type="button" class="flowchartShortcutClose" :aria-label="$t('dialog.close')" @click="closeFlowchartShortcuts">x</button>
         </div>
         <div class="flowchartShortcutBody">
           <div v-for="group in flowchartShortcutGroups" :key="group.type" class="flowchartShortcutGroup">

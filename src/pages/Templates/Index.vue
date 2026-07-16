@@ -69,8 +69,14 @@
           <em
             class="templateFavoriteBtn"
             :class="{ isOn: isFavoritePref('mindmap:' + item.key) }"
+            role="button"
+            tabindex="0"
+            :aria-pressed="isFavoritePref('mindmap:' + item.key) ? 'true' : 'false'"
+            :aria-label="$t('home.toggleFavoriteStarter')"
             :title="$t('home.toggleFavoriteStarter')"
             @click.stop="toggleFavoritePref('mindmap:' + item.key)"
+            @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:' + item.key)"
+            @keydown.space.prevent.stop="toggleFavoritePref('mindmap:' + item.key)"
           >★</em>
         </button>
       </div>
@@ -92,8 +98,14 @@
           <em
             class="templateFavoriteBtn"
             :class="{ isOn: isFavoritePref('flowchart:' + item.key) }"
+            role="button"
+            tabindex="0"
+            :aria-pressed="isFavoritePref('flowchart:' + item.key) ? 'true' : 'false'"
+            :aria-label="$t('home.toggleFavoriteStarter')"
             :title="$t('home.toggleFavoriteStarter')"
             @click.stop="toggleFavoritePref('flowchart:' + item.key)"
+            @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:' + item.key)"
+            @keydown.space.prevent.stop="toggleFavoritePref('flowchart:' + item.key)"
           >★</em>
         </button>
       </div>

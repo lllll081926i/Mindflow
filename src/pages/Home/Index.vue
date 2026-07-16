@@ -168,8 +168,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap-layout:blank') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap-layout:blank') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap-layout:blank')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap-layout:blank')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap-layout:blank')"
               >★</em>
             </button>
             <button
@@ -184,8 +190,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap-layout:mindMap') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap-layout:mindMap') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap-layout:mindMap')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap-layout:mindMap')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap-layout:mindMap')"
               >★</em>
             </button>
             <button
@@ -200,8 +212,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap-layout:organizationStructure') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap-layout:organizationStructure') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap-layout:organizationStructure')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap-layout:organizationStructure')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap-layout:organizationStructure')"
               >★</em>
             </button>
             <button
@@ -216,8 +234,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:meeting') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:meeting') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:meeting')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:meeting')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:meeting')"
               >★</em>
             </button>
             <button
@@ -232,8 +256,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:project') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:project') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:project')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:project')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:project')"
               >★</em>
             </button>
             <button
@@ -248,8 +278,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:learning') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:learning') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:learning')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:learning')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:learning')"
               >★</em>
             </button>
             <button
@@ -264,8 +300,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:review') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:review') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:review')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:review')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:review')"
               >★</em>
             </button>
             <button
@@ -280,8 +322,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:okr') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:okr') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:okr')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:okr')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:okr')"
               >★</em>
             </button>
             <button
@@ -296,8 +344,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:weekly') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:weekly') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:weekly')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:weekly')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:weekly')"
               >★</em>
             </button>
             <button
@@ -312,8 +366,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:interview') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:interview') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:interview')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:interview')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:interview')"
               >★</em>
             </button>
             <button
@@ -328,8 +388,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:reading') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:reading') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:reading')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:reading')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:reading')"
               >★</em>
             </button>
             <button
@@ -344,8 +410,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:business') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:business') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:business')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:business')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:business')"
               >★</em>
             </button>
             <button
@@ -360,8 +432,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:knowledge') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:knowledge') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:knowledge')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:knowledge')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:knowledge')"
               >★</em>
             </button>
             <button
@@ -376,8 +454,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:competitor') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:competitor') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:competitor')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:competitor')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:competitor')"
               >★</em>
             </button>
             <button
@@ -392,8 +476,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:retro') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:retro') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:retro')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:retro')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:retro')"
               >★</em>
             </button>
             <button
@@ -408,8 +498,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:roadmap') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:roadmap') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:roadmap')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:roadmap')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:roadmap')"
               >★</em>
             </button>
             <button
@@ -424,8 +520,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:content') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:content') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:content')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:content')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:content')"
               >★</em>
             </button>
             <button
@@ -440,8 +542,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('mindmap:pitch') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('mindmap:pitch') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('mindmap:pitch')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('mindmap:pitch')"
+                @keydown.space.prevent.stop="toggleFavoritePref('mindmap:pitch')"
               >★</em>
             </button>
             <button
@@ -456,8 +564,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:approval') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:approval') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:approval')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:approval')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:approval')"
               >★</em>
             </button>
             <button
@@ -472,8 +586,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:release') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:release') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:release')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:release')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:release')"
               >★</em>
             </button>
             <button
@@ -488,8 +608,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:enterpriseDelivery') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:enterpriseDelivery') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:enterpriseDelivery')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:enterpriseDelivery')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:enterpriseDelivery')"
               >★</em>
             </button>
             <button
@@ -504,8 +630,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:supportEscalation') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:supportEscalation') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:supportEscalation')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:supportEscalation')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:supportEscalation')"
               >★</em>
             </button>
             <button
@@ -520,8 +652,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:salesPipeline') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:salesPipeline') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:salesPipeline')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:salesPipeline')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:salesPipeline')"
               >★</em>
             </button>
             <button
@@ -536,8 +674,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:contentReview') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:contentReview') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:contentReview')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:contentReview')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:contentReview')"
               >★</em>
             </button>
             <button
@@ -552,8 +696,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:incident') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:incident') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:incident')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:incident')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:incident')"
               >★</em>
             </button>
             <button
@@ -568,8 +718,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:customerJourney') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:customerJourney') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:customerJourney')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:customerJourney')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:customerJourney')"
               >★</em>
             </button>
             <button
@@ -584,8 +740,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:procurement') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:procurement') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:procurement')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:procurement')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:procurement')"
               >★</em>
             </button>
             <button
@@ -600,8 +762,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:troubleshooting') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:troubleshooting') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:troubleshooting')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:troubleshooting')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:troubleshooting')"
               >★</em>
             </button>
             <button
@@ -616,8 +784,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:ticket') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:ticket') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:ticket')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:ticket')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:ticket')"
               >★</em>
             </button>
             <button
@@ -632,8 +806,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:onboarding') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:onboarding') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:onboarding')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:onboarding')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:onboarding')"
               >★</em>
             </button>
             <button
@@ -648,8 +828,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:dataPipeline') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:dataPipeline') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:dataPipeline')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:dataPipeline')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:dataPipeline')"
               >★</em>
             </button>
             <button
@@ -664,8 +850,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:projectPlan') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:projectPlan') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:projectPlan')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:projectPlan')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:projectPlan')"
               >★</em>
             </button>
             <button
@@ -680,8 +872,14 @@
               <em
                 class="starterFavoriteBtn"
                 :class="{ isOn: isFavoritePref('flowchart:crossFunctionalApproval') }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="isFavoritePref('flowchart:crossFunctionalApproval') ? 'true' : 'false'"
+                :aria-label="$t('home.toggleFavoriteStarter')"
                 :title="$t('home.toggleFavoriteStarter')"
                 @click.stop="toggleFavoritePref('flowchart:crossFunctionalApproval')"
+                @keydown.enter.prevent.stop="toggleFavoritePref('flowchart:crossFunctionalApproval')"
+                @keydown.space.prevent.stop="toggleFavoritePref('flowchart:crossFunctionalApproval')"
               >★</em>
             </button>
           </div>

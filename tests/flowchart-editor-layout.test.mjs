@@ -2182,3 +2182,24 @@ test('自动修复结果面板展示具体节点/连线变更', () => {
   assert.match(editorSource, /lastAutofixDiff/)
   assert.match(lessSource, /flowchartAutofixDiffList/)
 })
+
+
+test('流程图搜索与校验面板补齐可访问性属性', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  assert.ok(editorSource.includes('role="listbox"'))
+  assert.ok(editorSource.includes('role="option"'))
+  assert.ok(editorSource.includes('aria-modal="true"'))
+  assert.ok(editorSource.includes('flowchartSearchClose') && editorSource.includes(":aria-label=\"$t('dialog.close')\""))
+})
+
+
+test('流程图快捷键浮层具备完整标签与关闭可访问性', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  assert.ok(editorSource.includes('v-if="flowchartShortcutVisible"'))
+  assert.ok(editorSource.includes('class="flowchartShortcutOverlay"'))
+  assert.ok(editorSource.includes('<div' + String.fromCharCode(10) + '      v-if="flowchartShortcutVisible"'))
+  assert.ok(
+    editorSource.includes('flowchartShortcutClose') &&
+      editorSource.includes(":aria-label=\"$t('dialog.close')\"")
+  )
+})
