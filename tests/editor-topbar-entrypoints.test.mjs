@@ -56,7 +56,7 @@ test('编辑页顶部工具栏保留搜索入口并移除状态卡片与快捷�
   assert.match(toolbarSource, /saveCurrentLocalFile/)
   assert.match(toolbarSource, /canDirectSave/)
   assert.match(toolbarSource, /emitShowSearch\(\)/)
-  assert.doesNotMatch(toolbarSource, /toolbar\.shortcutAction/)
+  assert.match(toolbarSource, /toolbar\.shortcutAction/)
 })
 
 test('编辑页提供命令面板集中触发高频动作', () => {
@@ -279,4 +279,14 @@ test('编辑页工具栏展示文档保存状态提示', () => {
   assert.match(toolbarSource, /toolbarStatusDetail/)
   assert.match(toolbarSource, /statusAutosaving/)
   assert.match(toolbarSource, /statusUnsynced/)
+})
+
+
+test('思维导图命令面板覆盖主题结构与基础样式入口', () => {
+  assert.match(toolbarSource, /key:\s*'theme'/)
+  assert.match(toolbarSource, /key:\s*'structure'/)
+  assert.match(toolbarSource, /key:\s*'baseStyle'/)
+  assert.match(toolbarSource, /setActiveSidebar\('theme'\)/)
+  assert.match(toolbarSource, /setActiveSidebar\('structure'\)/)
+  assert.match(toolbarSource, /setActiveSidebar\('baseStyle'\)/)
 })

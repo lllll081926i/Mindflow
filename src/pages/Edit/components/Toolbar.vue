@@ -797,6 +797,26 @@ export default {
           action: () => this.emitEditorCommand('UNEXPAND_ALL', true, '')
         },
         {
+          key: 'theme',
+          label: this.$t('theme.title'),
+          action: () => setActiveSidebar('theme')
+        },
+        {
+          key: 'structure',
+          label: this.$t('structure.title'),
+          action: () => setActiveSidebar('structure')
+        },
+        {
+          key: 'baseStyle',
+          label: this.$t('baseStyle.title'),
+          action: () => setActiveSidebar('baseStyle')
+        },
+        {
+          key: 'shortcut',
+          label: this.$t('toolbar.shortcutAction'),
+          action: () => setActiveSidebar('shortcutKey')
+        },
+        {
           key: 'save',
           label: this.$t('toolbar.save'),
           shortcut: 'Ctrl S',
