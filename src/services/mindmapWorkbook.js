@@ -199,6 +199,21 @@ export const renameMindmapSheet = (data, sheetId, name, liveFullData = null) => 
   }
 }
 
+export const moveMindmapSheet = (data, sheetId, toIndex, liveFullData = null) => {
+  const snapshot = snapshotActiveMindmapSheet(data, liveFullData)
+  const from = snapshot.sheets.findIndex(sheet => sheet.id === sheetId)
+  if (from < 0) return snapshot
+  const target = Math.max(0, Math.min(snapshot.sheets.length - 1, Number(toIndex) || 0))
+  if (from === target) return snapshot
+  const sheets = [...snapshot.sheets]
+  const [item] = sheets.splice(from, 1)
+  sheets.splice(target, 0, item)
+  return {
+    ...snapshot,
+    sheets
+  }
+}
+
 export const deleteMindmapSheet = (data, sheetId, liveFullData = null) => {
   const snapshot = snapshotActiveMindmapSheet(data, liveFullData)
   if (snapshot.sheets.length <= 1) {

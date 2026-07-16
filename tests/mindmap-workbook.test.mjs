@@ -6,6 +6,7 @@ import {
   switchMindmapSheet,
   deleteMindmapSheet,
   renameMindmapSheet,
+  moveMindmapSheet,
   createWorkbookFromMindmapList
 } from '../src/services/mindmapWorkbook.js'
 
@@ -49,4 +50,18 @@ test('多个导图根可组装为工作簿', () => {
   ])
   assert.equal(workbook.sheets.length, 2)
   assert.equal(workbook.root.data.text, '一')
+})
+
+
+test('画布可重排序', () => {
+  let data = ensureMindmapWorkbook({
+    root: { data: { text: 'A' }, children: [] },
+    theme: { template: 'classic4', config: {} },
+    layout: 'logicalStructure'
+  })
+  data = addMindmapSheet(data, { name: 'B' })
+  data = addMindmapSheet(data, { name: 'C' })
+  const firstId = data.sheets[0].id
+  data = moveMindmapSheet(data, firstId, 2)
+  assert.equal(data.sheets[2].id, firstId)
 })

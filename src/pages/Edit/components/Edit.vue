@@ -158,6 +158,7 @@ import {
   switchMindmapSheet,
   renameMindmapSheet,
   deleteMindmapSheet,
+  moveMindmapSheet,
   snapshotActiveMindmapSheet
 } from '@/services/mindmapWorkbook'
 import { showLoading, hideLoading } from '@/utils/loading'
@@ -819,6 +820,8 @@ export default {
       this.$bus.$on('mindmapDuplicateSheet', this.handleMindmapDuplicateSheet)
       this.$bus.$on('mindmapNextSheet', this.handleMindmapNextSheet)
       this.$bus.$on('mindmapPrevSheet', this.handleMindmapPrevSheet)
+      this.$bus.$on('mindmapMoveSheetLeft', () => this.moveActiveMindmapSheet(-1))
+      this.$bus.$on('mindmapMoveSheetRight', () => this.moveActiveMindmapSheet(1))
       this.$bus.$on(
         'createAssociativeLine',
         this.handleCreateLineFromActiveNode
@@ -848,6 +851,8 @@ export default {
       this.$bus.$off('mindmapDuplicateSheet', this.handleMindmapDuplicateSheet)
       this.$bus.$off('mindmapNextSheet', this.handleMindmapNextSheet)
       this.$bus.$off('mindmapPrevSheet', this.handleMindmapPrevSheet)
+      this.$bus.$off('mindmapMoveSheetLeft')
+      this.$bus.$off('mindmapMoveSheetRight')
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)

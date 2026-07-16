@@ -577,6 +577,7 @@ import {
   switchFlowchartSheet,
   renameFlowchartSheet,
   deleteFlowchartSheet,
+  moveFlowchartSheet,
   snapshotActiveFlowchartSheet
 } from '@/services/flowchartWorkbook'
 import {
@@ -1974,6 +1975,20 @@ export default {
     },
     persistActiveFlowchartSheet() {
       this.flowchartData = snapshotActiveFlowchartSheet(this.flowchartData, this.flowchartData)
+      void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: false })
+    },
+    moveActiveFlowchartSheet(delta = 1) {
+      const sheets = this.flowchartSheets || []
+      const idx = sheets.findIndex(item => item.active)
+      if (idx < 0) return
+      const target = idx + delta
+      if (target < 0 || target >= sheets.length) return
+      this.flowchartData = moveFlowchartSheet(
+        this.flowchartData,
+        sheets[idx].id,
+        target,
+        this.flowchartData
+      )
       void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: false })
     },
     async switchFlowchartSheetById(sheetId) {

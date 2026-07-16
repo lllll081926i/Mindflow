@@ -201,6 +201,21 @@ export const renameFlowchartSheet = (data, sheetId, name, livePage = null) => {
   }
 }
 
+export const moveFlowchartSheet = (data, sheetId, toIndex, livePage = null) => {
+  const snapshot = snapshotActiveFlowchartSheet(data, livePage)
+  const from = snapshot.sheets.findIndex(sheet => sheet.id === sheetId)
+  if (from < 0) return snapshot
+  const target = Math.max(0, Math.min(snapshot.sheets.length - 1, Number(toIndex) || 0))
+  if (from === target) return snapshot
+  const sheets = [...snapshot.sheets]
+  const [item] = sheets.splice(from, 1)
+  sheets.splice(target, 0, item)
+  return {
+    ...snapshot,
+    sheets
+  }
+}
+
 export const deleteFlowchartSheet = (data, sheetId, livePage = null) => {
   const snapshot = snapshotActiveFlowchartSheet(data, livePage)
   if (snapshot.sheets.length <= 1) return snapshot

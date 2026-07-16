@@ -206,6 +206,15 @@ export const flowchartSelectionMethods = {
       }
       return
     }
+    if (
+      event.altKey &&
+      !isMetaKey &&
+      (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+    ) {
+      event.preventDefault()
+      this.moveActiveFlowchartSheet?.(event.key === 'ArrowLeft' ? -1 : 1)
+      return
+    }
     if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === '0') {
       event.preventDefault()
       this.fitCanvasToView()

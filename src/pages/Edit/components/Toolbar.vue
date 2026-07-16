@@ -1444,6 +1444,20 @@ export default {
       ) {
         event.preventDefault()
         this.$bus.$emit(event.shiftKey ? 'mindmapPrevSheet' : 'mindmapNextSheet')
+        return
+      }
+      // Alt+Left/Right reorder active sheet
+      if (
+        event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        (event.key === 'ArrowLeft' || event.key === 'ArrowRight') &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.$bus.$emit(
+          event.key === 'ArrowLeft' ? 'mindmapMoveSheetLeft' : 'mindmapMoveSheetRight'
+        )
       }
     },
 
