@@ -1872,3 +1872,33 @@ test('流程图命令面板覆盖对齐分布与快捷键帮助', () => {
   assert.match(editorSource, /flowchartShortcutPanel/)
   assert.match(selectionSource, /openFlowchartShortcuts\(\)/)
 })
+
+
+test('流程图节点支持备注和链接编辑与展示', () => {
+  const modelSource = fs.readFileSync(
+    path.resolve('src/services/flowchart/parts/20-model.js'),
+    'utf8'
+  )
+  const inspectorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartInspector.vue'),
+    'utf8'
+  )
+  const nodeLayerSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartNodeLayer.vue'),
+    'utf8'
+  )
+  const nodeLogicSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorNode.js'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(modelSource, /note = ''/)
+  assert.match(modelSource, /link = ''/)
+  assert.match(inspectorSource, /update-selected-node-note/)
+  assert.match(inspectorSource, /update-selected-node-link/)
+  assert.match(nodeLayerSource, /nodeMetaBadges/)
+  assert.match(nodeLogicSource, /updateSelectedNodeNote/)
+  assert.match(nodeLogicSource, /updateSelectedNodeLink/)
+  assert.match(langSource, /"nodeNote"/)
+  assert.match(langSource, /"nodeLink"/)
+})

@@ -575,88 +575,56 @@ const FLOWCHART_TEMPLATES = {
       createFlowchartEdge({ id: 'edge-execute-end', source: 'node-execute', target: 'node-end' })
     ]
   }),
+
   crossFunctionalApproval: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-request', type: 'start', text: '提交需求', x: 120, y: 120 }),
-      createFlowchartNode({ id: 'node-product', type: 'process', text: '产品评估', x: 120, y: 240 }),
-      createFlowchartNode({ id: 'node-design', type: 'process', text: '设计确认', x: 400, y: 240 }),
-      createFlowchartNode({ id: 'node-tech', type: 'process', text: '技术评审', x: 680, y: 240 }),
-      createFlowchartNode({
-        id: 'node-approve',
-        type: 'decision',
-        text: '跨部门通过？',
-        x: 400,
-        y: 392,
-        width: 188,
-        height: 92
-      }),
-      createFlowchartNode({ id: 'node-rework', type: 'process', text: '补充材料', x: 120, y: 560 }),
-      createFlowchartNode({ id: 'node-schedule', type: 'process', text: '排期执行', x: 680, y: 560 }),
-      createFlowchartNode({ id: 'node-end', type: 'end', text: '进入交付', x: 680, y: 692 })
+      createFlowchartNode({ id: 'node-request', type: 'start', text: '提交需求', x: 120, y: 100 }),
+      createFlowchartNode({ id: 'node-product', type: 'process', text: '产品评估', x: 120, y: 250 }),
+      createFlowchartNode({ id: 'node-design', type: 'process', text: '设计确认', x: 420, y: 250 }),
+      createFlowchartNode({ id: 'node-tech', type: 'process', text: '技术评审', x: 720, y: 250 }),
+      createFlowchartNode({ id: 'node-approve', type: 'decision', text: '跨部门通过？', x: 420, y: 410, width: 188, height: 92 }),
+      createFlowchartNode({ id: 'node-rework', type: 'process', text: '补充材料', x: 120, y: 590 }),
+      createFlowchartNode({ id: 'node-schedule', type: 'process', text: '排期执行', x: 720, y: 590 }),
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '进入交付', x: 720, y: 740 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-request-product', source: 'node-request', target: 'node-product' }),
       createFlowchartEdge({ id: 'edge-product-design', source: 'node-product', target: 'node-design' }),
       createFlowchartEdge({ id: 'edge-design-tech', source: 'node-design', target: 'node-tech' }),
-      createFlowchartEdge({
-        id: 'edge-tech-approve',
-        source: 'node-tech',
-        target: 'node-approve'
-      }),
-      createFlowchartEdge({ id: 'edge-approve-rework', source: 'node-approve', target: 'node-rework', label: '否' }),
+      createFlowchartEdge({ id: 'edge-tech-approve', source: 'node-tech', target: 'node-approve' }),
       createFlowchartEdge({ id: 'edge-approve-schedule', source: 'node-approve', target: 'node-schedule', label: '是' }),
-      createFlowchartEdge({
-        id: 'edge-rework-product',
-        source: 'node-rework',
-        target: 'node-product',
-        label: '补齐后重审',
-        style: { dashed: true }
-      }),
+      createFlowchartEdge({ id: 'edge-approve-rework', source: 'node-approve', target: 'node-rework', label: '否', style: { dashed: true } }),
+      createFlowchartEdge({ id: 'edge-rework-product', source: 'node-rework', target: 'node-product', label: '再评估', style: { dashed: true } }),
       createFlowchartEdge({ id: 'edge-schedule-end', source: 'node-schedule', target: 'node-end' })
     ]
   }),
+
+
   supportEscalation: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-ticket', type: 'start', text: '收到故障工单', x: 120, y: 120 }),
-      createFlowchartNode({ id: 'node-l1', type: 'process', text: 'L1 初步排查', x: 120, y: 248 }),
-      createFlowchartNode({
-        id: 'node-severity',
-        type: 'decision',
-        text: '影响范围升级？',
-        x: 120,
-        y: 388,
-        width: 188,
-        height: 92
-      }),
-      createFlowchartNode({ id: 'node-l2', type: 'process', text: 'L2 深入诊断', x: 420, y: 388 }),
-      createFlowchartNode({ id: 'node-comm', type: 'input', text: '同步客户状态', x: 720, y: 388 }),
-      createFlowchartNode({ id: 'node-warroom', type: 'process', text: '启动应急响应', x: 420, y: 560 }),
-      createFlowchartNode({ id: 'node-recover', type: 'process', text: '恢复服务', x: 720, y: 560 }),
-      createFlowchartNode({ id: 'node-postmortem', type: 'end', text: '复盘归档', x: 720, y: 708 })
+      createFlowchartNode({ id: 'node-ticket', type: 'start', text: '收到故障工单', x: 120, y: 100 }),
+      createFlowchartNode({ id: 'node-l1', type: 'process', text: 'L1 初步排查', x: 120, y: 250 }),
+      createFlowchartNode({ id: 'node-severity', type: 'decision', text: '影响范围升级？', x: 120, y: 410, width: 188, height: 92 }),
+      createFlowchartNode({ id: 'node-l2', type: 'process', text: 'L2 深入诊断', x: 420, y: 410 }),
+      createFlowchartNode({ id: 'node-comm', type: 'input', text: '同步客户状态', x: 740, y: 410 }),
+      createFlowchartNode({ id: 'node-warroom', type: 'process', text: '启动应急响应', x: 420, y: 590 }),
+      createFlowchartNode({ id: 'node-recover', type: 'process', text: '恢复服务', x: 740, y: 590 }),
+      createFlowchartNode({ id: 'node-postmortem', type: 'end', text: '复盘归档', x: 740, y: 740 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-ticket-l1', source: 'node-ticket', target: 'node-l1' }),
       createFlowchartEdge({ id: 'edge-l1-severity', source: 'node-l1', target: 'node-severity' }),
       createFlowchartEdge({ id: 'edge-severity-l2', source: 'node-severity', target: 'node-l2', label: '是' }),
-      createFlowchartEdge({
-        id: 'edge-l2-comm',
-        source: 'node-l2',
-        target: 'node-comm'
-      }),
-      createFlowchartEdge({ id: 'edge-comm-warroom', source: 'node-comm', target: 'node-warroom' }),
+      createFlowchartEdge({ id: 'edge-severity-comm', source: 'node-severity', target: 'node-comm', label: '同步' }),
+      createFlowchartEdge({ id: 'edge-l2-warroom', source: 'node-l2', target: 'node-warroom' }),
       createFlowchartEdge({ id: 'edge-warroom-recover', source: 'node-warroom', target: 'node-recover' }),
-      createFlowchartEdge({ id: 'edge-recover-postmortem', source: 'node-recover', target: 'node-postmortem' }),
-      createFlowchartEdge({
-        id: 'edge-severity-postmortem',
-        source: 'node-severity',
-        target: 'node-postmortem',
-        label: '否',
-        style: { dashed: true }
-      })
+      createFlowchartEdge({ id: 'edge-comm-recover', source: 'node-comm', target: 'node-recover', style: { dashed: true } }),
+      createFlowchartEdge({ id: 'edge-recover-postmortem', source: 'node-recover', target: 'node-postmortem' })
     ]
   }),
+
   contentReview: title => ({
     title,
     nodes: [
@@ -727,43 +695,31 @@ const FLOWCHART_TEMPLATES = {
       createFlowchartEdge({ id: 'edge-purchase-receive', source: 'node-purchase', target: 'node-receive' })
     ]
   }),
+
   salesPipeline: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-lead', type: 'start', text: '线索进入', x: 120, y: 120 }),
-      createFlowchartNode({ id: 'node-qualify', type: 'process', text: '线索筛选', x: 120, y: 248 }),
-      createFlowchartNode({ id: 'node-demo', type: 'process', text: '方案演示', x: 420, y: 248 }),
-      createFlowchartNode({
-        id: 'node-intent',
-        type: 'decision',
-        text: '客户有明确意向？',
-        x: 720,
-        y: 248,
-        width: 196,
-        height: 92
-      }),
-      createFlowchartNode({ id: 'node-proposal', type: 'process', text: '报价提案', x: 720, y: 420 }),
-      createFlowchartNode({ id: 'node-follow', type: 'process', text: '继续跟进', x: 420, y: 560 }),
-      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同签署', x: 980, y: 420 }),
-      createFlowchartNode({ id: 'node-close', type: 'end', text: '成交回款', x: 980, y: 580 })
+      createFlowchartNode({ id: 'node-lead', type: 'start', text: '线索进入', x: 120, y: 100 }),
+      createFlowchartNode({ id: 'node-qualify', type: 'process', text: '线索筛选', x: 120, y: 250 }),
+      createFlowchartNode({ id: 'node-demo', type: 'process', text: '方案演示', x: 420, y: 250 }),
+      createFlowchartNode({ id: 'node-intent', type: 'decision', text: '客户有明确意向？', x: 740, y: 238, width: 196, height: 92 }),
+      createFlowchartNode({ id: 'node-proposal', type: 'process', text: '报价提案', x: 740, y: 430 }),
+      createFlowchartNode({ id: 'node-follow', type: 'process', text: '继续跟进', x: 420, y: 590 }),
+      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同签署', x: 1020, y: 430 }),
+      createFlowchartNode({ id: 'node-close', type: 'end', text: '成交回款', x: 1020, y: 590 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-lead-qualify', source: 'node-lead', target: 'node-qualify' }),
       createFlowchartEdge({ id: 'edge-qualify-demo', source: 'node-qualify', target: 'node-demo' }),
       createFlowchartEdge({ id: 'edge-demo-intent', source: 'node-demo', target: 'node-intent' }),
       createFlowchartEdge({ id: 'edge-intent-proposal', source: 'node-intent', target: 'node-proposal', label: '是' }),
-      createFlowchartEdge({
-        id: 'edge-intent-follow',
-        source: 'node-intent',
-        target: 'node-follow',
-        label: '否',
-        style: { dashed: true }
-      }),
+      createFlowchartEdge({ id: 'edge-intent-follow', source: 'node-intent', target: 'node-follow', label: '否', style: { dashed: true } }),
       createFlowchartEdge({ id: 'edge-follow-demo', source: 'node-follow', target: 'node-demo', label: '复访' }),
       createFlowchartEdge({ id: 'edge-proposal-contract', source: 'node-proposal', target: 'node-contract' }),
       createFlowchartEdge({ id: 'edge-contract-close', source: 'node-contract', target: 'node-close' })
     ]
   }),
+
   enterpriseDelivery: title => ({
     title,
     nodes: [
@@ -862,16 +818,22 @@ function createFlowchartNode({
   id,
   type = 'process',
   text = '',
+  note = '',
+  link = '',
   x = 0,
   y = 0,
   width = 168,
   height = 72,
   style = {}
 } = {}) {
+  const normalizedNote = String(note || '').trim()
+  const normalizedLink = String(link || '').trim()
   return {
     id: String(id || ''),
     type,
     text: String(text || '').trim() || DEFAULT_UNNAMED_NODE_TEXT,
+    ...(normalizedNote ? { note: normalizedNote } : {}),
+    ...(normalizedLink ? { link: normalizedLink } : {}),
     x: Number.isFinite(Number(x)) ? Number(x) : 0,
     y: Number.isFinite(Number(y)) ? Number(y) : 0,
     width: Number.isFinite(Number(width)) ? Number(width) : 168,

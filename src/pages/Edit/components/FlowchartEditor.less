@@ -2030,3 +2030,35 @@
 .flowchartEditor.isDark .flowchartShortcutValue {
   background: rgba(255, 255, 255, 0.08);
 }
+
+
+.nodeMetaBadges {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  gap: 4px;
+  z-index: 2;
+}
+
+.nodeMetaBadge {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.nodeMetaBadge.isNote {
+  background: rgba(37, 99, 235, 0.9);
+}
+
+.nodeMetaBadge.isLink {
+  background: rgba(5, 150, 105, 0.92);
+}

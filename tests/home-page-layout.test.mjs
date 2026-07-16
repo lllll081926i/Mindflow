@@ -134,3 +134,14 @@ test('思维导图结构模板会预置示例分支，打开即可见结构', ()
   assert.match(source, /中心主题|组织架构/)
   assert.match(source, /分支一|部门 A/)
 })
+
+
+test('首页提供会议纪要与项目计划场景模板', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /createMindMapScenario\('meeting'\)/)
+  assert.match(source, /createMindMapScenario\('project'\)/)
+  assert.match(source, /createScenarioMindMapData/)
+  assert.match(langSource, /"starterMindMapMeeting"/)
+  assert.match(langSource, /"starterMindMapProject"/)
+})

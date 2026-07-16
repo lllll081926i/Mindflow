@@ -896,6 +896,38 @@ export default {
       })
     },
 
+    async exportFlowchartAsPdf({
+      svgMarkup,
+      fileName,
+      transparent = false
+    }) {
+      const { blob } = await this.buildFlowchartRasterBlob({
+        svgMarkup,
+        extension: 'png',
+        transparent
+      })
+      const { PDFDocument } = await import('pdf-lib')
+      const pngBytes = new Uint8Array(await blob.arrayBuffer())
+      const pdfDoc = await PDFDocument.create()
+      const pngImage = await pdfDoc.embedPng(pngBytes)
+      const page = pdfDoc.addPage([pngImage.width, pngImage.height])
+      page.drawImage(pngImage, {
+        x: 0,
+        y: 0,
+        width: pngImage.width,
+        height: pngImage.height
+      })
+      const pdfBytes = await pdfDoc.save()
+      await platform.saveBinaryFileAs({
+        suggestedName: fileName,
+        content: pdfBytes,
+        defaultPath: this.currentDocument?.path || '',
+        extension: 'pdf',
+        name: this.$t('exportPage.fileTypePdf') || 'PDF',
+        mimeType: 'application/pdf'
+      })
+    },
+
     async handleFlowchartExport(safeFileName) {
       const exportType = this.exportState.exportType
       const withBackground = !!this.exportState.withBackground
@@ -931,6 +963,14 @@ export default {
           extension: 'json',
           name: this.$t('exportPage.fileTypeJson'),
           mimeType: 'application/json;charset=utf-8'
+        })
+        return
+      }
+      if (exportType === 'pdf') {
+        await this.exportFlowchartAsPdf({
+          svgMarkup,
+          fileName: safeFileName,
+          transparent: !withBackground
         })
         return
       }

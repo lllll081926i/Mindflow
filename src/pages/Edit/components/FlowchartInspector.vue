@@ -216,6 +216,21 @@
           :value="selectedNode.text"
           @input="$emit('update-selected-node-text', $event.target.value)"
         ></textarea>
+        <label class="fieldLabel">{{ labels.nodeNote }}</label>
+        <textarea
+          class="fieldInput"
+          :value="selectedNode.note || ''"
+          :placeholder="labels.nodeNotePlaceholder"
+          @input="$emit('update-selected-node-note', $event.target.value)"
+        ></textarea>
+        <label class="fieldLabel">{{ labels.nodeLink }}</label>
+        <input
+          class="fieldInput"
+          type="url"
+          :value="selectedNode.link || ''"
+          :placeholder="labels.nodeLinkPlaceholder"
+          @input="$emit('update-selected-node-link', $event.target.value)"
+        />
         <label class="fieldLabel">{{ labels.nodePreset }}</label>
         <div class="flowchartStylePresetGrid">
           <button
@@ -441,8 +456,7 @@ const TEXT_COLOR_PALETTE = [
 
 export default {
   name: 'FlowchartInspector',
-  emits: [
-    'toggle-inspector',
+  emits: ['toggle-inspector',
     'toggle-section',
     'close-inspector',
     'request-template-apply',
@@ -455,6 +469,8 @@ export default {
     'update-flowchart-config',
     'update-selected-node-style',
     'update-selected-edge-style',
+    'update-selected-node-note',
+    'update-selected-node-link'
   ],
   props: {
     isOpen: {

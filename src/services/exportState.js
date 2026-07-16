@@ -52,6 +52,11 @@ const flowchartFormats = [
     name: 'JSON',
     type: 'json',
     desc: '导出可再次打开的流程图数据'
+  },
+  {
+    name: 'PDF',
+    type: 'pdf',
+    desc: '导出适合打印和分享的 PDF'
   }
 ]
 

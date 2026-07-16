@@ -2,16 +2,22 @@ function createFlowchartNode({
   id,
   type = 'process',
   text = '',
+  note = '',
+  link = '',
   x = 0,
   y = 0,
   width = 168,
   height = 72,
   style = {}
 } = {}) {
+  const normalizedNote = String(note || '').trim()
+  const normalizedLink = String(link || '').trim()
   return {
     id: String(id || ''),
     type,
     text: String(text || '').trim() || DEFAULT_UNNAMED_NODE_TEXT,
+    ...(normalizedNote ? { note: normalizedNote } : {}),
+    ...(normalizedLink ? { link: normalizedLink } : {}),
     x: Number.isFinite(Number(x)) ? Number(x) : 0,
     y: Number.isFinite(Number(y)) ? Number(y) : 0,
     width: Number.isFinite(Number(width)) ? Number(width) : 168,

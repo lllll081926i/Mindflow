@@ -35,6 +35,10 @@
       ></polygon>
     </svg>
     <span class="nodeText">{{ node.text }}</span>
+    <div v-if="node.note || node.link" class="nodeMetaBadges" aria-hidden="true">
+      <span v-if="node.note" class="nodeMetaBadge isNote" title="note">N</span>
+      <span v-if="node.link" class="nodeMetaBadge isLink" title="link">L</span>
+    </div>
     <template v-if="showConnectorHandlesForNode(node.id)">
       <button
         v-for="direction in getConnectorDirections(node)"

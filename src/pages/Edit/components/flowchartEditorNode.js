@@ -220,6 +220,38 @@ export const flowchartNodeMethods = {
     }
   },
 
+  updateSelectedNodeText(text) {
+    if (!this.selectedNode) return
+    this.selectedNode.text = String(text || '').trim() || this.selectedNode.text
+    void this.persistFlowchartState()
+  },
+
+  updateSelectedNodeNote(note) {
+    if (!this.selectedNode) return
+    const nextNote = String(note || '').trim()
+    if (nextNote) this.selectedNode.note = nextNote
+    else delete this.selectedNode.note
+    void this.persistFlowchartState()
+  },
+
+  updateSelectedNodeLink(link) {
+    if (!this.selectedNode) return
+    const nextLink = String(link || '').trim()
+    if (nextLink) this.selectedNode.link = nextLink
+    else delete this.selectedNode.link
+    void this.persistFlowchartState()
+  },
+
+  openSelectedNodeLink() {
+    const link = String(this.selectedNode?.link || '').trim()
+    if (!link) return
+    try {
+      window.open(link, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      this.$message.error(error?.message || this.$t('flowchart.nodeLinkOpenFailed'))
+    }
+  },
+
   updateSelectedNodeType(type) {
     if (!this.selectedNode) return
     const normalizedType = FLOWCHART_NODE_TYPES.some(item => item.type === type)

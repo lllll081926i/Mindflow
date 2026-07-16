@@ -327,6 +327,8 @@
         @update-flowchart-config="updateFlowchartConfig"
         @update-selected-node-type="updateSelectedNodeType"
         @update-selected-node-text="updateSelectedNodeText"
+        @update-selected-node-note="updateSelectedNodeNote"
+        @update-selected-node-link="updateSelectedNodeLink"
         @update-selected-edge-label="updateSelectedEdgeLabel"
         @update-selected-edge-label-position="updateSelectedEdgeLabelPosition"
         @apply-selected-node-preset="applySelectedNodePreset"
@@ -720,6 +722,10 @@ export default {
         inspectorTitle: this.$t('flowchart.inspectorTitle'),
         nodeType: this.$t('flowchart.nodeType'),
         nodeText: this.$t('flowchart.nodeText'),
+        nodeNote: this.$t('flowchart.nodeNote'),
+        nodeNotePlaceholder: this.$t('flowchart.nodeNotePlaceholder'),
+        nodeLink: this.$t('flowchart.nodeLink'),
+        nodeLinkPlaceholder: this.$t('flowchart.nodeLinkPlaceholder'),
         nodePreset: this.$t('flowchart.nodePreset'),
         nodeFill: this.$t('flowchart.nodeFill'),
         nodeStroke: this.$t('flowchart.nodeStroke'),
@@ -883,6 +889,7 @@ export default {
         { key: 'copy', label: this.$t('flowchart.copySelection'), shortcut: 'Ctrl C', disabled: !hasNodeSelection, action: () => this.copySelectedNodes() },
         { key: 'paste', label: this.$t('flowchart.pasteSelection'), shortcut: 'Ctrl V', action: () => this.pasteCopiedNodes() },
         { key: 'delete', label: this.$t('flowchart.delete'), shortcut: 'Delete', disabled: !hasSelection, action: () => this.removeSelection() },
+        { key: 'openLink', label: this.$t('flowchart.openNodeLink'), disabled: !this.selectedNode?.link, action: () => this.openSelectedNodeLink() },
         { key: 'alignLeft', label: this.$t('flowchart.alignLeft'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesLeft() },
         { key: 'alignCenterX', label: this.$t('flowchart.alignCenterX'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesCenterX() },
         { key: 'alignRight', label: this.$t('flowchart.alignRight'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesRight() },

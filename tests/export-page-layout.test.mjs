@@ -205,3 +205,20 @@ test('流程图导出支持 JSON 数据格式', () => {
   assert.match(exportPageSource, /exportType === 'json'/)
   assert.match(exportPageSource, /serializeStoredDocumentContent/)
 })
+
+
+test('流程图导出支持 PDF 与 JSON', () => {
+  const exportStateSource = fs.readFileSync(
+    path.resolve('src/services/exportState.js'),
+    'utf8'
+  )
+  const exportPageSource = fs.readFileSync(
+    path.resolve('src/pages/Export/Index.vue'),
+    'utf8'
+  )
+  assert.match(exportStateSource, /type: 'pdf'/)
+  assert.match(exportStateSource, /type: 'json'/)
+  assert.match(exportPageSource, /exportFlowchartAsPdf/)
+  assert.match(exportPageSource, /exportType === 'pdf'/)
+  assert.match(exportPageSource, /exportType === 'json'/)
+})

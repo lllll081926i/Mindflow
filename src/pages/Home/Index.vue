@@ -140,6 +140,24 @@
               type="button"
               class="starterCard"
               :disabled="busy"
+              @click="createMindMapScenario('meeting')"
+            >
+              <strong>{{ $t('home.starterMindMapMeeting') }}</strong>
+              <span>{{ $t('home.starterMindMapMeetingDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapScenario('project')"
+            >
+              <strong>{{ $t('home.starterMindMapProject') }}</strong>
+              <span>{{ $t('home.starterMindMapProjectDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
               <strong>{{ $t('home.starterFlowApproval') }}</strong>
@@ -507,6 +525,68 @@ export default {
         return createWorkspaceLocalFile({
           router: this.$router,
           content: this.createSeededMindMapData(layout)
+        })
+      })
+    },
+
+    createScenarioMindMapData(scenario = 'meeting') {
+      const layout = scenario === 'project' ? 'organizationStructure' : 'mindMap'
+      const data = this.createBlankProjectContent(layout)
+      if (scenario === 'project') {
+        data.root.data.text = '项目计划'
+        data.root.children = [
+          {
+            data: { text: '目标与范围' },
+            children: [
+              { data: { text: '成功标准' }, children: [] },
+              { data: { text: '非目标' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '里程碑' },
+            children: [
+              { data: { text: '方案评审' }, children: [] },
+              { data: { text: '开发完成' }, children: [] },
+              { data: { text: '上线发布' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '风险与依赖' },
+            children: [
+              { data: { text: '资源风险' }, children: [] },
+              { data: { text: '外部依赖' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      data.root.data.text = '会议纪要'
+      data.root.children = [
+        {
+          data: { text: '议题' },
+          children: [
+            { data: { text: '议题 1' }, children: [] },
+            { data: { text: '议题 2' }, children: [] }
+          ]
+        },
+        {
+          data: { text: '决议' },
+          children: [{ data: { text: '决议 1' }, children: [] }]
+        },
+        {
+          data: { text: '待办' },
+          children: [{ data: { text: '负责人 / 截止时间' }, children: [] }]
+        }
+      ]
+      return data
+    },
+
+    async createMindMapScenario(scenario = 'meeting') {
+      await this.runWorkspaceAction(async () => {
+        const { createWorkspaceLocalFile } = await loadWorkspaceActions()
+        return createWorkspaceLocalFile({
+          router: this.$router,
+          content: this.createScenarioMindMapData(scenario)
         })
       })
     },
