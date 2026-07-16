@@ -458,6 +458,9 @@ const zh = {
     "fileSaveFailed": "文件保存失败"
   },
   "edit": {
+    "focusModeOn": "已进入聚焦模式",
+    "focusModeOff": "已退出聚焦模式",
+    "focusModeNeedSelection": "请先选择一个主题",
     "sheetSwitched": "已切换画布",
     "sheets": "画布",
     "addSheet": "新建画布",

@@ -608,3 +608,12 @@ test('思维导图支持按优先级标记筛选', () => {
   assert.ok(editSource.includes('handleApplyMarkerFilter'))
   assert.ok(editSource.includes('applyActiveMarkerFilter'))
 })
+
+
+test('思维导图支持 Alt+F 聚焦模式', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('toggleFocusMode'))
+  assert.ok(editSource.includes('applyFocusMode'))
+  assert.ok(editSource.includes('focusModeActive'))
+})

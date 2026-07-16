@@ -1240,6 +1240,19 @@ export default {
         this.$bus.$emit('toggleBlankMode')
         return
       }
+      // toggle focus mode Alt+F
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'f'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('toggleFocusMode')
+        return
+      }
       // toggle always show expand Alt+E
       if (
         !isTypingTarget &&

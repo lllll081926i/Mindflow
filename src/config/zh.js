@@ -450,6 +450,11 @@ export const shortcutKeyList = [
         value: 'Alt + B'
       },
       {
+        icon: 'iconfocus',
+        name: '切换聚焦模式',
+        value: 'Alt + F'
+      },
+      {
         icon: 'iconexpand',
         name: '切换始终显示展开按钮',
         value: 'Alt + E'

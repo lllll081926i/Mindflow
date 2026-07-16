@@ -578,6 +578,8 @@ export default {
       sheetRenameDraft: '',
       sheetEditingId: '',
       activeMarkerFilter: '',
+      focusModeActive: false,
+      focusModeUid: '',
       enableShowLoading: true,
       mindMap: null,
       mindMapData: null,
@@ -829,6 +831,7 @@ export default {
       this.$bus.$on('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$on('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$on('applyMarkerFilter', this.handleApplyMarkerFilter)
+      this.$bus.$on('toggleFocusMode', this.toggleFocusMode)
       this.$bus.$on(
         'createAssociativeLine',
         this.handleCreateLineFromActiveNode
@@ -863,6 +866,7 @@ export default {
       this.$bus.$off('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$off('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$off('applyMarkerFilter', this.handleApplyMarkerFilter)
+      this.$bus.$off('toggleFocusMode', this.toggleFocusMode)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)
@@ -1136,12 +1140,74 @@ export default {
       storeData(this.mindMapData)
     },
 
+    toggleFocusMode() {
+      if (this.focusModeActive) {
+        this.focusModeActive = false
+        this.focusModeUid = ''
+        this.applyActiveMarkerFilter()
+        this.$message.success(this.$t('edit.focusModeOff') || '已退出聚焦模式')
+        return
+      }
+      const active = this.mindMap?.renderer?.activeNodeList || []
+      if (!active.length) {
+        this.$message.warning(
+          this.$t('edit.focusModeNeedSelection') || '请先选择一个主题'
+        )
+        return
+      }
+      this.focusModeActive = true
+      this.focusModeUid = active[0].uid || active[0].getData?.('uid') || ''
+      this.applyFocusMode()
+      this.$message.success(this.$t('edit.focusModeOn') || '已进入聚焦模式')
+    },
+    applyFocusMode() {
+      if (!this.focusModeActive || !this.mindMap?.renderer) return
+      const targetUid = this.focusModeUid
+      const keep = new Set()
+      const findNode = (node, path = []) => {
+        if (!node) return null
+        const uid = node.uid || node.getData?.('uid')
+        const nextPath = path.concat(node)
+        if (uid === targetUid) {
+          nextPath.forEach(n => keep.add(n.uid || n.getData?.('uid')))
+          const markDesc = n => {
+            const id = n.uid || n.getData?.('uid')
+            if (id) keep.add(id)
+            ;(n.children || []).forEach(markDesc)
+          }
+          markDesc(node)
+          return node
+        }
+        for (const child of node.children || []) {
+          const hit = findNode(child, nextPath)
+          if (hit) return hit
+        }
+        return null
+      }
+      findNode(this.mindMap.renderer.root)
+      const walk = node => {
+        if (!node) return
+        const uid = node.uid || node.getData?.('uid')
+        const match = !uid || keep.has(uid)
+        try {
+          if (node.group && typeof node.group.opacity === 'function') {
+            node.group.opacity(match ? 1 : 0.12)
+          }
+        } catch (_error) {}
+        ;(node.children || []).forEach(walk)
+      }
+      walk(this.mindMap.renderer.root)
+    },
     handleApplyMarkerFilter(marker = '') {
       this.activeMarkerFilter = String(marker || '')
       this.applyActiveMarkerFilter()
     },
     applyActiveMarkerFilter() {
       if (!this.mindMap?.renderer) return
+      if (this.focusModeActive) {
+        this.applyFocusMode()
+        return
+      }
       const token = this.activeMarkerFilter
       const walk = node => {
         if (!node) return
