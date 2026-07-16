@@ -237,8 +237,10 @@ export const flowchartNodeMethods = {
     }
     const worldPoint = this.getWorldPointFromEvent(event)
     void this.addNodeByType({
-      type: 'process',
-      worldPoint
+      type: !(this.flowchartData?.nodes || []).length ? 'start' : 'process',
+      worldPoint,
+      autoConnect: false,
+      startInlineEdit: true
     })
   },
 

@@ -2492,3 +2492,14 @@ test('L 连接后会选中新建连线以便继续标注', () => {
   )
   assert.ok(selectionSource.includes('selectedEdgeId = edge.id'))
 })
+
+
+test('双击画布空白会新建节点并进入编辑', () => {
+  const nodeSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorNode.js'),
+    'utf8'
+  )
+  assert.ok(nodeSource.includes('addNodeAtCanvasPoint'))
+  assert.ok(nodeSource.includes('startInlineEdit: true'))
+  assert.ok(nodeSource.includes("type: !(this.flowchartData?.nodes || []).length ? 'start' : 'process'"))
+})
