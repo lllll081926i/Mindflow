@@ -91,6 +91,8 @@ export default {
       dialogVisible: false,
       fileList: [],
       selectPromiseResolve: null,
+      importAllXmindCanvases: false,
+      pendingXmindCanvasList: [],
       xmindCanvasSelectDialogVisible: false,
       selectCanvas: '',
       canvasList: [],
@@ -314,15 +316,55 @@ export default {
     // 处理.xmind文件
     async handleXmind(file) {
       try {
-        let data = await xmind.parseXmindFile(file.raw, content => {
+        this.importAllXmindCanvases = false
+        this.pendingXmindCanvasList = []
+        let data = await xmind.parseXmindFile(file.raw || file, content => {
           this.showSelectXmindCanvasDialog(content)
           return new Promise(resolve => {
             this.selectPromiseResolve = resolve
           })
         })
+        if (
+          this.importAllXmindCanvases &&
+          Array.isArray(this.pendingXmindCanvasList) &&
+          this.pendingXmindCanvasList.length > 1 &&
+          typeof xmind.transformXmind === 'function'
+        ) {
+          const zipMod = await import('jszip')
+          const JSZip = zipMod.default || zipMod
+          const zip = await JSZip.loadAsync(file.raw || file)
+          const jsonFile = zip.files['content.json']
+          if (jsonFile) {
+            const json = await jsonFile.async('string')
+            const transformed = []
+            for (let index = 0; index < this.pendingXmindCanvasList.length; index += 1) {
+              const sheetData = await xmind.transformXmind(
+                json,
+                zip.files,
+                async list => list[index]
+              )
+              transformed.push({
+                name:
+                  this.pendingXmindCanvasList[index]?.title ||
+                  this.pendingXmindCanvasList[index]?.name ||
+                  '画布 ' + (index + 1),
+                root: sheetData?.root || sheetData,
+                theme: sheetData?.theme,
+                layout: sheetData?.layout
+              })
+            }
+            if (transformed.length) {
+              data = createWorkbookFromMindmapList(transformed)
+            }
+          }
+        }
+        this.importAllXmindCanvases = false
+        this.pendingXmindCanvasList = []
         this.$bus.$emit('setData', data)
         this.$message.success(this.$t('import.importSuccess'))
       } catch (error) {
+        this.importAllXmindCanvases = false
+        this.pendingXmindCanvasList = []
         console.error('handleXmind failed', error)
         this.$message.error(
           error?.i18nKey
@@ -349,17 +391,11 @@ export default {
 
     // 导入全部画布为多页工作簿
     confirmSelectAllCanvases() {
-      const list = Array.isArray(this.canvasList) ? this.canvasList : []
-      const workbook = createWorkbookFromMindmapList(
-        list.map((item, index) => {
-          if (item?.root) return item
-          return {
-            name: item?.name || item?.title || `画布 ${index + 1}`,
-            root: item
-          }
-        })
-      )
-      this.selectPromiseResolve(workbook)
+      this.importAllXmindCanvases = true
+      this.pendingXmindCanvasList = Array.isArray(this.canvasList)
+        ? [...this.canvasList]
+        : []
+      this.selectPromiseResolve(this.canvasList[this.selectCanvas] || this.canvasList[0])
       this.xmindCanvasSelectDialogVisible = false
       this.canvasList = []
       this.selectCanvas = 0

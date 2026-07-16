@@ -1713,17 +1713,27 @@ export default {
     // 动态设置思维导图数据
     async setData(data, options = {}) {
       this.handleShowLoading()
-      if (hasExtendedNodeIcons(data)) {
+      const normalized = this.normalizeMindMapData(
+        data?.root ? data : { root: data, theme: this.mindMapData?.theme, layout: this.mindMapData?.layout }
+      )
+      // Keep workbook sheet registry on editor state even though renderer only needs active root.
+      this.mindMapData = normalized
+      if (hasExtendedNodeIcons(normalized)) {
         await this.ensureExtendedIconListLoaded(true)
       }
-      if (this.openNodeRichText && hasRichTextNodes(data)) {
+      if (this.openNodeRichText && hasRichTextNodes(normalized)) {
         await this.ensureRichTextPluginReady()
       }
-      const rootNodeData = data.root || data
-      if (data.root) {
-        this.mindMap.setFullData(data)
+      const rootNodeData = normalized.root || normalized
+      if (normalized.root) {
+        this.mindMap.setFullData({
+          root: normalized.root,
+          theme: normalized.theme,
+          layout: normalized.layout,
+          view: normalized.view
+        })
       } else {
-        this.mindMap.setData(data)
+        this.mindMap.setData(normalized)
       }
       this.mindMap?.view?.reset?.()
       if ('configData' in options) {
@@ -1734,6 +1744,8 @@ export default {
       }
       if (!options.skipSave) {
         this.manualSave()
+      } else {
+        storeData(normalized)
       }
       // 如果导入的是富文本内容，那么自动开启富文本模式
       if (rootNodeData.data.richText && !this.openNodeRichText) {

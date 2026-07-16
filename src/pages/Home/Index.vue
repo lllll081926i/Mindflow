@@ -1442,13 +1442,52 @@ export default {
         if (/\.xmind$/.test(name)) {
           const xmindMod = await import('simple-mind-map/src/parse/xmind.js')
           const xmind = xmindMod.default || xmindMod
-          const mindMapData = await xmind.parseXmindFile(file, content => {
-            if (!Array.isArray(content) || content.length <= 1) {
-              return Array.isArray(content) ? content[0] : content
+          const zipMod = await import('jszip')
+          const JSZip = zipMod.default || zipMod
+          const zip = await JSZip.loadAsync(file)
+          const jsonFile = zip.files['content.json']
+          let mindMapData
+          if (jsonFile && typeof xmind.transformXmind === 'function') {
+            const json = await jsonFile.async('string')
+            const content = JSON.parse(json)
+            const sheets = Array.isArray(content) ? content : [content]
+            const transformed = []
+            for (let index = 0; index < sheets.length; index += 1) {
+              const sheetData = await xmind.transformXmind(
+                json,
+                zip.files,
+                async list => list[index]
+              )
+              transformed.push({
+                name:
+                  sheets[index]?.title ||
+                  sheets[index]?.rootTopic?.title ||
+                  '画布 ' + (index + 1),
+                root: sheetData?.root || sheetData,
+                theme: sheetData?.theme,
+                layout: sheetData?.layout
+              })
             }
-            this.$message.info(this.$t('home.dragOpenXmindMultiTip'))
-            return content[0]
-          })
+            if (transformed.length > 1) {
+              const { createWorkbookFromMindmapList } = await import(
+                '@/services/mindmapWorkbook'
+              )
+              mindMapData = createWorkbookFromMindmapList(transformed)
+              this.$message.info(this.$t('home.dragOpenXmindMultiTip'))
+            } else if (transformed.length === 1) {
+              mindMapData = {
+                root: transformed[0].root,
+                theme: transformed[0].theme || {
+                  template: 'classic4',
+                  config: {}
+                },
+                layout: transformed[0].layout || 'logicalStructure'
+              }
+            }
+          }
+          if (!mindMapData) {
+            mindMapData = await xmind.parseXmindFile(file)
+          }
           parsed = {
             documentMode: 'mindmap',
             data: mindMapData,
