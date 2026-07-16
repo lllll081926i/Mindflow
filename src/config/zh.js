@@ -510,6 +510,16 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + H'
       },
       {
+        icon: 'iconlayout',
+        name: '整理布局',
+        value: ctrl + ' + L'
+      },
+      {
+        icon: 'iconcode',
+        name: '源码编辑',
+        value: ctrl + ' + Alt + C'
+      },
+      {
         icon: 'iconroot',
         name: '回到根节点',
         value: ctrl + ' + Shift + B'

@@ -115,6 +115,7 @@
       :mindMap="mindMap"
     ></NodeIconToolbar>
     <OutlineEdit v-if="mindMap && isOutlineEdit" :mindMap="mindMap"></OutlineEdit>
+    <SourceCodeEdit v-if="mindMap" :mindMap="mindMap"></SourceCodeEdit>
     <Scrollbar v-if="isShowScrollbar && mindMap" :mindMap="mindMap"></Scrollbar>
     <FormulaSidebar
       v-if="mindMap && openNodeRichText && richTextPluginReady"
@@ -209,6 +210,7 @@ const NodeIconToolbar = defineAsyncComponent(() =>
   import('./NodeIconToolbar.vue')
 )
 const OutlineEdit = defineAsyncComponent(() => import('./OutlineEdit.vue'))
+const SourceCodeEdit = defineAsyncComponent(() => import('./SourceCodeEdit.vue'))
 const Scrollbar = defineAsyncComponent(() => import('./Scrollbar.vue'))
 const NodeOuterFrame = defineAsyncComponent(() =>
   import('./NodeOuterFrame.vue')
@@ -563,6 +565,7 @@ export default {
     NodeIconSidebar,
     NodeIconToolbar,
     OutlineEdit,
+    SourceCodeEdit,
     Scrollbar,
     FormulaSidebar,
     NodeOuterFrame,

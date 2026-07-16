@@ -212,6 +212,9 @@ export default {
 
     backToRoot() {
       this.mindMap.renderer.setRootNodeCenter()
+    },
+    openSourceCodeEdit() {
+      this.$bus.$emit('openSourceCodeEdit')
     }
   }
 }

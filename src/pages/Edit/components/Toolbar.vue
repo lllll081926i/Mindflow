@@ -1368,6 +1368,31 @@ export default {
         this.clearMarkerFilter()
         return
       }
+      // Ctrl+L reset layout
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        !event.altKey &&
+        event.key.toLowerCase() === 'l'
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('RESET_LAYOUT')
+        return
+      }
+      // Ctrl+Alt+C open source code edit
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'c'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('openSourceCodeEdit')
+        return
+      }
       // priority/progress markers
       if (
         !isTypingTarget &&

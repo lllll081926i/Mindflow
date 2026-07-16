@@ -399,6 +399,8 @@ const zh = {
     "markerFilterInvalid": "请输入 1-9 或留空",
     "markerFilterApplied": "已筛选优先级",
     "markerFilterCleared": "已清除标记筛选",
+    "sourceCodeEdit": "源码编辑",
+    "sourceCodeApplied": "源码已应用",
     "convertToFlowchart": "转换为流程图",
     "convertToFlowchartDone": "已将当前导图转换为流程图",
     "noMindMapToConvert": "当前没有可转换的思维导图",

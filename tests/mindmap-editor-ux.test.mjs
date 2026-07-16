@@ -617,3 +617,15 @@ test('思维导图支持 Alt+F 聚焦模式', () => {
   assert.ok(editSource.includes('applyFocusMode'))
   assert.ok(editSource.includes('focusModeActive'))
 })
+
+
+test('思维导图提供源码编辑面板与快捷键', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  const sourcePanel = fs.readFileSync(path.resolve('src/pages/Edit/components/SourceCodeEdit.vue'), 'utf8')
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const navSource = fs.readFileSync(path.resolve('src/pages/Edit/components/NavigatorToolbar.vue'), 'utf8')
+  assert.ok(editSource.includes('SourceCodeEdit'))
+  assert.ok(sourcePanel.includes('openSourceCodeEdit'))
+  assert.ok(toolbarSource.includes('openSourceCodeEdit'))
+  assert.ok(navSource.includes('openSourceCodeEdit()'))
+})
