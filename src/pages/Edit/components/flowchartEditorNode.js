@@ -1378,6 +1378,102 @@ export const flowchartNodeMethods = {
     void this.persistFlowchartState()
   },
 
+  alignSelectedNodesRight() {
+    const selectedNodes = this.getSelectedNodes()
+    if (selectedNodes.length < 2) {
+      this.$message.warning(this.$t('flowchart.alignNeedTwoNodes'))
+      return
+    }
+    const right = Math.max(
+      ...selectedNodes.map(node => Number(node.x || 0) + Number(node.width || 0))
+    )
+    selectedNodes.forEach(node => {
+      const snappedPosition = this.snapPositionToGrid({
+        x: right - Number(node.width || 0),
+        y: Number(node.y || 0)
+      })
+      node.x = snappedPosition.x
+      node.y = snappedPosition.y
+    })
+    void this.persistFlowchartState()
+  },
+
+  alignSelectedNodesTop() {
+    const selectedNodes = this.getSelectedNodes()
+    if (selectedNodes.length < 2) {
+      this.$message.warning(this.$t('flowchart.alignNeedTwoNodes'))
+      return
+    }
+    const top = Math.min(...selectedNodes.map(node => Number(node.y || 0)))
+    selectedNodes.forEach(node => {
+      const snappedPosition = this.snapPositionToGrid({
+        x: Number(node.x || 0),
+        y: top
+      })
+      node.x = snappedPosition.x
+      node.y = snappedPosition.y
+    })
+    void this.persistFlowchartState()
+  },
+
+  alignSelectedNodesBottom() {
+    const selectedNodes = this.getSelectedNodes()
+    if (selectedNodes.length < 2) {
+      this.$message.warning(this.$t('flowchart.alignNeedTwoNodes'))
+      return
+    }
+    const bottom = Math.max(
+      ...selectedNodes.map(node => Number(node.y || 0) + Number(node.height || 0))
+    )
+    selectedNodes.forEach(node => {
+      const snappedPosition = this.snapPositionToGrid({
+        x: Number(node.x || 0),
+        y: bottom - Number(node.height || 0)
+      })
+      node.x = snappedPosition.x
+      node.y = snappedPosition.y
+    })
+    void this.persistFlowchartState()
+  },
+
+  alignSelectedNodesCenterX() {
+    const selectedNodes = this.getSelectedNodes()
+    if (selectedNodes.length < 2) {
+      this.$message.warning(this.$t('flowchart.alignNeedTwoNodes'))
+      return
+    }
+    const centers = selectedNodes.map(node => this.getNodeCenterPosition(node).x)
+    const centerX = centers.reduce((sum, value) => sum + value, 0) / centers.length
+    selectedNodes.forEach(node => {
+      const snappedPosition = this.snapPositionToGrid({
+        x: centerX - Number(node.width || 0) / 2,
+        y: Number(node.y || 0)
+      })
+      node.x = snappedPosition.x
+      node.y = snappedPosition.y
+    })
+    void this.persistFlowchartState()
+  },
+
+  alignSelectedNodesCenterY() {
+    const selectedNodes = this.getSelectedNodes()
+    if (selectedNodes.length < 2) {
+      this.$message.warning(this.$t('flowchart.alignNeedTwoNodes'))
+      return
+    }
+    const centers = selectedNodes.map(node => this.getNodeCenterPosition(node).y)
+    const centerY = centers.reduce((sum, value) => sum + value, 0) / centers.length
+    selectedNodes.forEach(node => {
+      const snappedPosition = this.snapPositionToGrid({
+        x: Number(node.x || 0),
+        y: centerY - Number(node.height || 0) / 2
+      })
+      node.x = snappedPosition.x
+      node.y = snappedPosition.y
+    })
+    void this.persistFlowchartState()
+  },
+
   distributeSelectedNodesHorizontally() {
     const selectedNodes = this.getSelectedNodes()
     if (selectedNodes.length < 3) {

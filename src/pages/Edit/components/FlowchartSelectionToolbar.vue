@@ -16,6 +16,81 @@
       </svg>
     </button>
     <button
+      v-if="selectedNodeCount > 1"
+      type="button"
+      class="flowchartSelectionTool"
+      :aria-label="labels.alignCenterX"
+      :title="labels.alignCenterX"
+      @click="$emit('align-center-x')"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 4v16"></path>
+        <path d="M8 8h8"></path>
+        <path d="M9 12h6"></path>
+        <path d="M8 16h8"></path>
+      </svg>
+    </button>
+    <button
+      v-if="selectedNodeCount > 1"
+      type="button"
+      class="flowchartSelectionTool"
+      :aria-label="labels.alignRight"
+      :title="labels.alignRight"
+      @click="$emit('align-right')"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M18 4v16"></path>
+        <path d="M6 7h8"></path>
+        <path d="M9 12h5"></path>
+        <path d="M6 17h8"></path>
+      </svg>
+    </button>
+    <button
+      v-if="selectedNodeCount > 1"
+      type="button"
+      class="flowchartSelectionTool"
+      :aria-label="labels.alignTop"
+      :title="labels.alignTop"
+      @click="$emit('align-top')"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 6h16"></path>
+        <path d="M7 10v8"></path>
+        <path d="M12 10v5"></path>
+        <path d="M17 10v8"></path>
+      </svg>
+    </button>
+    <button
+      v-if="selectedNodeCount > 1"
+      type="button"
+      class="flowchartSelectionTool"
+      :aria-label="labels.alignCenterY"
+      :title="labels.alignCenterY"
+      @click="$emit('align-center-y')"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 12h16"></path>
+        <path d="M8 8v8"></path>
+        <path d="M12 9v6"></path>
+        <path d="M16 8v8"></path>
+      </svg>
+    </button>
+    <button
+      v-if="selectedNodeCount > 1"
+      type="button"
+      class="flowchartSelectionTool"
+      :aria-label="labels.alignBottom"
+      :title="labels.alignBottom"
+      @click="$emit('align-bottom')"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 18h16"></path>
+        <path d="M7 6v8"></path>
+        <path d="M12 9v5"></path>
+        <path d="M17 6v8"></path>
+      </svg>
+    </button>
+    <button
       v-if="selectedNodeCount > 2"
       type="button"
       class="flowchartSelectionTool"
@@ -108,6 +183,11 @@ export default {
   name: 'FlowchartSelectionToolbar',
   emits: [
     'align-left',
+    'align-center-x',
+    'align-right',
+    'align-top',
+    'align-center-y',
+    'align-bottom',
     'distribute-horizontal',
     'distribute-vertical',
     'bring-front',

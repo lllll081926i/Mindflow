@@ -233,13 +233,13 @@ test('流程图编辑器存在并包含核心工具入口', () => {
   assert.match(source, /tidyFlowchartLayout\(/)
 })
 
-test('流程图保留图标化快速加节点条，并移除底部选区浮动工具条入口', () => {
+test('流程图保留图标化快速加节点条，并保留底部选区浮动工具条入口', () => {
   assert.match(flowchartEditorSource, /FlowchartQuickAddBar/)
-  assert.doesNotMatch(flowchartEditorSource, /FlowchartSelectionToolbar/)
+  assert.match(flowchartEditorSource, /FlowchartSelectionToolbar/)
   assert.match(flowchartQuickAddBarSource, /v-for="typeItem in filteredNodeTypes"/)
   assert.match(flowchartQuickAddBarSource, /add-node/)
   assert.match(flowchartStyleSource, /\.flowchartQuickAddBar/)
-  assert.doesNotMatch(flowchartStyleSource, /\.flowchartSelectionToolbar/)
+  assert.match(flowchartStyleSource, /\.flowchartSelectionToolbar/)
 })
 
 test('流程图快速加节点条提供形状搜索和回车添加，吸收 draw.io 形状库查找体验', () => {
@@ -1830,4 +1830,27 @@ test('流程图工具栏提供搜索入口', () => {
   assert.match(toolbarSource, /labels\.search/)
   assert.match(editorSource, /@open-search="openFlowchartSearch"/)
   assert.match(editorSource, /search: this\.\$t\('toolbar\.searchAction'\)/)
+})
+
+test('流程图挂载多选对齐工具条并支持完整对齐操作', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const toolbarSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartSelectionToolbar.vue'),
+    'utf8'
+  )
+  const nodeSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorNode.js'),
+    'utf8'
+  )
+  assert.match(editorSource, /FlowchartSelectionToolbar/)
+  assert.match(editorSource, /alignSelectedNodesRight/)
+  assert.match(editorSource, /alignSelectedNodesCenterX/)
+  assert.match(toolbarSource, /align-center-x/)
+  assert.match(toolbarSource, /align-bottom/)
+  assert.match(nodeSource, /alignSelectedNodesRight\(/)
+  assert.match(nodeSource, /alignSelectedNodesCenterY\(/)
+  assert.match(nodeSource, /alignSelectedNodesTop\(/)
 })

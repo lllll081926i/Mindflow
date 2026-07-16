@@ -262,6 +262,23 @@
         @add-node="addNodeByType"
       />
 
+      <FlowchartSelectionToolbar
+        :selected-node-count="selectedNodeIds.length"
+        :labels="flowchartUiText"
+        @align-left="alignSelectedNodesLeft"
+        @align-center-x="alignSelectedNodesCenterX"
+        @align-right="alignSelectedNodesRight"
+        @align-top="alignSelectedNodesTop"
+        @align-center-y="alignSelectedNodesCenterY"
+        @align-bottom="alignSelectedNodesBottom"
+        @distribute-horizontal="distributeSelectedNodesHorizontally"
+        @distribute-vertical="distributeSelectedNodesVertically"
+        @bring-front="bringSelectedNodesToFront"
+        @send-back="sendSelectedNodesToBack"
+        @duplicate="duplicateSelectedNodes"
+        @delete="removeSelection"
+      />
+
       <FlowchartInspector
         :is-open="isInspectorOpen"
         :panel-section="inspectorPanelSection"
@@ -325,6 +342,7 @@ import FlowchartMinimap from './FlowchartMinimap.vue'
 import FlowchartNodeLayer from './FlowchartNodeLayer.vue'
 import FlowchartQuickAddBar from './FlowchartQuickAddBar.vue'
 import FlowchartToolbar from './FlowchartToolbar.vue'
+import FlowchartSelectionToolbar from './FlowchartSelectionToolbar.vue'
 import FlowchartCommandPalette from './FlowchartCommandPalette.vue'
 import AiConfigDialog from './AiConfigDialog.vue'
 import './FlowchartEditor.less'
@@ -365,6 +383,7 @@ export default {
     FlowchartNodeLayer,
     FlowchartQuickAddBar,
     FlowchartToolbar,
+    FlowchartSelectionToolbar,
     FlowchartCommandPalette,
     AiConfigDialog
   },
@@ -652,6 +671,11 @@ export default {
         shapeSearchPlaceholder: this.$t('flowchart.shapeSearchPlaceholder'),
         duplicate: this.$t('flowchart.duplicate'),
         alignLeft: this.$t('flowchart.alignLeft'),
+        alignRight: this.$t('flowchart.alignRight'),
+        alignTop: this.$t('flowchart.alignTop'),
+        alignBottom: this.$t('flowchart.alignBottom'),
+        alignCenterX: this.$t('flowchart.alignCenterX'),
+        alignCenterY: this.$t('flowchart.alignCenterY'),
         distributeHorizontal: this.$t('flowchart.distributeHorizontal'),
         distributeVertical: this.$t('flowchart.distributeVertical'),
         arrangeFront: this.$t('flowchart.arrangeFront'),

@@ -1896,3 +1896,47 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
+.flowchartSelectionToolbar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 1260;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--flowchart-floating-bg);
+  border: 1px solid var(--flowchart-floating-border);
+  box-shadow: var(--flowchart-floating-shadow);
+}
+
+.flowchartSelectionTool {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--flowchart-text);
+  cursor: pointer;
+}
+
+.flowchartSelectionTool:hover {
+  background: var(--flowchart-toolbar-btn-hover);
+}
+
+.flowchartSelectionTool svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
