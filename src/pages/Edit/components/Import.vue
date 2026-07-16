@@ -135,7 +135,7 @@ export default {
     },
 
     getRegexp() {
-      return /\.(smm|json|xmind|md|mm)$/
+      return /\.(smm|json|xmind|md|mm|zip)$/
     },
 
     getImportPayload(file) {
@@ -401,6 +401,60 @@ export default {
       this.xmindCanvasSelectDialogVisible = false
       this.canvasList = []
       this.selectCanvas = 0
+    },
+
+    // 处理多个 FreeMind .mm 的 zip 包
+    async handleFreemindZip(file) {
+      try {
+        const zipMod = await import('jszip')
+        const JSZip = zipMod.default || zipMod
+        const zip = await JSZip.loadAsync(file.raw || file)
+        const mmFiles = Object.keys(zip.files).filter(
+          name => /.mm$/i.test(name) && !zip.files[name].dir
+        )
+        if (!mmFiles.length) {
+          throw new Error(
+            this.$t('import.fileContentError') || '压缩包内未找到 .mm 文件'
+          )
+        }
+        const { createWorkbookFromMindmapList } = await import(
+          '@/services/mindmapWorkbook'
+        )
+        const maps = []
+        for (const name of mmFiles.sort()) {
+          const xml = await zip.file(name).async('string')
+          const data = await parseFreemindFile(xml)
+          const base = name.split('/').pop().replace(/.mm$/i, '')
+          maps.push({
+            name: base || data?.root?.data?.text || '画布',
+            root: data.root,
+            theme: data.theme,
+            layout: data.layout
+          })
+        }
+        const workbook =
+          maps.length > 1
+            ? createWorkbookFromMindmapList(maps)
+            : {
+                root: maps[0].root,
+                theme: maps[0].theme,
+                layout: maps[0].layout
+              }
+        this.$bus.$emit('setData', workbook)
+        this.$message.success(
+          maps.length > 1
+            ? this.$t('import.importMmZipSuccess', { count: maps.length }) ||
+                '已导入 ' + maps.length + ' 个 FreeMind 画布'
+            : this.$t('import.importSuccess')
+        )
+      } catch (error) {
+        console.error('handleFreemindZip failed', error)
+        this.$message.error(
+          error?.i18nKey
+            ? this.$t(error.i18nKey)
+            : error?.message || this.$t('import.fileParsingFailed')
+        )
+      }
     },
 
     // 处理 FreeMind / Freeplane .mm
