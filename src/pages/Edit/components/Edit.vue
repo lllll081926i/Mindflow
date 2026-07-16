@@ -1132,6 +1132,11 @@ export default {
       this.mindMapData = next
       storeData(next)
       await this.setData(next, { skipSave: true, configData: this.mindMapConfig })
+      this.$nextTick(() => {
+        try {
+          this.mindMap?.view?.fit?.()
+        } catch (_error) {}
+      })
       this.$message.success(this.$t('edit.sheetSwitched'))
     },
 
@@ -1145,6 +1150,11 @@ export default {
       this.mindMapData = next
       storeData(next)
       await this.setData(next, { skipSave: true, configData: this.mindMapConfig })
+      this.$nextTick(() => {
+        try {
+          this.mindMap?.view?.fit?.()
+        } catch (_error) {}
+      })
       this.$message.success(this.$t('edit.sheetAdded'))
     },
 
