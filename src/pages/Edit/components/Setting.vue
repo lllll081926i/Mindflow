@@ -526,12 +526,14 @@ export default {
   },
   created() {
     this.$bus.$on('toggleWatermark', this.toggleWatermarkShortcut)
+    this.$bus.$on('toggleFreeDrag', this.toggleFreeDragShortcut)
     
     this.initLoacalConfig()
     this.$bus.$on('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
   },
   beforeUnmount() {
     this.$bus.$off('toggleWatermark', this.toggleWatermarkShortcut)
+    this.$bus.$off('toggleFreeDrag', this.toggleFreeDragShortcut)
     
     this.$bus.$off('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
     clearTimeout(this.storeConfigTimer)
@@ -614,6 +616,16 @@ export default {
     },
 
     // 切换显示水印与否
+    toggleFreeDragShortcut() {
+      const next = !this.config.enableFreeDrag
+      this.config.enableFreeDrag = next
+      this.updateOtherConfig('enableFreeDrag', next)
+      this.$message?.success?.(
+        next
+          ? this.$t('setting.enableFreeDrag') || '已开启自由拖拽'
+          : this.$t('setting.disableFreeDrag') || '已关闭自由拖拽'
+      )
+    },
     toggleWatermarkShortcut() {
       this.watermarkConfig.show = !this.watermarkConfig.show
       this.watermarkShowChange(this.watermarkConfig.show)

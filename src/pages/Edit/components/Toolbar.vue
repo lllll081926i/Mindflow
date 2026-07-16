@@ -1200,6 +1200,19 @@ export default {
         this.$bus.$emit('toggleWatermark')
         return
       }
+      // toggle free drag Alt+D
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'd'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('toggleFreeDrag')
+        return
+      }
       // toggle child numbering Ctrl+Alt+N
       if (
         !isTypingTarget &&

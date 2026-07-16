@@ -425,6 +425,11 @@ export const shortcutKeyList = [
         value: 'Alt + W'
       },
       {
+        icon: 'icondrag',
+        name: '切换自由拖拽',
+        value: 'Alt + D'
+      },
+      {
         icon: 'iconnumber',
         name: '切换子主题编号',
         value: ctrl + ' + Alt + N'
