@@ -675,6 +675,13 @@ export const flowchartSelectionMethods = {
       (this.flowchartData.nodes || []).some(node => node.id === fallbackNodeId)
     ) {
       this.selectedNodeIds = [fallbackNodeId]
+      const node = (this.flowchartData.nodes || []).find(item => item.id === fallbackNodeId)
+      if (node && typeof this.centerViewportAt === 'function') {
+        this.centerViewportAt({
+          x: Number(node.x || 0) + Number(node.width || 0) / 2,
+          y: Number(node.y || 0) + Number(node.height || 0) / 2
+        })
+      }
     }
     this.$message.success(this.$t('flowchart.deleteSuccess'))
     void this.persistFlowchartState()
