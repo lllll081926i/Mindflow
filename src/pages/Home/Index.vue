@@ -230,6 +230,24 @@
               type="button"
               class="starterCard"
               :disabled="busy"
+              @click="createMindMapScenario('competitor')"
+            >
+              <strong>{{ $t('home.starterMindMapCompetitor') }}</strong>
+              <span>{{ $t('home.starterMindMapCompetitorDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapScenario('retro')"
+            >
+              <strong>{{ $t('home.starterMindMapRetro') }}</strong>
+              <span>{{ $t('home.starterMindMapRetroDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
               <strong>{{ $t('home.starterFlowApproval') }}</strong>
@@ -874,6 +892,61 @@ export default {
             children: [
               { data: { text: '复用场景' }, children: [] },
               { data: { text: '输出作品' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'competitor') {
+        data.root.data.text = '竞品分析'
+        data.root.children = [
+          {
+            data: { text: '竞品画像' },
+            children: [
+              { data: { text: '定位与客群' }, children: [] },
+              { data: { text: '核心卖点' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '能力对比' },
+            children: [
+              { data: { text: '优势' }, children: [] },
+              { data: { text: '劣势' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '策略启发' },
+            children: [
+              { data: { text: '可借鉴点' }, children: [] },
+              { data: { text: '差异化机会' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'retro') {
+        data.root.data.text = '复盘会'
+        data.root.children = [
+          {
+            data: { text: '目标与结果' },
+            children: [
+              { data: { text: '预期' }, children: [] },
+              { data: { text: '实际' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '过程观察' },
+            children: [
+              { data: { text: 'Keep' }, children: [] },
+              { data: { text: 'Problem' }, children: [] },
+              { data: { text: 'Try' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '行动项' },
+            children: [
+              { data: { text: '负责人' }, children: [] },
+              { data: { text: '截止时间' }, children: [] }
             ]
           }
         ]

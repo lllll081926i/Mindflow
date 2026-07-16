@@ -1979,3 +1979,14 @@ test('流程图校验面板支持问题多选定位与全选问题节点', () =>
   assert.match(editorSource, /shiftKey|ctrlKey|metaKey/)
   assert.match(langSource, /"validateSelectAllIssues"/)
 })
+
+
+test('流程图校验摘要展示健康度分数', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /summary.score/)
+  assert.match(langSource, /健康度 {score}/)
+})

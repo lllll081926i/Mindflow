@@ -27,7 +27,9 @@ export const validateFlowchartStructure = (flowchartData = {}) => {
         startCount: 0,
         endCount: 0,
         floatingCount: 0,
-        danglingEdgeCount: 0
+        danglingEdgeCount: 0,
+        unlabeledDecisionEdgeCount: 0,
+        score: 0
       }
     }
   }
@@ -89,10 +91,35 @@ export const validateFlowchartStructure = (flowchartData = {}) => {
     })
   }
 
-  // nodes with only outgoing/incoming are fine for process graphs; no extra issue
+  // decision nodes should usually label outgoing branches
+  const unlabeledDecisionEdges = []
+  nodes
+    .filter(node => node.type === 'decision')
+    .forEach(node => {
+      edges
+        .filter(edge => edge.source === node.id)
+        .forEach(edge => {
+          if (!String(edge.label || '').trim()) {
+            unlabeledDecisionEdges.push(edge.id || `${edge.source}->${edge.target}`)
+          }
+        })
+    })
+  if (unlabeledDecisionEdges.length) {
+    issues.push({
+      code: 'unlabeled-decision-edges',
+      severity: 'warn',
+      messageKey: 'flowchart.validateUnlabeledDecisionEdges',
+      count: unlabeledDecisionEdges.length,
+      edgeIds: unlabeledDecisionEdges
+    })
+  }
+
+  const warnCount = issues.filter(i => i.severity === 'warn').length
+  const errorCount = issues.filter(i => i.severity === 'error').length
+  const score = Math.max(0, 100 - errorCount * 35 - warnCount * 12)
 
   return {
-    ok: !issues.some(item => item.severity === 'error'),
+    ok: errorCount === 0,
     issues,
     summary: {
       nodes: nodes.length,
@@ -100,7 +127,9 @@ export const validateFlowchartStructure = (flowchartData = {}) => {
       startCount: startNodes.length,
       endCount: endNodes.length,
       floatingCount: floatingNodes.length,
-      danglingEdgeCount
+      danglingEdgeCount,
+      unlabeledDecisionEdgeCount: unlabeledDecisionEdges.length,
+      score
     }
   }
 }
@@ -304,7 +333,42 @@ export const buildFlowchartAutofixPlan = (flowchartData = {}) => {
     }
   }
 
-    const nextData = {
+    // label unlabeled outgoing decision edges by relative target position
+  let labeledCount = 0
+  nodes
+    .filter(node => node.type === 'decision')
+    .forEach(decision => {
+      const outs = validEdges.filter(edge => edge.source === decision.id)
+      const unlabeled = outs.filter(edge => !String(edge.label || '').trim())
+      if (!unlabeled.length) return
+      // sort by target y then x
+      const enriched = unlabeled
+        .map(edge => {
+          const target = nodeMap.get(edge.target)
+          return {
+            edge,
+            x: Number(target?.x || 0),
+            y: Number(target?.y || 0)
+          }
+        })
+        .sort((a, b) => a.y - b.y || a.x - b.x)
+      if (enriched.length === 1) {
+        enriched[0].edge.label = '是'
+        labeledCount += 1
+        return
+      }
+      enriched.forEach((item, index) => {
+        if (index === 0) item.edge.label = '是'
+        else if (index === 1) item.edge.label = '否'
+        else item.edge.label = `分支${index + 1}`
+        labeledCount += 1
+      })
+    })
+  if (labeledCount > 0) {
+    actions.push({ code: 'label-decision-edges', count: labeledCount })
+  }
+
+  const nextData = {
     ...flowchartData,
     nodes,
     edges: validEdges

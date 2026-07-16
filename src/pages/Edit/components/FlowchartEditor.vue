@@ -78,7 +78,6 @@
     </div>
 
     <div
-          <div
       v-if="flowchartValidationVisible"
       class="flowchartValidationPanel"
       role="dialog"
@@ -93,7 +92,8 @@
           $t('flowchart.validateSummary', {
             nodes: flowchartValidationResult.summary.nodes,
             edges: flowchartValidationResult.summary.edges,
-            issues: flowchartValidationResult.issues.length
+            issues: flowchartValidationResult.issues.length,
+            score: flowchartValidationResult.summary.score || 0
           })
         }}
       </div>
