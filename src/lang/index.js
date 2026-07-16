@@ -686,6 +686,7 @@ const zh = {
     "pasteOutlineEmpty": "剪贴板中没有可识别的大纲文本",
     "pasteOutlineFailed": "读取剪贴板失败，请检查浏览器权限",
     "pasteOutlineSuccess": "已根据大纲生成 {count} 个节点",
+    "linkSelectedSuccess": "已连接所选节点",
     "searchNodesTitle": "搜索节点",
     "searchNodesPlaceholder": "输入节点文字",
     "searchNodesEmpty": "没有匹配节点",

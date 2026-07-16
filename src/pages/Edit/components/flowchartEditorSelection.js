@@ -340,7 +340,6 @@ export const flowchartSelectionMethods = {
       !this.selectedEdgeId &&
       event.key.length === 1 &&
       !event.repeat &&
-      !/^[ -]$/.test(event.key) &&
       event.key !== ' '
     ) {
       event.preventDefault()
@@ -357,12 +356,63 @@ export const flowchartSelectionMethods = {
           if (inputEl) {
             inputEl.value = event.key
             inputEl.focus?.()
-            // caret at end
             const len = event.key.length
             inputEl.setSelectionRange?.(len, len)
           }
         }
       })
+      return
+    }
+    // Type-to-edit edge label
+    if (
+      !isMetaKey &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      this.selectedEdgeId &&
+      !this.selectedNodeIds.length &&
+      event.key.length === 1 &&
+      !event.repeat &&
+      event.key !== ' '
+    ) {
+      event.preventDefault()
+      const edgeId = this.selectedEdgeId
+      this.editEdgeLabel(edgeId)
+      this.$nextTick(() => {
+        if (this.inlineTextEditorState?.id === edgeId) {
+          this.inlineTextEditorState = {
+            ...this.inlineTextEditorState,
+            value: event.key
+          }
+          const editor = this.$refs.inlineTextEditorRef
+          const inputEl = Array.isArray(editor) ? editor[0] : editor
+          if (inputEl) {
+            inputEl.value = event.key
+            inputEl.focus?.()
+            const len = event.key.length
+            inputEl.setSelectionRange?.(len, len)
+          }
+        }
+      })
+      return
+    }
+    // L links two selected nodes (source = first selected, target = second)
+    if (
+      !isMetaKey &&
+      !event.altKey &&
+      !event.shiftKey &&
+      event.key.toLowerCase() === 'l' &&
+      this.selectedNodeIds.length === 2
+    ) {
+      event.preventDefault()
+      const [sourceId, targetId] = this.selectedNodeIds
+      if (typeof this.ensureFlowchartEdge === 'function') {
+        this.ensureFlowchartEdge(sourceId, targetId)
+        void this.persistFlowchartState?.()
+        this.$message?.success?.(
+          this.$t('flowchart.linkSelectedSuccess') || '已连接所选节点'
+        )
+      }
+      return
     }
   },
 

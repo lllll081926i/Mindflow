@@ -2443,3 +2443,18 @@ test('流程图选中节点后可直接输入进入编辑', () => {
   assert.ok(selectionSource.includes('openInlineTextEditor'))
   assert.ok(configSource.includes('直接输入开始编辑'))
 })
+
+
+test('流程图支持 L 连接双选节点，并支持连线直接输入编辑', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(selectionSource.includes("event.key.toLowerCase() === 'l'"))
+  assert.ok(selectionSource.includes('selectedNodeIds.length === 2'))
+  assert.ok(selectionSource.includes('Type-to-edit edge label'))
+  assert.ok(configSource.includes('连接两个所选节点'))
+  assert.ok(langSource.includes('linkSelectedSuccess'))
+})
