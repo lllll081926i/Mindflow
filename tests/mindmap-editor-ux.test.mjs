@@ -409,3 +409,16 @@ test('思维导图格式刷/外框/概要快捷键可用', () => {
   assert.ok(configSource.includes('格式刷'))
   assert.ok(configSource.includes('添加外框'))
 })
+
+
+test('思维导图导出/图标/公式快捷键可用', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 'e'"))
+  assert.ok(toolbarSource.includes('openExportDialog'))
+  assert.ok(toolbarSource.includes("setActiveSidebar('nodeIconSidebar')"))
+  assert.ok(toolbarSource.includes("setActiveSidebar('formulaSidebar')"))
+  assert.ok(configSource.includes('打开导出中心'))
+  assert.ok(configSource.includes('节点图标'))
+  assert.ok(configSource.includes('插入公式'))
+})

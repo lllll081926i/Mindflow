@@ -375,6 +375,21 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + G'
       },
       {
+        icon: 'iconexport',
+        name: '打开导出中心',
+        value: ctrl + ' + E'
+      },
+      {
+        icon: 'iconxiaolian',
+        name: '节点图标',
+        value: ctrl + ' + Shift + O'
+      },
+      {
+        icon: 'icongongshi',
+        name: '插入公式',
+        value: ctrl + ' + Shift + F'
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`

@@ -1276,6 +1276,50 @@ export default {
           event.preventDefault()
           this.$bus.$emit('execCommand', 'ADD_GENERALIZATION')
         }
+        return
+      }
+      // Ctrl+E open export center
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        event.key?.toLowerCase() === 'e' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        void this.openExportDialog()
+        return
+      }
+      // Ctrl+Shift+O open icons (avoid conflict with outline nowhere on mindmap)
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'o' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.$bus.$emit('close_node_icon_toolbar')
+          setActiveSidebar('nodeIconSidebar')
+        }
+        return
+      }
+      // Ctrl+Shift+F formula
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'f' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          setActiveSidebar('formulaSidebar')
+        }
       }
     },
 
