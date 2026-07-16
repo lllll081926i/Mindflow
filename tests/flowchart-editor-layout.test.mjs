@@ -2264,4 +2264,5 @@ test('流程图支持 Tab/Insert 快速新增下级节点', () => {
   assert.ok(selectionSource.includes("addNodeByType"))
   assert.ok(configSource.includes('新增下级处理节点'))
   assert.ok(configSource.includes('Tab | Insert'))
+  assert.ok(selectionSource.includes("type: isEmptyCanvas" ) || selectionSource.includes("'start'"))
 })
