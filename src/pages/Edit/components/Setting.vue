@@ -254,6 +254,29 @@
           >
         </div>
       </div>
+      <!-- 演示模式填空 -->
+      <div class="row">
+        <div class="rowItem">
+          <el-checkbox
+            v-model="config.openBlankMode"
+            @change="
+              value => {
+                updateOtherConfig('openBlankMode', value)
+                // keep demonstrateConfig in sync if present on mindMap
+                try {
+                  this.mindMap.updateConfig({
+                    demonstrateConfig: {
+                      ...(this.mindMap.getConfig('demonstrateConfig') || {}),
+                      openBlankMode: value
+                    }
+                  })
+                } catch (_error) {}
+              }
+            "
+            >{{ $t('setting.openBlankMode') }}</el-checkbox
+          >
+        </div>
+      </div>
       <!-- 是否在键盘输入时自动进入节点文本编辑模式 -->
       <div class="row">
         <div class="rowItem">
@@ -487,6 +510,7 @@ export default {
         createNewNodeBehavior: 'default',
         openRealtimeRenderOnNodeTextEdit: true,
         alwaysShowExpandBtn: false,
+        openBlankMode: false,
         enableAutoEnterTextEditWhenKeydown: true,
         imgTextMargin: 0,
         textContentMargin: 0,
@@ -558,6 +582,8 @@ export default {
     this.$bus.$on('toggleWatermark', this.toggleWatermarkShortcut)
     this.$bus.$on('toggleFreeDrag', this.toggleFreeDragShortcut)
     this.$bus.$on('toggleHandDrawn', this.toggleHandDrawnShortcut)
+    this.$bus.$on('toggleBlankMode', this.toggleBlankModeShortcut)
+    this.$bus.$on('toggleAlwaysShowExpandBtn', this.toggleAlwaysShowExpandBtnShortcut)
     
     this.initLoacalConfig()
     this.$bus.$on('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
@@ -566,6 +592,8 @@ export default {
     this.$bus.$off('toggleWatermark', this.toggleWatermarkShortcut)
     this.$bus.$off('toggleFreeDrag', this.toggleFreeDragShortcut)
     this.$bus.$off('toggleHandDrawn', this.toggleHandDrawnShortcut)
+    this.$bus.$off('toggleBlankMode', this.toggleBlankModeShortcut)
+    this.$bus.$off('toggleAlwaysShowExpandBtn', this.toggleAlwaysShowExpandBtnShortcut)
     
     this.$bus.$off('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
     clearTimeout(this.storeConfigTimer)
@@ -648,6 +676,34 @@ export default {
     },
 
     // 切换显示水印与否
+    toggleBlankModeShortcut() {
+      const next = !this.config.openBlankMode
+      this.config.openBlankMode = next
+      this.updateOtherConfig('openBlankMode', next)
+      try {
+        this.mindMap.updateConfig({
+          demonstrateConfig: {
+            ...(this.mindMap.getConfig('demonstrateConfig') || {}),
+            openBlankMode: next
+          }
+        })
+      } catch (_error) {}
+      this.$message?.success?.(
+        next
+          ? this.$t('setting.openBlankMode') || '已开启演示填空'
+          : this.$t('setting.closeBlankMode') || '已关闭演示填空'
+      )
+    },
+    toggleAlwaysShowExpandBtnShortcut() {
+      const next = !this.config.alwaysShowExpandBtn
+      this.config.alwaysShowExpandBtn = next
+      this.updateOtherConfig('alwaysShowExpandBtn', next)
+      this.$message?.success?.(
+        next
+          ? this.$t('setting.alwaysShowExpandBtn') || '已始终显示展开按钮'
+          : this.$t('setting.hideExpandBtn') || '已恢复默认展开按钮显示'
+      )
+    },
     toggleHandDrawnShortcut() {
       const next = !this.config.isUseHandDrawnLikeStyle
       this.config.isUseHandDrawnLikeStyle = next

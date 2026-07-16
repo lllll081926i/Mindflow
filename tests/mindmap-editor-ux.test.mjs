@@ -588,3 +588,13 @@ test('思维导图支持 Alt+H 切换手绘风格', () => {
   assert.ok(settingSource.includes('toggleHandDrawnShortcut'))
   assert.ok(settingSource.includes('isUseHandDrawnLikeStyle'))
 })
+
+
+test('思维导图支持演示填空与展开按钮快捷键', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const settingSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Setting.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('toggleBlankMode'))
+  assert.ok(toolbarSource.includes('toggleAlwaysShowExpandBtn'))
+  assert.ok(settingSource.includes('toggleBlankModeShortcut'))
+  assert.ok(settingSource.includes('openBlankMode'))
+})

@@ -1226,6 +1226,32 @@ export default {
         this.$bus.$emit('toggleHandDrawn')
         return
       }
+      // toggle blank mode Alt+B
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'b'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('toggleBlankMode')
+        return
+      }
+      // toggle always show expand Alt+E
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'e'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('toggleAlwaysShowExpandBtn')
+        return
+      }
       // toggle child numbering Ctrl+Alt+N
       if (
         !isTypingTarget &&

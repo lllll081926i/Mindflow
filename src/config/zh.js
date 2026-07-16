@@ -435,6 +435,16 @@ export const shortcutKeyList = [
         value: 'Alt + H'
       },
       {
+        icon: 'iconblank',
+        name: '切换演示填空',
+        value: 'Alt + B'
+      },
+      {
+        icon: 'iconexpand',
+        name: '切换始终显示展开按钮',
+        value: 'Alt + E'
+      },
+      {
         icon: 'iconnumber',
         name: '切换子主题编号',
         value: ctrl + ' + Alt + N'
