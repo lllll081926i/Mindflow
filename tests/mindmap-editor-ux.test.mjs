@@ -348,3 +348,12 @@ test('导图转流程后会立即同步编辑器文档模式', () => {
   assert.ok(toolbarSource.includes('useEditorStore'))
   assert.ok(toolbarSource.includes("documentMode: 'flowchart'"))
 })
+
+
+test('默认开启拖拽导入以便核心打开链路更顺手', () => {
+  const schemaSource = fs.readFileSync(
+    path.resolve('src/platform/shared/configSchema.js'),
+    'utf8'
+  )
+  assert.ok(schemaSource.includes('enableDragImport: true'))
+})

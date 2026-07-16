@@ -15,7 +15,8 @@ export const DEFAULT_LOCAL_CONFIG = {
   lastDarkTheme: 'dark4',
   lastLightTheme: 'default',
   enableAi: false,
-  enableDragImport: false
+  // Keep drag-import on by default so open/import stays one gesture away.
+  enableDragImport: true
 }
 
 export const createDefaultMindMapData = (
