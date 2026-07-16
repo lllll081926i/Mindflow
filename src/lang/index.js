@@ -231,6 +231,7 @@ const zh = {
     "maxFileNum": "最多只能选择一个文件",
     "notSelectTip": "请选择要导入的文件",
     "fileContentError": "文件内容有误",
+    "importMmZipSuccess": "已导入 {count} 个 FreeMind 画布",
     "importSuccess": "导入成功",
     "fileParsingFailed": "文件解析失败",
     "importAllCanvases": "导入全部画布",

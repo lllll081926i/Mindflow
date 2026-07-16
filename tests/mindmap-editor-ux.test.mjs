@@ -642,3 +642,12 @@ test('主题批注与概要删除、增强标记筛选可用', () => {
   assert.ok(contextSource.includes('REMOVE_GENERALIZATION'))
   assert.ok(editSource.includes('progress_') || editSource.includes('comments'))
 })
+
+
+test('支持导入多个 FreeMind .mm 的 zip 工作簿', () => {
+  const importSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Import.vue'), 'utf8')
+  const desktopSource = fs.readFileSync(path.resolve('src/platform/desktop/index.js'), 'utf8')
+  assert.ok(importSource.includes('handleFreemindZip'))
+  assert.ok(importSource.includes('.zip'))
+  assert.ok(desktopSource.includes("'zip'") || desktopSource.includes('.zip'))
+})

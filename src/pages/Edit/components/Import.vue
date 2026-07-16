@@ -104,7 +104,7 @@ export default {
       isDark: 'isDark'
     }),
     supportFileStr() {
-      return '.smm,.json,.xmind,.md,.mm'
+      return '.smm,.json,.xmind,.md,.mm,.zip'
     }
   },
   watch: {
@@ -236,6 +236,8 @@ export default {
           this.handleMd(data)
         } else if (type === 'mm') {
           this.handleFreemind(data)
+        } else if (type === 'zip') {
+          this.handleFreemindZip(data)
         }
       } catch (error) {
         console.error('handleFileURL failed', error)

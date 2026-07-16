@@ -398,7 +398,7 @@ const createBrowserTauriModules = () => {
         throw new Error('当前环境不支持选择文件夹')
       }
       const file = await pickBrowserFile({
-        accept: '.smm,.json,.xmind,.md,.mm,application/json'
+        accept: '.smm,.json,.xmind,.md,.mm,.zip,application/json'
       })
       if (!file) return null
       const path = createBrowserFilePath(file.name)
@@ -595,7 +595,7 @@ export const desktopPlatform = {
       filters: [
         {
           name: 'Mind Map',
-          extensions: ['smm', 'json', 'xmind', 'md', 'mm']
+          extensions: ['smm', 'json', 'xmind', 'md', 'mm', 'zip']
         }
       ]
     })
