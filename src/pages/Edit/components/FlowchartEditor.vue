@@ -451,6 +451,7 @@
       />
 
       <FlowchartInspector
+        ref="flowchartInspectorRef"
         :is-open="isInspectorOpen"
         :panel-section="inspectorPanelSection"
         :labels="flowchartUiText"

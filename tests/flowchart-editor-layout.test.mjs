@@ -2545,3 +2545,21 @@ test('流程转导图后会立即同步编辑器文档模式', () => {
   assert.ok(documentSource.includes('useEditorStore'))
   assert.ok(documentSource.includes("documentMode: 'mindmap'"))
 })
+
+
+test('流程图 Space/Ctrl+Shift+K 聚焦备注与链接字段', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const inspectorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartInspector.vue'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes('focusNodeNoteField'))
+  assert.ok(selectionSource.includes('focusNodeLinkField'))
+  assert.ok(inspectorSource.includes('nodeNoteInputRef'))
+  assert.ok(inspectorSource.includes('nodeLinkInputRef'))
+  assert.ok(configSource.includes('编辑节点链接'))
+})

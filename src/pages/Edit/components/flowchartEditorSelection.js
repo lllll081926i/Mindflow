@@ -277,7 +277,28 @@ export const flowchartSelectionMethods = {
     ) {
       event.preventDefault()
       this.inspectorPanelSection = 'inspector'
-      this.toggleInspector()
+      const shouldOpen = !this.isInspectorOpen
+      this.isInspectorOpen = true
+      if (shouldOpen || this.selectedNodeIds.length === 1) {
+        this.$nextTick(() => {
+          this.$refs.flowchartInspectorRef?.focusNodeNoteField?.()
+        })
+      }
+      return
+    }
+    // Ctrl+Shift+K focuses link field for selected node
+    if (
+      isMetaKey &&
+      event.shiftKey &&
+      event.key.toLowerCase() === 'k' &&
+      this.selectedNodeIds.length === 1
+    ) {
+      event.preventDefault()
+      this.inspectorPanelSection = 'inspector'
+      this.isInspectorOpen = true
+      this.$nextTick(() => {
+        this.$refs.flowchartInspectorRef?.focusNodeLinkField?.()
+      })
       return
     }
     // XMind-like structure keys: Tab inserts a connected child process.

@@ -218,6 +218,7 @@
         ></textarea>
         <label class="fieldLabel">{{ labels.nodeNote }}</label>
         <textarea
+          ref="nodeNoteInputRef"
           class="fieldInput"
           :value="selectedNode.note || ''"
           :placeholder="labels.nodeNotePlaceholder"
@@ -225,6 +226,7 @@
         ></textarea>
         <label class="fieldLabel">{{ labels.nodeLink }}</label>
         <input
+          ref="nodeLinkInputRef"
           class="fieldInput"
           type="url"
           :value="selectedNode.link || ''"
@@ -661,6 +663,16 @@ export default {
     },
     formatLabelRatioLabel(value) {
       return `${Math.round(Number(value || 0.5) * 100)}%`
+    },
+    focusNodeNoteField() {
+      this.$nextTick(() => {
+        this.$refs.nodeNoteInputRef?.focus?.()
+      })
+    },
+    focusNodeLinkField() {
+      this.$nextTick(() => {
+        this.$refs.nodeLinkInputRef?.focus?.()
+      })
     }
   }
 }
