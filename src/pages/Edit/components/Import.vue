@@ -284,6 +284,10 @@ export default {
         this.handleXmind(file)
       } else if (/\.md$/.test(file.name)) {
         this.handleMd(file)
+      } else if (/\.mm$/.test(file.name)) {
+        this.handleFreemind(file)
+      } else if (/\.zip$/.test(file.name)) {
+        this.handleFreemindZip(file)
       }
       this.cancel()
       setActiveSidebar('')
