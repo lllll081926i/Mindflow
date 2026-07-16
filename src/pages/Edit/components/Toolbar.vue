@@ -1158,6 +1158,20 @@ export default {
         this.closeCommandPalette()
         return
       }
+      // Shift+F2 renames active workbook sheet
+      if (
+        event.key === 'F2' &&
+        event.shiftKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        !isTypingTarget &&
+        !this.commandPaletteVisible
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('mindmapRenameActiveSheet')
+        return
+      }
       // Space opens note for active mindmap node (core annotation loop).
       if (
         event.key === ' ' &&

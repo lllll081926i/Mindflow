@@ -281,6 +281,13 @@ export const flowchartSelectionMethods = {
       this.createSiblingProcessNode()
       return
     }
+    // Shift+F2 renames active flowchart page
+    if (event.key === 'F2' && event.shiftKey && !isMetaKey) {
+      event.preventDefault()
+      const active = (this.flowchartSheets || []).find(item => item.active)
+      if (active) this.startRenameFlowchartSheet?.(active)
+      return
+    }
     if (event.key === 'Enter' || event.key === 'F2') {
       if (this.selectedNodeIds.length === 1) {
         event.preventDefault()

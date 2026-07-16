@@ -493,3 +493,11 @@ test('思维导图画布标签支持拖拽排序', () => {
   assert.ok(editSource.includes('onSheetDrop'))
   assert.ok(editSource.includes('draggable="true"'))
 })
+
+
+test('思维导图支持 Shift+F2 重命名当前画布', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('mindmapRenameActiveSheet'))
+  assert.ok(editSource.includes('handleMindmapRenameActiveSheet'))
+})

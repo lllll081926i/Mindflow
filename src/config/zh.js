@@ -427,6 +427,11 @@ export const shortcutKeyList = [
         value: ctrl + ' + T'
       },
       {
+        icon: 'iconedit',
+        name: '重命名当前画布',
+        value: 'Shift + F2'
+      },
+      {
         icon: 'iconcopy',
         name: '复制当前画布',
         value: ctrl + ' + Shift + N'
@@ -862,6 +867,7 @@ export const flowchartShortcutKeyList = [
       { name: '保存', value: ctrl + ' + S' },
       { name: '打开导出中心', value: ctrl + ' + E' },
       { name: '新建流程图页面', value: ctrl + ' + T' },
+      { name: '重命名当前流程图页面', value: 'Shift + F2' },
       { name: '切换流程图页面', value: ctrl + ' + Tab' },
       { name: '适应画布', value: ctrl + ' + 0' },
       { name: '重置视口', value: ctrl + ' + 1' },

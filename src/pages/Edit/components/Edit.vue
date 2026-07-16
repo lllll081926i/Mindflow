@@ -825,6 +825,7 @@ export default {
       this.$bus.$on('mindmapPrevSheet', this.handleMindmapPrevSheet)
       this.$bus.$on('mindmapMoveSheetLeft', () => this.moveActiveMindmapSheet(-1))
       this.$bus.$on('mindmapMoveSheetRight', () => this.moveActiveMindmapSheet(1))
+      this.$bus.$on('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$on(
         'createAssociativeLine',
         this.handleCreateLineFromActiveNode
@@ -856,6 +857,7 @@ export default {
       this.$bus.$off('mindmapPrevSheet', this.handleMindmapPrevSheet)
       this.$bus.$off('mindmapMoveSheetLeft')
       this.$bus.$off('mindmapMoveSheetRight')
+      this.$bus.$off('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)
@@ -1129,6 +1131,10 @@ export default {
       storeData(this.mindMapData)
     },
 
+    handleMindmapRenameActiveSheet() {
+      const active = (this.mindmapSheets || []).find(item => item.active)
+      if (active) this.startRenameMindmapSheet(active)
+    },
     onSheetDragStart(sheet, event) {
       if (!sheet?.id || !event?.dataTransfer) return
       event.dataTransfer.setData('text/sheet-id', sheet.id)
