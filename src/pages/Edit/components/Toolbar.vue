@@ -738,6 +738,16 @@ export default {
           action: this.openOutlinePanel
         },
         {
+          key: 'addSheet',
+          label: this.$t('edit.addSheet') || '新建画布',
+          action: () => this.$bus.$emit('mindmapAddSheet')
+        },
+        {
+          key: 'duplicateSheet',
+          label: this.$t('edit.sheetDuplicate') || '复制当前画布',
+          action: () => this.$bus.$emit('mindmapDuplicateSheet')
+        },
+        {
           key: 'insertSiblingNode',
           label: this.$t('toolbar.insertSiblingNode'),
           shortcut: 'Enter',

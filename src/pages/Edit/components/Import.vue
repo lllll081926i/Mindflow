@@ -57,6 +57,9 @@
       </el-radio-group>
       <template #footer>
         <span class="dialog-footer">
+          <el-button @click="confirmSelectAllCanvases">{{
+            $t('import.importAllCanvases') || '导入全部画布'
+          }}</el-button>
           <el-button type="primary" @click="confirmSelect">{{
             $t('dialog.confirm')
           }}</el-button>
@@ -69,6 +72,7 @@
 <script>
 import xmind from 'simple-mind-map/src/parse/xmind.js'
 import { parseFreemindFile } from '@/services/freemindParse'
+import { createWorkbookFromMindmapList } from '@/services/mindmapWorkbook'
 import markdown from 'simple-mind-map/src/parse/markdown.js'
 import { mapState } from 'pinia'
 import { parseExternalJsonSafely } from '@/utils/json'
@@ -338,6 +342,24 @@ export default {
     // 确认导入指定的画布
     confirmSelect() {
       this.selectPromiseResolve(this.canvasList[this.selectCanvas])
+      this.xmindCanvasSelectDialogVisible = false
+      this.canvasList = []
+      this.selectCanvas = 0
+    },
+
+    // 导入全部画布为多页工作簿
+    confirmSelectAllCanvases() {
+      const list = Array.isArray(this.canvasList) ? this.canvasList : []
+      const workbook = createWorkbookFromMindmapList(
+        list.map((item, index) => {
+          if (item?.root) return item
+          return {
+            name: item?.name || item?.title || `画布 ${index + 1}`,
+            root: item
+          }
+        })
+      )
+      this.selectPromiseResolve(workbook)
       this.xmindCanvasSelectDialogVisible = false
       this.canvasList = []
       this.selectCanvas = 0

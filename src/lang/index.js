@@ -226,6 +226,7 @@ const zh = {
     "fileContentError": "文件内容有误",
     "importSuccess": "导入成功",
     "fileParsingFailed": "文件解析失败",
+    "importAllCanvases": "导入全部画布",
     "xmindCanvasSelectDialogTitle": "选择要导入的画布",
     "mdImportDialogTitle": "粘贴Markdown内容导入",
     "mdPlaceholder": "请输入Markdown格式的内容",
@@ -446,6 +447,15 @@ const zh = {
     "fileSaveFailed": "文件保存失败"
   },
   "edit": {
+    "sheetSwitched": "已切换画布",
+    "addSheet": "新建画布",
+    "sheetAdded": "已新建画布",
+    "sheetDeleted": "已删除画布",
+    "sheetDeleteLast": "至少保留一个画布",
+    "sheetDeleteConfirm": "确定删除该画布吗？",
+    "sheetDelete": "删除画布",
+    "sheetDuplicate": "复制当前画布",
+
     "newFeatureNoticeTitle": "新特性提醒",
     "newFeatureNoticeMessage": "本次更新支持了节点富文本编辑，但是存在一定缺陷，最主要的影响是导出为图片的时间和节点数量成正比，所以对导出需求比较依赖的话可以通过【基础样式】-【其他配置】-【是否开启节点富文本编辑】设置关掉富文本编辑模式。",
     "root": "根节点",

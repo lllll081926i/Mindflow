@@ -448,3 +448,14 @@ test('思维导图展开收起与适应画布快捷键可用', () => {
   assert.ok(configSource.includes('适应画布'))
   assert.ok(configSource.includes('回到根节点'))
 })
+
+
+test('思维导图编辑器提供多画布工作簿标签栏', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  const serviceSource = fs.readFileSync(path.resolve('src/services/mindmapWorkbook.js'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(editSource.includes('mindmapSheetBar'))
+  assert.ok(editSource.includes('switchMindmapSheetById'))
+  assert.ok(serviceSource.includes('ensureMindmapWorkbook'))
+  assert.ok(langSource.includes('sheetSwitched') || langSource.includes('sheetAdded'))
+})

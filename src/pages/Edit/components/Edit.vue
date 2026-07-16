@@ -1,6 +1,6 @@
 <template>
   <div
-    class="editContainer"
+    :class="['editContainer', { isDark }]"
     @dragenter.stop.prevent="onDragenter"
     @dragleave.stop.prevent
     @dragover.stop.prevent
@@ -14,6 +14,46 @@
           <el-button @click="$router.push('/home')">返回首页</el-button>
           <el-button type="primary" @click="retryInit">重试</el-button>
         </div>
+      </div>
+    </div>
+    <div v-if="mindmapSheets.length" class="mindmapSheetBar" @mousedown.stop>
+      <div class="mindmapSheetList">
+        <button
+          v-for="sheet in mindmapSheets"
+          :key="sheet.id"
+          type="button"
+          class="mindmapSheetTab"
+          :class="{ isActive: sheet.active }"
+          @click="switchMindmapSheetById(sheet.id)"
+          @dblclick.stop="startRenameMindmapSheet(sheet)"
+        >
+          <input
+            v-if="sheetEditingId === sheet.id"
+            ref="sheetRenameInput"
+            v-model.trim="sheetRenameDraft"
+            class="mindmapSheetRenameInput"
+            @click.stop
+            @keydown.enter.prevent="commitRenameMindmapSheet"
+            @keydown.esc.prevent="sheetEditingId = ''"
+            @blur="commitRenameMindmapSheet"
+          />
+          <span v-else>{{ sheet.name }}</span>
+          <em
+            v-if="mindmapSheets.length > 1"
+            class="mindmapSheetClose"
+            :title="$t('edit.sheetDelete')"
+            @click.stop="deleteMindmapSheetById(sheet.id)"
+          >×</em>
+        </button>
+      </div>
+      <div class="mindmapSheetActions">
+        <button type="button" class="mindmapSheetActionBtn" @click="addMindmapSheet(false)">+</button>
+        <button
+          type="button"
+          class="mindmapSheetActionBtn"
+          :title="$t('edit.sheetDuplicate')"
+          @click="addMindmapSheet(true)"
+        >⧉</button>
       </div>
     </div>
     <div
@@ -111,6 +151,15 @@ import NodeImgPreview from './NodeImgPreview.vue'
 import SidebarTrigger from './SidebarTrigger.vue'
 import { mapState } from 'pinia'
 import { createDefaultMindMapData } from '@/platform/shared/configSchema'
+import {
+  ensureMindmapWorkbook,
+  listMindmapSheets,
+  addMindmapSheet,
+  switchMindmapSheet,
+  renameMindmapSheet,
+  deleteMindmapSheet,
+  snapshotActiveMindmapSheet
+} from '@/services/mindmapWorkbook'
 import { showLoading, hideLoading } from '@/utils/loading'
 import {
   clearCurrentDataGetter,
@@ -522,6 +571,8 @@ export default {
   },
   data() {
     return {
+      sheetRenameDraft: '',
+      sheetEditingId: '',
       enableShowLoading: true,
       mindMap: null,
       mindMapData: null,
@@ -563,6 +614,17 @@ export default {
     }
   },
   computed: {
+    mindmapSheets() {
+      try {
+        return listMindmapSheets(this.mindMapData || getData())
+      } catch (_error) {
+        return []
+      }
+    },
+    activeMindmapSheetId() {
+      const active = this.mindmapSheets.find(item => item.active)
+      return active?.id || ''
+    },
     ...mapState(useSettingsStore, {
       localConfig: 'localConfig'
     }),
@@ -753,6 +815,8 @@ export default {
         'pasteOutlineFromClipboard',
         this.pasteOutlineFromClipboard
       )
+      this.$bus.$on('mindmapAddSheet', this.handleMindmapAddSheet)
+      this.$bus.$on('mindmapDuplicateSheet', this.handleMindmapDuplicateSheet)
       this.$bus.$on(
         'createAssociativeLine',
         this.handleCreateLineFromActiveNode
@@ -778,6 +842,8 @@ export default {
         'pasteOutlineFromClipboard',
         this.pasteOutlineFromClipboard
       )
+      this.$bus.$off('mindmapAddSheet', this.handleMindmapAddSheet)
+      this.$bus.$off('mindmapDuplicateSheet', this.handleMindmapDuplicateSheet)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)
@@ -1038,6 +1104,101 @@ export default {
       }
     },
 
+    persistActiveSheetSnapshot() {
+      if (!this.mindMap) return
+      const fullData = this.mindMap.getData(true)
+      this.mindMapData = snapshotActiveMindmapSheet(
+        {
+          ...(this.mindMapData || getData() || {}),
+          ...fullData
+        },
+        fullData
+      )
+      storeData(this.mindMapData)
+    },
+
+    async switchMindmapSheetById(sheetId) {
+      if (!sheetId || sheetId === this.activeMindmapSheetId) return
+      this.persistActiveSheetSnapshot()
+      const next = switchMindmapSheet(
+        this.mindMapData || getData(),
+        sheetId,
+        this.mindMap?.getData?.(true)
+      )
+      this.mindMapData = next
+      storeData(next)
+      await this.setData(next, { skipSave: true, configData: this.mindMapConfig })
+      this.$message.success(this.$t('edit.sheetSwitched'))
+    },
+
+    async addMindmapSheet(copyActive = false) {
+      this.persistActiveSheetSnapshot()
+      const next = addMindmapSheet(
+        this.mindMapData || getData(),
+        { copyActive },
+        this.mindMap?.getData?.(true)
+      )
+      this.mindMapData = next
+      storeData(next)
+      await this.setData(next, { skipSave: true, configData: this.mindMapConfig })
+      this.$message.success(this.$t('edit.sheetAdded'))
+    },
+
+    startRenameMindmapSheet(sheet) {
+      this.sheetEditingId = sheet?.id || ''
+      this.sheetRenameDraft = sheet?.name || ''
+      this.$nextTick(() => {
+        const input = this.$refs.sheetRenameInput
+        const el = Array.isArray(input) ? input[0] : input
+        el?.focus?.()
+        el?.select?.()
+      })
+    },
+
+    async commitRenameMindmapSheet() {
+      const sheetId = this.sheetEditingId
+      const name = this.sheetRenameDraft
+      this.sheetEditingId = ''
+      this.sheetRenameDraft = ''
+      if (!sheetId) return
+      this.persistActiveSheetSnapshot()
+      const next = renameMindmapSheet(
+        this.mindMapData || getData(),
+        sheetId,
+        name,
+        this.mindMap?.getData?.(true)
+      )
+      this.mindMapData = next
+      storeData(next)
+    },
+
+    async deleteMindmapSheetById(sheetId) {
+      if (!sheetId) return
+      if ((this.mindmapSheets || []).length <= 1) {
+        this.$message.warning(this.$t('edit.sheetDeleteLast'))
+        return
+      }
+      try {
+        await this.$confirm(
+          this.$t('edit.sheetDeleteConfirm'),
+          this.$t('edit.tip'),
+          { type: 'warning' }
+        )
+      } catch (_error) {
+        return
+      }
+      this.persistActiveSheetSnapshot()
+      const next = deleteMindmapSheet(
+        this.mindMapData || getData(),
+        sheetId,
+        this.mindMap?.getData?.(true)
+      )
+      this.mindMapData = next
+      storeData(next)
+      await this.setData(next, { skipSave: true, configData: this.mindMapConfig })
+      this.$message.success(this.$t('edit.sheetDeleted'))
+    },
+
     // 获取思维导图数据，实际应该调接口获取
     getData() {
       const nextMindMapData = getData()
@@ -1053,13 +1214,13 @@ export default {
         data.theme &&
         typeof data.theme === 'object'
       ) {
-        return data
+        return ensureMindmapWorkbook(data)
       }
       console.error(
         'Invalid mind map bootstrap data, fallback to default desktop data',
         data
       )
-      return createDefaultMindMapData()
+      return ensureMindmapWorkbook(createDefaultMindMapData())
     },
 
     clearPendingRootDataSave() {
@@ -1080,11 +1241,33 @@ export default {
       }
       const nextRootData = this.pendingRootData
       this.pendingRootData = null
-      storeData({ root: nextRootData })
+      try {
+        if (this.mindMapData?.sheets) {
+          storeData(this.mindMapData)
+        } else {
+          storeData({ root: nextRootData })
+        }
+      } catch (_error) {
+        storeData({ root: nextRootData })
+      }
     },
 
     scheduleRootDataSave(data) {
-      this.pendingRootData = data
+      // workbook root sync
+      try {
+        const base = this.mindMapData || getData() || {}
+        const next = snapshotActiveMindmapSheet(
+          {
+            ...base,
+            root: data
+          },
+          this.mindMap ? this.mindMap.getData(true) : { root: data }
+        )
+        this.mindMapData = next
+        this.pendingRootData = data
+      } catch (_error) {
+        this.pendingRootData = data
+      }
       if (this.storeRootTimer) {
         return
       }
@@ -1120,7 +1303,7 @@ export default {
     // 手动保存
     manualSave() {
       this.clearPendingRootDataSave()
-      storeData(this.mindMap.getData(true))
+      storeData(this.getCurrentMindMapData())
     },
 
     resolveMindMapContainerEl() {
@@ -1769,5 +1952,81 @@ export default {
       }
     }
   }
+}
+.mindmapSheetBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 8px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255,255,255,0.92);
+}
+.editContainer.editContainer.isDark .mindmapSheetBar {
+  background: rgba(24, 28, 34, 0.96);
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+.mindmapSheetList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+.mindmapSheetTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 180px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid rgba(15,23,42,0.08);
+  border-bottom: none;
+  background: rgba(15,23,42,0.03);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.mindmapSheetTab.isActive {
+  background: #fff;
+}
+.editContainer.editContainer.isDark .mindmapSheetTab.isActive {
+  background: #1c2128;
+}
+.mindmapSheetTab span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mindmapSheetClose {
+  font-style: normal;
+  opacity: 0.55;
+}
+.mindmapSheetClose:hover { opacity: 1; }
+.mindmapSheetRenameInput {
+  width: 110px;
+  height: 20px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.mindmapSheetActions {
+  display: flex;
+  gap: 4px;
+}
+.mindmapSheetActionBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(15,23,42,0.08);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
 }
 </style>
