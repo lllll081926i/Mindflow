@@ -786,7 +786,9 @@ export const flowchartShortcutKeyList = [
       { name: '复制一份', value: ctrl + ' + D' },
       { name: '快速克隆并连线', value: 'Alt + Shift + 方向键' },
       { name: '微调节点', value: '方向键' },
-      { name: '沿连线切换选中', value: ctrl + ' + 方向键' }
+      { name: '沿连线切换选中', value: ctrl + ' + 方向键' },
+      { name: '切换到父节点', value: ctrl + ' + Shift + ↑' },
+      { name: '切换兄弟节点', value: ctrl + ' + Shift + ←/→' }
     ]
   },
   {

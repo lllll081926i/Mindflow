@@ -2458,3 +2458,16 @@ test('流程图支持 L 连接双选节点，并支持连线直接输入编辑',
   assert.ok(configSource.includes('连接两个所选节点'))
   assert.ok(langSource.includes('linkSelectedSuccess'))
 })
+
+
+test('流程图支持父节点与兄弟节点键盘导航', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes('navigateParentNode'))
+  assert.ok(selectionSource.includes('navigateSiblingNode'))
+  assert.ok(configSource.includes('切换到父节点'))
+  assert.ok(configSource.includes('切换兄弟节点'))
+})

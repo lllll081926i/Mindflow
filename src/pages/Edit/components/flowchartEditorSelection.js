@@ -324,6 +324,14 @@ export const flowchartSelectionMethods = {
       // Ctrl/Cmd + Arrow: jump selection along graph structure (XMind-like topic nav)
       if (isMetaKey && this.selectedNodeIds.length === 1) {
         event.preventDefault()
+        if (event.shiftKey && event.key === 'ArrowUp') {
+          this.navigateParentNode()
+          return
+        }
+        if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+          this.navigateSiblingNode(event.key === 'ArrowRight' ? 1 : -1)
+          return
+        }
         this.navigateConnectedNode(event.key)
         return
       }
@@ -475,6 +483,61 @@ export const flowchartSelectionMethods = {
   getSelectedNodes() {
     const selectedSet = new Set(this.selectedNodeIds)
     return this.flowchartData.nodes.filter(node => selectedSet.has(node.id))
+  },
+
+  navigateParentNode() {
+    const currentId = this.selectedNodeIds[0]
+    if (!currentId) return false
+    const edges = Array.isArray(this.flowchartData?.edges) ? this.flowchartData.edges : []
+    const parents = edges
+      .filter(edge => edge.target === currentId)
+      .map(edge => edge.source)
+    if (!parents.length) return false
+    const parentId = parents[0]
+    this.selectedNodeIds = [parentId]
+    this.selectedEdgeId = ''
+    const node = this.flowchartNodeLookup?.get?.(parentId) ||
+      (this.flowchartData.nodes || []).find(item => item.id === parentId)
+    if (node && typeof this.centerViewportAt === 'function') {
+      this.centerViewportAt({
+        x: Number(node.x || 0) + Number(node.width || 0) / 2,
+        y: Number(node.y || 0) + Number(node.height || 0) / 2
+      })
+    }
+    return true
+  },
+
+  navigateSiblingNode(step = 1) {
+    const currentId = this.selectedNodeIds[0]
+    if (!currentId) return false
+    const edges = Array.isArray(this.flowchartData?.edges) ? this.flowchartData.edges : []
+    const nodes = Array.isArray(this.flowchartData?.nodes) ? this.flowchartData.nodes : []
+    const parents = edges.filter(edge => edge.target === currentId).map(edge => edge.source)
+    if (!parents.length) return false
+    const parentId = parents[0]
+    const siblings = edges
+      .filter(edge => edge.source === parentId)
+      .map(edge => edge.target)
+      .filter((id, index, list) => list.indexOf(id) === index)
+    siblings.sort((a, b) => {
+      const na = nodes.find(node => node.id === a)
+      const nb = nodes.find(node => node.id === b)
+      return Number(na?.y || 0) - Number(nb?.y || 0) || Number(na?.x || 0) - Number(nb?.x || 0)
+    })
+    const index = siblings.indexOf(currentId)
+    if (index < 0 || siblings.length < 2) return false
+    const nextIndex = (index + step + siblings.length) % siblings.length
+    const nextId = siblings[nextIndex]
+    this.selectedNodeIds = [nextId]
+    this.selectedEdgeId = ''
+    const node = nodes.find(item => item.id === nextId)
+    if (node && typeof this.centerViewportAt === 'function') {
+      this.centerViewportAt({
+        x: Number(node.x || 0) + Number(node.width || 0) / 2,
+        y: Number(node.y || 0) + Number(node.height || 0) / 2
+      })
+    }
+    return true
   },
 
   selectAllNodes() {
