@@ -2,7 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   isFreemindXml,
-  parseFreemindXml
+  parseFreemindXml,
+  serializeFreemindXml
 } from '../src/services/freemindParse.js'
 
 test('识别 FreeMind / Freeplane XML', () => {
@@ -30,4 +31,24 @@ test('解析 FreeMind 节点树、备注与链接', () => {
   assert.equal(data.root.children[0].children[1].data.hyperlink, 'https://example.com')
   assert.equal(data.root.children[1].data.note, '备注内容')
   assert.equal(data.root.data.note || '', '')
+})
+
+
+test('FreeMind 导出会序列化为可再导入的 .mm', () => {
+  const data = {
+    root: {
+      data: { text: '中心', note: '备注' },
+      children: [
+        { data: { text: 'A', hyperlink: 'https://a.test' }, children: [] }
+      ]
+    }
+  }
+  const xml = serializeFreemindXml(data)
+  assert.ok(xml.includes('<map'))
+  assert.ok(xml.includes('TEXT="中心"'))
+  assert.ok(xml.includes('LINK="https://a.test"'))
+  const back = parseFreemindXml(xml)
+  assert.equal(back.root.data.text, '中心')
+  assert.equal(back.root.data.note, '备注')
+  assert.equal(back.root.children[0].data.hyperlink, 'https://a.test')
 })

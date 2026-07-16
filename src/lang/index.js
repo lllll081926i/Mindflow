@@ -1060,6 +1060,7 @@ const zh = {
     "fileTypeSvg": "SVG 文件",
     "fileTypeJson": "JSON 文件",
     "fileTypeMd": "Markdown",
+    "fileTypeMm": "FreeMind",
     "fileTypeTxt": "TXT",
     "fileTypePdf": "PDF 文件",
     "statusDocumentLabel": "来源文档",
@@ -1070,6 +1071,7 @@ const zh = {
       "displayName": "思绪文件"
     },
     "formatNames": {
+      "mm": "FreeMind",
       "smm": "思绪文件",
       "png": "图片",
       "svg": "SVG",

@@ -20,7 +20,7 @@ const PERSISTED_EXPORT_FIELDS = [
 ]
 
 const baseFormats = [
-  ...((downTypeList.zh || []).filter(item => !['mm', 'xlsx'].includes(item.type))),
+  ...((downTypeList.zh || []).filter(item => !['xlsx'].includes(item.type))),
   {
     name: '高清PDF',
     type: 'pdf-hd',

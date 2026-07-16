@@ -238,6 +238,7 @@ import {
   serializeStoredDocumentContent
 } from '@/services/flowchartDocument'
 import { buildMindMapHtmlDocument, sanitizeSvgMarkup } from '@/services/htmlExport'
+import { serializeFreemindXml } from '@/services/freemindParse'
 import {
   validateFlowchartStructure,
   formatFlowchartValidationMessage
@@ -1282,7 +1283,30 @@ export default {
             exportPaddingY: Number(this.exportState.paddingY) || 0
           })
           this.advanceExportProgress(55, 'render')
-          if (this.exportState.exportType === 'html') {
+          if (this.exportState.exportType === 'mm') {
+            this.advanceExportProgress(60, 'compose')
+            const mindData =
+              typeof this.mindMap?.getData === 'function'
+                ? this.mindMap.getData()
+                : null
+            const content = serializeFreemindXml(mindData || {}, {
+              title: safeFileName
+            })
+            this.advanceExportProgress(84, 'save')
+            const fileRef = await platform.saveTextFileAs({
+              suggestedName: safeFileName,
+              content,
+              defaultPath: getLastDirectory(),
+              extension: 'mm',
+              name: this.$t('exportPage.fileTypeMm') || 'FreeMind',
+              mimeType: 'application/x-freemind'
+            })
+            if (!fileRef) {
+              this.finishExportProgress(false)
+              this.exporting = false
+              return
+            }
+          } else if (this.exportState.exportType === 'html') {
             const svgMarkup = await this.mindMap.export('svg', false, safeFileName)
             this.advanceExportProgress(72, 'compose')
             const htmlContent = buildMindMapHtmlDocument({

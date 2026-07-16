@@ -214,3 +214,71 @@ export const parseFreemindFile = async file => {
   error.i18nKey = 'import.fileParsingFailed'
   throw error
 }
+
+
+
+const escapeXml = value =>
+  String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+
+const renderNodeXml = (node, depth = 0) => {
+  const indent = '  '.repeat(depth + 1)
+  const text = escapeXml(
+    String(node?.data?.text || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim() || '分支主题'
+  )
+  const note = String(node?.data?.note || '').trim()
+  const link = String(node?.data?.hyperlink || node?.data?.link || '').trim()
+  const attrs = ['TEXT="' + text + '"']
+  if (link) attrs.push('LINK="' + escapeXml(link) + '"')
+  const children = Array.isArray(node?.children) ? node.children : []
+  const hasBody = note || children.length
+  if (!hasBody) {
+    return indent + '<node ' + attrs.join(' ') + '/>'
+  }
+  const lines = [indent + '<node ' + attrs.join(' ') + '>']
+  if (note) {
+    lines.push(
+      indent +
+        '  <richcontent TYPE="NOTE"><html><head></head><body><p>' +
+        escapeXml(note) +
+        '</p></body></html></richcontent>'
+    )
+  }
+  children.forEach(child => {
+    lines.push(renderNodeXml(child, depth + 1))
+  })
+  lines.push(indent + '</node>')
+  return lines.join(String.fromCharCode(10))
+}
+
+/**
+ * Serialize simple-mind-map data into FreeMind-compatible .mm XML.
+ */
+export const serializeFreemindXml = (mindMapData = {}, options = {}) => {
+  const root =
+    mindMapData?.root ||
+    (mindMapData?.data?.text
+      ? mindMapData
+      : {
+          data: { text: options.title || '思维导图' },
+          children: []
+        })
+  const body = renderNodeXml(root, 0)
+  return (
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    String.fromCharCode(10) +
+    '<map version="1.0.1">' +
+    String.fromCharCode(10) +
+    body +
+    String.fromCharCode(10) +
+    '</map>' +
+    String.fromCharCode(10)
+  )
+}

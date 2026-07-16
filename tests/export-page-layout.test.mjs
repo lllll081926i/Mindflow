@@ -311,3 +311,12 @@ test('流程图导出支持 Markdown 与 TXT 大纲', () => {
   assert.ok(exportPageSource.includes("exportType === 'md'"))
   assert.ok(documentSource.includes('convertFlowchartToOutlineText'))
 })
+
+
+test('导图导出支持 FreeMind .mm 格式', () => {
+  const exportStateSource = fs.readFileSync(path.resolve('src/services/exportState.js'), 'utf8')
+  const exportPageSource = fs.readFileSync(path.resolve('src/pages/Export/Index.vue'), 'utf8')
+  assert.ok(!exportStateSource.includes("!['mm', 'xlsx']"))
+  assert.ok(exportPageSource.includes("exportState.exportType === 'mm'") || exportPageSource.includes("exportType === 'mm'"))
+  assert.ok(exportPageSource.includes('serializeFreemindXml'))
+})
