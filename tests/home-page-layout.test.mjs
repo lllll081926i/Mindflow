@@ -387,4 +387,6 @@ test('首页支持拖放打开导图文件', () => {
   assert.ok(source.includes('homeDragMask'))
   assert.ok(source.includes('normalizeOpenableDocumentContent'))
   assert.ok(langSource.includes('dragOpenTip'))
+  assert.ok(source.includes('parseXmindFile') || source.includes("xmind"))
+  assert.ok(langSource.includes('dragOpenXmindMultiTip'))
 })

@@ -1431,27 +1431,43 @@ export default {
       const file = event?.dataTransfer?.files?.[0]
       if (!file) return
       const name = String(file.name || '').toLowerCase()
-      if (/.xmind$/.test(name)) {
-        this.$message.info(this.$t('home.dragOpenXmindTip'))
-        return
-      }
-      if (!/.(smm|json|md|mm)$/.test(name)) {
+      if (!/\.(smm|json|md|mm|xmind)$/.test(name)) {
         this.$message.warning(this.$t('home.dragOpenUnsupported'))
         return
       }
       if (this.busy) return
       this.busy = true
       try {
-        const content = await new Promise((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onerror = () => reject(new Error(this.$t('home.actionFailed')))
-          reader.onload = () => resolve(String(reader.result || ''))
-          reader.readAsText(file)
-        })
-        const workspaceActions = await loadWorkspaceActions()
-        const parsed = workspaceActions.normalizeOpenableDocumentContent(content, {
-          name: file.name
-        })
+        let parsed
+        if (/\.xmind$/.test(name)) {
+          const xmindMod = await import('simple-mind-map/src/parse/xmind.js')
+          const xmind = xmindMod.default || xmindMod
+          const mindMapData = await xmind.parseXmindFile(file, content => {
+            if (!Array.isArray(content) || content.length <= 1) {
+              return Array.isArray(content) ? content[0] : content
+            }
+            this.$message.info(this.$t('home.dragOpenXmindMultiTip'))
+            return content[0]
+          })
+          parsed = {
+            documentMode: 'mindmap',
+            data: mindMapData,
+            mindMapData,
+            mindMapConfig: null,
+            isFullDataFile: true
+          }
+        } else {
+          const content = await new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onerror = () => reject(new Error(this.$t('home.actionFailed')))
+            reader.onload = () => resolve(String(reader.result || ''))
+            reader.readAsText(file)
+          })
+          const workspaceActions = await loadWorkspaceActions()
+          parsed = workspaceActions.normalizeOpenableDocumentContent(content, {
+            name: file.name
+          })
+        }
         const { saveBootstrapStatePatch } = await import('@/platform')
         if (parsed.documentMode === 'flowchart') {
           await saveBootstrapStatePatch({
@@ -1503,6 +1519,7 @@ export default {
         this.busy = false
       }
     },
+
     async toggleAppearance() {
       if (this.busy) return
       try {
