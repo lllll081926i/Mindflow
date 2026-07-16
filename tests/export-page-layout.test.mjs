@@ -297,3 +297,17 @@ test('导出页提供分阶段进度反馈', () => {
   assert.match(langSource, /"exportStageWorking"/)
   assert.match(langSource, /"exportStage"/)
 })
+
+
+test('流程图导出支持 Markdown 与 TXT 大纲', () => {
+  const exportStateSource = fs.readFileSync(path.resolve('src/services/exportState.js'), 'utf8')
+  const exportPageSource = fs.readFileSync(path.resolve('src/pages/Export/Index.vue'), 'utf8')
+  const documentSource = fs.readFileSync(
+    path.resolve('src/services/flowchart/parts/40-document.js'),
+    'utf8'
+  )
+  assert.match(exportStateSource, /type: 'md'/)
+  assert.match(exportStateSource, /type: 'txt'/)
+  assert.ok(exportPageSource.includes("exportType === 'md'"))
+  assert.ok(documentSource.includes('convertFlowchartToOutlineText'))
+})

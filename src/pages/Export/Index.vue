@@ -232,6 +232,7 @@ import { getCurrentFileRef, getLastDirectory } from '@/services/documentSession'
 import {
   DEFAULT_FLOWCHART_TITLE,
   buildFlowchartSvgMarkup,
+  convertFlowchartToOutlineText,
   createDefaultFlowchartData,
   getFlowchartExportBounds,
   serializeStoredDocumentContent
@@ -1105,6 +1106,29 @@ export default {
           extension: 'json',
           name: this.$t('exportPage.fileTypeJson'),
           mimeType: 'application/json;charset=utf-8'
+        })
+        return
+      }
+      if (exportType === 'md' || exportType === 'txt') {
+        this.advanceExportProgress(68, 'compose')
+        const content = convertFlowchartToOutlineText(this.getFlowchartData(), {
+          format: exportType,
+          title: this.getFlowchartData()?.title || safeFileName
+        })
+        this.advanceExportProgress(84, 'save')
+        await platform.saveTextFileAs({
+          suggestedName: safeFileName,
+          content,
+          defaultPath: this.currentDocument?.path || '',
+          extension: exportType,
+          name:
+            exportType === 'md'
+              ? this.$t('exportPage.fileTypeMd')
+              : this.$t('exportPage.fileTypeTxt'),
+          mimeType:
+            exportType === 'md'
+              ? 'text/markdown;charset=utf-8'
+              : 'text/plain;charset=utf-8'
         })
         return
       }

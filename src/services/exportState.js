@@ -60,6 +60,16 @@ const flowchartFormats = [
     name: 'PDF',
     type: 'pdf',
     desc: '导出适合打印和分享的 PDF'
+  },
+  {
+    name: 'Markdown',
+    type: 'md',
+    desc: '导出流程大纲为 Markdown，便于协作与二次编辑'
+  },
+  {
+    name: 'TXT',
+    type: 'txt',
+    desc: '导出流程大纲为纯文本'
   }
 ]
 

@@ -1050,6 +1050,8 @@ const zh = {
     "fileTypePng": "PNG 文件",
     "fileTypeSvg": "SVG 文件",
     "fileTypeJson": "JSON 文件",
+    "fileTypeMd": "Markdown",
+    "fileTypeTxt": "TXT",
     "fileTypePdf": "PDF 文件",
     "statusDocumentLabel": "来源文档",
     "statusTargetLabel": "导出目标",

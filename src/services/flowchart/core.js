@@ -4753,6 +4753,41 @@ export const convertFlowchartToMindMap = (flowchartData = {}, options = {}) => {
   }
 }
 
+export const convertFlowchartToOutlineText = (
+  flowchartData = {},
+  { format = 'md', title = '' } = {}
+) => {
+  const mind = convertFlowchartToMindMap(flowchartData, { title })
+  const lines = []
+  const walk = (node, depth) => {
+    if (!node) return
+    const text = stripHtmlText(node?.data?.text || '') || '未命名'
+    if (format === 'txt') {
+      lines.push(`${'  '.repeat(depth)}- ${text}`)
+    } else {
+      if (depth === 0) lines.push(`# ${text}`)
+      else if (depth === 1) lines.push(`## ${text}`)
+      else if (depth === 2) lines.push(`### ${text}`)
+      else lines.push(`${'  '.repeat(Math.max(0, depth - 3))}- ${text}`)
+    }
+    const note = stripHtmlText(node?.data?.note || '')
+    if (note) {
+      if (format === 'txt') {
+        lines.push(`${'  '.repeat(depth + 1)}${note}`)
+      } else {
+        lines.push('')
+        lines.push(note)
+        lines.push('')
+      }
+    }
+    ;(Array.isArray(node.children) ? node.children : []).forEach(child =>
+      walk(child, depth + 1)
+    )
+  }
+  walk(mind.root, 0)
+  return lines.join('\n').trim() + '\n'
+}
+
 export const normalizeFlowchartAiResult = result => {
   const parsed =
     typeof result === 'string'
