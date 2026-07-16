@@ -365,6 +365,16 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + A'
       },
       {
+        icon: 'iconpainter',
+        name: '格式刷',
+        value: ctrl + ' + Shift + P'
+      },
+      {
+        icon: 'iconwaikuang',
+        name: '添加外框',
+        value: ctrl + ' + Shift + G'
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`

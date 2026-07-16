@@ -1228,6 +1228,54 @@ export default {
           event.preventDefault()
           this.$bus.$emit('createAssociativeLine')
         }
+        return
+      }
+      // Ctrl+Shift+P format painter
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'p' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.$bus.$emit('startPainter')
+        }
+        return
+      }
+      // Ctrl+Shift+G outer frame
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'g' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.$bus.$emit('execCommand', 'ADD_OUTER_FRAME')
+        }
+        return
+      }
+      // Ctrl+G summary/generalization
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        event.key?.toLowerCase() === 'g' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.$bus.$emit('execCommand', 'ADD_GENERALIZATION')
+        }
       }
     },
 

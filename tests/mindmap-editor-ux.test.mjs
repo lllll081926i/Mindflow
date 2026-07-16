@@ -397,3 +397,15 @@ test('思维导图图片与关联线快捷键可用', () => {
   assert.ok(configSource.includes('编辑图片'))
   assert.ok(configSource.includes('创建关联线'))
 })
+
+
+test('思维导图格式刷/外框/概要快捷键可用', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 'p'"))
+  assert.ok(toolbarSource.includes('startPainter'))
+  assert.ok(toolbarSource.includes('ADD_OUTER_FRAME'))
+  assert.ok(toolbarSource.includes('ADD_GENERALIZATION'))
+  assert.ok(configSource.includes('格式刷'))
+  assert.ok(configSource.includes('添加外框'))
+})
