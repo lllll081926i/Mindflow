@@ -433,3 +433,18 @@ test('思维导图导入与专注模式快捷键可用', () => {
   assert.ok(configSource.includes('打开导入'))
   assert.ok(configSource.includes('切换专注模式'))
 })
+
+
+test('思维导图展开收起与适应画布快捷键可用', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes('EXPAND_ALL'))
+  assert.ok(toolbarSource.includes('UNEXPAND_ALL'))
+  assert.ok(toolbarSource.includes('FIT_CANVAS'))
+  assert.ok(toolbarSource.includes('RETURN_CENTER'))
+  assert.ok(toolbarSource.includes('selectAttachment'))
+  assert.ok(configSource.includes('展开全部主题'))
+  assert.ok(configSource.includes('收起全部主题'))
+  assert.ok(configSource.includes('适应画布'))
+  assert.ok(configSource.includes('回到根节点'))
+})

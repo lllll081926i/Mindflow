@@ -400,6 +400,26 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + F'
       },
       {
+        icon: 'iconzhankai',
+        name: '展开全部主题',
+        value: ctrl + ' + Shift + E'
+      },
+      {
+        icon: 'iconshouqi',
+        name: '收起全部主题',
+        value: ctrl + ' + Shift + W'
+      },
+      {
+        icon: 'iconfull',
+        name: '适应画布',
+        value: ctrl + ' + Shift + H'
+      },
+      {
+        icon: 'iconroot',
+        name: '回到根节点',
+        value: ctrl + ' + Shift + B'
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`

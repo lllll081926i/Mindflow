@@ -1342,6 +1342,66 @@ export default {
           event.preventDefault()
           setActiveSidebar('formulaSidebar')
         }
+        return
+      }
+      // Ctrl+Shift+E expand all
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'e' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('EXPAND_ALL')
+        return
+      }
+      // Ctrl+Shift+W collapse all
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'w' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('UNEXPAND_ALL', true, '')
+        return
+      }
+      // Ctrl+Shift+H fit canvas / return center alternates with Fit then center if needed
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'h' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('FIT_CANVAS')
+        return
+      }
+      // Ctrl+Shift+B back to root center
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'b' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('RETURN_CENTER')
+        return
+      }
+      // Ctrl+Shift+U attachment
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'u' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.$bus.$emit('selectAttachment', activeNodes)
+        }
       }
     },
 
