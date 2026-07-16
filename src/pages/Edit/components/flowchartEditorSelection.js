@@ -412,12 +412,13 @@ export const flowchartSelectionMethods = {
     if (
       !isMetaKey &&
       !event.altKey &&
-      !event.shiftKey &&
       event.key.toLowerCase() === 'l' &&
       this.selectedNodeIds.length === 2
     ) {
       event.preventDefault()
-      const [sourceId, targetId] = this.selectedNodeIds
+      const [firstId, secondId] = this.selectedNodeIds
+      const sourceId = event.shiftKey ? secondId : firstId
+      const targetId = event.shiftKey ? firstId : secondId
       if (typeof this.ensureFlowchartEdge === 'function') {
         const edge = this.ensureFlowchartEdge(sourceId, targetId)
         if (edge?.id) {

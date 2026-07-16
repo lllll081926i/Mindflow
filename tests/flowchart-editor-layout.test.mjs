@@ -2524,3 +2524,14 @@ test('框选节点按从上到下从左到右稳定排序', () => {
   assert.ok(viewportSource.includes('Keep a stable drafting order'))
   assert.ok(viewportSource.includes('return ay - by'))
 })
+
+
+test('流程图支持 Shift+L 反向连接双选节点', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes('event.shiftKey ? secondId : firstId'))
+  assert.ok(configSource.includes('反向连接两个所选节点'))
+})
