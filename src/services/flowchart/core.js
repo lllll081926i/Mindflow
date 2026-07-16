@@ -479,7 +479,7 @@ const FLOWCHART_TEMPLATES = {
       createFlowchartNode({ id: 'node-start', type: 'start', text: '告警触发', note: '流程起点：明确触发条件', x: 120, y: 120 }),
       createFlowchartNode({ id: 'node-triage', type: 'process', text: '初步分级', x: 120, y: 236 }),
       createFlowchartNode({ id: 'node-major', type: 'decision', text: '重大故障？', x: 120, y: 360, width: 168, height: 92 }),
-      createFlowchartNode({ id: 'node-warroom', type: 'process', text: '建立响应群', x: 380, y: 360 }),
+      createFlowchartNode({ id: 'node-warroom', type: 'process', text: '建立响应群', note: '应急响应需明确指挥与同步节奏', x: 380, y: 360 }),
       createFlowchartNode({ id: 'node-fix', type: 'process', text: '止血修复', x: 380, y: 500 }),
       createFlowchartNode({ id: 'node-normal', type: 'process', text: '常规处理', x: 120, y: 516 }),
       createFlowchartNode({ id: 'node-review', type: 'input', text: '复盘记录', note: '决策点：记录判断依据与审批标准', x: 380, y: 640 })
@@ -497,9 +497,9 @@ const FLOWCHART_TEMPLATES = {
   dataPipeline: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-source', type: 'input', text: '数据源', x: 120, y: 120 }),
+      createFlowchartNode({ id: 'node-source', type: 'input', text: '数据源', note: '明确数据来源与权限', x: 120, y: 120 }),
       createFlowchartNode({ id: 'node-ingest', type: 'process', text: '采集入湖', x: 120, y: 236 }),
-      createFlowchartNode({ id: 'node-quality', type: 'decision', text: '质量通过？', x: 120, y: 360, width: 168, height: 92 }),
+      createFlowchartNode({ id: 'node-quality', type: 'decision', text: '质量通过？', note: '质量门禁：不合格回流修复', x: 120, y: 360, width: 168, height: 92 }),
       createFlowchartNode({ id: 'node-clean', type: 'process', text: '清洗转换', x: 380, y: 360 }),
       createFlowchartNode({ id: 'node-repair', type: 'process', text: '修复重跑', x: 120, y: 516 }),
       createFlowchartNode({ id: 'node-serve', type: 'process', text: '服务发布', x: 380, y: 500 }),
@@ -541,9 +541,9 @@ const FLOWCHART_TEMPLATES = {
     title,
     nodes: [
       createFlowchartNode({ id: 'node-request', type: 'start', text: '提交需求', note: '跨部门需求入口，补充背景与优先级', x: 120, y: 100 }),
-      createFlowchartNode({ id: 'node-product', type: 'process', text: '产品评估', x: 120, y: 250 }),
-      createFlowchartNode({ id: 'node-design', type: 'process', text: '设计确认', x: 420, y: 250 }),
-      createFlowchartNode({ id: 'node-tech', type: 'process', text: '技术评审', x: 720, y: 250 }),
+      createFlowchartNode({ id: 'node-product', type: 'process', text: '产品评估', note: '产品评估关注价值与优先级', x: 120, y: 250 }),
+      createFlowchartNode({ id: 'node-design', type: 'process', text: '设计确认', note: '设计确认关注体验与约束', x: 420, y: 250 }),
+      createFlowchartNode({ id: 'node-tech', type: 'process', text: '技术评审', note: '技术评审关注可行性与成本', x: 720, y: 250 }),
       createFlowchartNode({ id: 'node-approve', type: 'decision', text: '跨部门通过？', note: '审批节点：补充审批人与时限', x: 420, y: 410, width: 188, height: 92 }),
       createFlowchartNode({ id: 'node-rework', type: 'process', text: '补充材料', x: 120, y: 590 }),
       createFlowchartNode({ id: 'node-schedule', type: 'process', text: '排期执行', x: 720, y: 590 }),
@@ -566,12 +566,12 @@ const FLOWCHART_TEMPLATES = {
     title,
     nodes: [
       createFlowchartNode({ id: 'node-ticket', type: 'start', text: '收到故障工单', note: '记录故障来源与紧急程度', x: 120, y: 100 }),
-      createFlowchartNode({ id: 'node-l1', type: 'process', text: 'L1 初步排查', x: 120, y: 250 }),
+      createFlowchartNode({ id: 'node-l1', type: 'process', text: 'L1 初步排查', note: '一线排查优先恢复可用性', x: 120, y: 250 }),
       createFlowchartNode({ id: 'node-severity', type: 'decision', text: '影响范围升级？', note: '升级前同步影响面与客户预期', x: 120, y: 410, width: 188, height: 92 }),
-      createFlowchartNode({ id: 'node-l2', type: 'process', text: 'L2 深入诊断', x: 420, y: 410 }),
+      createFlowchartNode({ id: 'node-l2', type: 'process', text: 'L2 深入诊断', note: '二线聚焦根因与修复方案', x: 420, y: 410 }),
       createFlowchartNode({ id: 'node-comm', type: 'input', text: '同步客户状态', x: 740, y: 410 }),
-      createFlowchartNode({ id: 'node-warroom', type: 'process', text: '启动应急响应', x: 420, y: 590 }),
-      createFlowchartNode({ id: 'node-recover', type: 'process', text: '恢复服务', x: 740, y: 590 }),
+      createFlowchartNode({ id: 'node-warroom', type: 'process', text: '启动应急响应', note: '应急响应需明确指挥与同步节奏', x: 420, y: 590 }),
+      createFlowchartNode({ id: 'node-recover', type: 'process', text: '恢复服务', note: '恢复后补充验证与监控', x: 740, y: 590 }),
       createFlowchartNode({ id: 'node-postmortem', type: 'end', text: '复盘归档', x: 740, y: 740 })
     ],
     edges: [
@@ -637,7 +637,7 @@ const FLOWCHART_TEMPLATES = {
         height: 92
       }),
       createFlowchartNode({ id: 'node-rfq', type: 'process', text: '询价比选', x: 420, y: 376 }),
-      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同审批', x: 700, y: 376 }),
+      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同审批', note: '合同签署核对权责与交付', x: 700, y: 376 }),
       createFlowchartNode({ id: 'node-purchase', type: 'process', text: '下单采购', x: 700, y: 544 }),
       createFlowchartNode({ id: 'node-receive', type: 'end', text: '到货验收', x: 700, y: 688 })
     ],
@@ -661,12 +661,12 @@ const FLOWCHART_TEMPLATES = {
     title,
     nodes: [
       createFlowchartNode({ id: 'node-lead', type: 'start', text: '线索进入', note: '线索来源与渠道标记', x: 120, y: 100 }),
-      createFlowchartNode({ id: 'node-qualify', type: 'process', text: '线索筛选', x: 120, y: 250 }),
-      createFlowchartNode({ id: 'node-demo', type: 'process', text: '方案演示', x: 420, y: 250 }),
+      createFlowchartNode({ id: 'node-qualify', type: 'process', text: '线索筛选', note: '筛选有效线索，避免无效演示', x: 120, y: 250 }),
+      createFlowchartNode({ id: 'node-demo', type: 'process', text: '方案演示', note: '演示聚焦痛点与方案匹配', x: 420, y: 250 }),
       createFlowchartNode({ id: 'node-intent', type: 'decision', text: '客户有明确意向？', note: '意向判断决定报价或继续培育', x: 740, y: 238, width: 196, height: 92 }),
-      createFlowchartNode({ id: 'node-proposal', type: 'process', text: '报价提案', x: 740, y: 430 }),
+      createFlowchartNode({ id: 'node-proposal', type: 'process', text: '报价提案', note: '报价提案明确边界与条件', x: 740, y: 430 }),
       createFlowchartNode({ id: 'node-follow', type: 'process', text: '继续跟进', x: 420, y: 590 }),
-      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同签署', x: 1020, y: 430 }),
+      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同签署', note: '合同签署核对权责与交付', x: 1020, y: 430 }),
       createFlowchartNode({ id: 'node-close', type: 'end', text: '成交回款', note: '确认回款与交接完成', x: 1020, y: 590 })
     ],
     edges: [
@@ -691,19 +691,19 @@ const FLOWCHART_TEMPLATES = {
       createFlowchartNode({ id: 'node-estimate', type: 'process', text: '成本评估', x: 1180, y: 110 }),
       createFlowchartNode({ id: 'node-approve', type: 'decision', text: '审批通过？', note: '审批节点：补充审批人与时限', x: 1460, y: 98, width: 188, height: 92 }),
 
-      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同确认', x: 100, y: 300 }),
+      createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同确认', note: '合同签署核对权责与交付', x: 100, y: 300 }),
       createFlowchartNode({ id: 'node-resource', type: 'process', text: '资源排期', x: 360, y: 300 }),
       createFlowchartNode({ id: 'node-procure', type: 'process', text: '采购准备', x: 620, y: 300 }),
       createFlowchartNode({ id: 'node-vendor', type: 'decision', text: '供应就绪？', x: 900, y: 288, width: 188, height: 92 }),
       createFlowchartNode({ id: 'node-kickoff', type: 'process', text: '项目启动', x: 1180, y: 300 }),
       createFlowchartNode({ id: 'node-plan', type: 'process', text: '交付计划', x: 1460, y: 300 }),
 
-      createFlowchartNode({ id: 'node-build', type: 'process', text: '实施配置', x: 100, y: 490 }),
+      createFlowchartNode({ id: 'node-build', type: 'process', text: '实施配置', note: '实施配置保留变更记录', x: 100, y: 490 }),
       createFlowchartNode({ id: 'node-integrate', type: 'process', text: '系统联调', x: 360, y: 490 }),
       createFlowchartNode({ id: 'node-data', type: 'input', text: '数据导入', x: 620, y: 490 }),
       createFlowchartNode({ id: 'node-qa', type: 'decision', text: '验收通过？', x: 900, y: 478, width: 188, height: 92 }),
       createFlowchartNode({ id: 'node-training', type: 'process', text: '用户培训', x: 1180, y: 490 }),
-      createFlowchartNode({ id: 'node-live', type: 'process', text: '上线切换', x: 1460, y: 490 }),
+      createFlowchartNode({ id: 'node-live', type: 'process', text: '上线切换', note: '上线切换准备回滚预案', x: 1460, y: 490 }),
 
       createFlowchartNode({ id: 'node-monitor', type: 'process', text: '运行监控', x: 100, y: 680 }),
       createFlowchartNode({ id: 'node-support', type: 'process', text: '问题响应', x: 360, y: 680 }),

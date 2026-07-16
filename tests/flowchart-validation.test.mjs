@@ -58,3 +58,23 @@ test('流程自动修复会补齐起止并连接悬空节点', () => {
   assert.equal(plan.after.summary.danglingEdgeCount, 0)
   assert.equal(plan.after.summary.floatingCount, 0)
 })
+
+
+test('自动修复按最近路径串接悬空节点，避免对起止星型过度连线', () => {
+  const plan = buildFlowchartAutofixPlan({
+    nodes: [
+      { id: 'a', type: 'process', text: 'A', x: 0, y: 0, width: 120, height: 60 },
+      { id: 'b', type: 'process', text: 'B', x: 200, y: 0, width: 120, height: 60 },
+      { id: 'c', type: 'process', text: 'C', x: 400, y: 0, width: 120, height: 60 }
+    ],
+    edges: []
+  })
+  const edges = plan.flowchartData.edges
+  // should chain a->b and b->c rather than start->each and each->end only
+  const hasChain =
+    edges.some(e => e.source === 'a' && e.target === 'b') &&
+    edges.some(e => e.source === 'b' && e.target === 'c')
+  assert.equal(hasChain, true)
+  assert.ok(plan.actions.some(a => a.code === 'connect-floating' || a.code === 'chain-floating' || a.code === 'connect-start'))
+  assert.equal(plan.after.summary.floatingCount, 0)
+})

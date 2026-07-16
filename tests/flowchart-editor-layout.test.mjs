@@ -1944,6 +1944,8 @@ test('流程图模板关键节点带有默认备注说明', () => {
   )
   assert.match(templateSource, /note: '流程起点：明确触发条件'/)
   assert.match(templateSource, /note: '流程终点：确认完成标准'/)
+  assert.match(templateSource, /note: '产品评估关注价值与优先级'/)
+  assert.match(templateSource, /note: '一线排查优先恢复可用性'/)
 })
 
 
@@ -1963,4 +1965,17 @@ test('流程图提供校验结果面板与一键修复入口', () => {
   assert.match(editorSource, /key: 'autofix'/)
   assert.match(styleSource, /.flowchartValidationPanel/)
   assert.match(langSource, /"autofixStructure"/)
+})
+
+
+test('流程图校验面板支持问题多选定位与全选问题节点', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /highlightAllValidationNodes/)
+  assert.match(editorSource, /selectedValidationIssueKey/)
+  assert.match(editorSource, /shiftKey|ctrlKey|metaKey/)
+  assert.match(langSource, /"validateSelectAllIssues"/)
 })

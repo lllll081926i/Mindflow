@@ -181,3 +181,13 @@ test('首页流程图模板中心覆盖升级销售与审核场景', () => {
   assert.match(langSource, /"starterFlowSales"/)
   assert.match(langSource, /"starterFlowReviewFlow"/)
 })
+
+
+test('首页导图模板中心覆盖商业计划与知识管理场景', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /createMindMapScenario\('business'\)/)
+  assert.match(source, /createMindMapScenario\('knowledge'\)/)
+  assert.match(langSource, /"starterMindMapBusiness"/)
+  assert.match(langSource, /"starterMindMapKnowledge"/)
+})

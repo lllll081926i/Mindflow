@@ -212,6 +212,24 @@
               type="button"
               class="starterCard"
               :disabled="busy"
+              @click="createMindMapScenario('business')"
+            >
+              <strong>{{ $t('home.starterMindMapBusiness') }}</strong>
+              <span>{{ $t('home.starterMindMapBusinessDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapScenario('knowledge')"
+            >
+              <strong>{{ $t('home.starterMindMapKnowledge') }}</strong>
+              <span>{{ $t('home.starterMindMapKnowledgeDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
               <strong>{{ $t('home.starterFlowApproval') }}</strong>
@@ -795,6 +813,67 @@ export default {
             children: [
               { data: { text: '可落地行动' }, children: [] },
               { data: { text: '关联项目' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'business') {
+        data.root.data.text = '商业计划'
+        data.root.children = [
+          {
+            data: { text: '市场与用户' },
+            children: [
+              { data: { text: '目标用户' }, children: [] },
+              { data: { text: '核心痛点' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '产品方案' },
+            children: [
+              { data: { text: '价值主张' }, children: [] },
+              { data: { text: '关键功能' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '增长与商业' },
+            children: [
+              { data: { text: '获客路径' }, children: [] },
+              { data: { text: '收入模型' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '里程碑' },
+            children: [
+              { data: { text: 'MVP' }, children: [] },
+              { data: { text: '验证目标' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'knowledge') {
+        data.root.data.text = '知识管理'
+        data.root.children = [
+          {
+            data: { text: '知识采集' },
+            children: [
+              { data: { text: '来源清单' }, children: [] },
+              { data: { text: '摘录规范' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '知识整理' },
+            children: [
+              { data: { text: '主题分类' }, children: [] },
+              { data: { text: '标签体系' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '知识应用' },
+            children: [
+              { data: { text: '复用场景' }, children: [] },
+              { data: { text: '输出作品' }, children: [] }
             ]
           }
         ]

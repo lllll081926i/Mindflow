@@ -103,8 +103,11 @@
           :key="issue.code + '-' + index"
           type="button"
           class="flowchartValidationItem"
-          :class="'is-' + issue.severity"
-          @click="focusFlowchartValidationIssue(issue)"
+          :class="[
+            'is-' + issue.severity,
+            { isActive: selectedValidationIssueKey === issue.code + '-' + index }
+          ]"
+          @click="focusFlowchartValidationIssue(issue, index, $event)"
         >
           <span class="flowchartValidationSeverity">{{
             issue.severity === 'error'
@@ -120,6 +123,9 @@
       <div class="flowchartValidationActions">
         <button type="button" class="flowchartValidationAction" @click="validateCurrentFlowchart({ openPanel: true })">
           {{ $t('flowchart.validateRefresh') }}
+        </button>
+        <button type="button" class="flowchartValidationAction" @click="highlightAllValidationNodes">
+          {{ $t('flowchart.validateSelectAllIssues') }}
         </button>
         <button type="button" class="flowchartValidationAction isPrimary" @click="autofixCurrentFlowchart">
           {{ $t('flowchart.autofixStructure') }}
@@ -543,6 +549,8 @@ export default {
       flowchartShortcutVisible: false,
       flowchartValidationVisible: false,
       flowchartValidationResult: null,
+      selectedValidationIssueKey: '',
+      validationHighlightNodeIds: [],
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
@@ -1094,30 +1102,62 @@ export default {
     closeFlowchartValidationPanel() {
       this.flowchartValidationVisible = false
     },
-    focusFlowchartValidationIssue(issue) {
+    focusFlowchartValidationIssue(issue, index = 0, event = null) {
       if (!issue) return
-      if (Array.isArray(issue.nodeIds) && issue.nodeIds.length) {
-        this.selectedNodeIds = [...issue.nodeIds]
-        this.selectedEdgeId = ''
-        const node = this.flowchartNodeLookup.get(issue.nodeIds[0])
-        if (node && typeof this.centerViewportAt === 'function') {
-          this.centerViewportAt({
-            x: Number(node.x || 0) + Number(node.width || 0) / 2,
-            y: Number(node.y || 0) + Number(node.height || 0) / 2
-          })
+      this.selectedValidationIssueKey = issue.code + '-' + index
+      const append = !!(event?.shiftKey || event?.ctrlKey || event?.metaKey)
+      let nodeIds = Array.isArray(issue.nodeIds) ? [...issue.nodeIds] : []
+      if (!nodeIds.length) {
+        if (issue.code === 'missing-start') {
+          const start = (this.flowchartData.nodes || []).find(n => n.type === 'start')
+          if (start) nodeIds = [start.id]
+        } else if (issue.code === 'missing-end') {
+          const end = (this.flowchartData.nodes || []).find(n => n.type === 'end')
+          if (end) nodeIds = [end.id]
         }
-        return
       }
-      // generic missing start/end focus
-      if (issue.code === 'missing-start') {
-        const start = (this.flowchartData.nodes || []).find(n => n.type === 'start')
-        if (start) this.selectedNodeIds = [start.id]
-      }
-      if (issue.code === 'missing-end') {
-        const end = (this.flowchartData.nodes || []).find(n => n.type === 'end')
-        if (end) this.selectedNodeIds = [end.id]
+      if (!nodeIds.length) return
+      this.selectedNodeIds = append
+        ? Array.from(new Set([...(this.selectedNodeIds || []), ...nodeIds]))
+        : nodeIds
+      this.selectedEdgeId = ''
+      this.validationHighlightNodeIds = [...this.selectedNodeIds]
+      const node = this.flowchartNodeLookup.get(nodeIds[0])
+      if (node && typeof this.centerViewportAt === 'function') {
+        this.centerViewportAt({
+          x: Number(node.x || 0) + Number(node.width || 0) / 2,
+          y: Number(node.y || 0) + Number(node.height || 0) / 2
+        })
       }
     },
+    highlightAllValidationNodes() {
+      const issues = this.flowchartValidationResult?.issues || []
+      const nodeIds = []
+      issues.forEach(issue => {
+        if (Array.isArray(issue.nodeIds)) nodeIds.push(...issue.nodeIds)
+      })
+      // include missing start/end if exist after previous autofix attempts
+      const start = (this.flowchartData.nodes || []).find(n => n.type === 'start')
+      const end = (this.flowchartData.nodes || []).find(n => n.type === 'end')
+      if (issues.some(i => i.code === 'missing-start') && start) nodeIds.push(start.id)
+      if (issues.some(i => i.code === 'missing-end') && end) nodeIds.push(end.id)
+      const unique = Array.from(new Set(nodeIds.filter(Boolean)))
+      if (!unique.length) {
+        this.$message.info(this.$t('flowchart.validateNoSelectableNodes'))
+        return
+      }
+      this.selectedNodeIds = unique
+      this.selectedEdgeId = ''
+      this.validationHighlightNodeIds = unique
+      const node = this.flowchartNodeLookup.get(unique[0])
+      if (node && typeof this.centerViewportAt === 'function') {
+        this.centerViewportAt({
+          x: Number(node.x || 0) + Number(node.width || 0) / 2,
+          y: Number(node.y || 0) + Number(node.height || 0) / 2
+        })
+      }
+    },
+
     autofixCurrentFlowchart() {
       const plan = buildFlowchartAutofixPlan(this.flowchartData)
       if (!plan.actions.length) {

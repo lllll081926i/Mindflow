@@ -211,71 +211,100 @@ export const buildFlowchartAutofixPlan = (flowchartData = {}) => {
     actions.push({ code: 'add-end', nodeId: endNode.id })
   }
 
-  // connect floating nodes to start/end chain
-  const floating = nodes.filter(node => {
-    if (node.type === 'start' || node.type === 'end') return false
-    return (incoming.get(node.id) || 0) === 0 && (outgoing.get(node.id) || 0) === 0
+  const centerOf = node => ({
+    x: Number(node.x || 0) + Number(node.width || 0) / 2,
+    y: Number(node.y || 0) + Number(node.height || 0) / 2
   })
-  floating.forEach(node => {
-    if (startNode) {
-      validEdges.push({
-        id: createTempId('edge', nextIndex++),
-        source: startNode.id,
-        target: node.id,
-        label: '',
-        style: {}
-      })
-      outgoing.set(startNode.id, (outgoing.get(startNode.id) || 0) + 1)
-      incoming.set(node.id, (incoming.get(node.id) || 0) + 1)
+  const distance = (a, b) => {
+    const ca = centerOf(a)
+    const cb = centerOf(b)
+    const dx = ca.x - cb.x
+    const dy = ca.y - cb.y
+    return Math.hypot(dx, dy)
+  }
+  const edgeExists = (sourceId, targetId) =>
+    validEdges.some(edge => edge.source === sourceId && edge.target === targetId)
+  const addEdge = (sourceId, targetId, code) => {
+    if (!sourceId || !targetId || sourceId === targetId || edgeExists(sourceId, targetId)) {
+      return false
     }
-    if (endNode) {
-      validEdges.push({
-        id: createTempId('edge', nextIndex++),
-        source: node.id,
-        target: endNode.id,
-        label: '',
-        style: {}
-      })
-      outgoing.set(node.id, (outgoing.get(node.id) || 0) + 1)
-      incoming.set(endNode.id, (incoming.get(endNode.id) || 0) + 1)
-    }
-  })
-  if (floating.length) {
-    actions.push({ code: 'connect-floating', count: floating.length, nodeIds: floating.map(n => n.id) })
+    validEdges.push({
+      id: createTempId('edge', nextIndex++),
+      source: sourceId,
+      target: targetId,
+      label: '',
+      style: {}
+    })
+    outgoing.set(sourceId, (outgoing.get(sourceId) || 0) + 1)
+    incoming.set(targetId, (incoming.get(targetId) || 0) + 1)
+    if (code) actions.push({ code, sourceId, targetId })
+    return true
   }
 
-  // if start exists but has no outgoing and there are process nodes, connect to nearest process
+  // connect floating nodes with nearest-path chaining (avoid star connections)
+  const floating = nodes
+    .filter(node => {
+      if (node.type === 'start' || node.type === 'end') return false
+      return (incoming.get(node.id) || 0) === 0 && (outgoing.get(node.id) || 0) === 0
+    })
+    .sort((a, b) => {
+      const ca = centerOf(a)
+      const cb = centerOf(b)
+      return ca.x - cb.x || ca.y - cb.y
+    })
+
+  if (floating.length) {
+    // chain floating nodes left-to-right
+    for (let i = 0; i < floating.length - 1; i++) {
+      addEdge(floating[i].id, floating[i + 1].id, 'chain-floating')
+    }
+    // attach chain ends to start/end by nearest endpoint
+    if (startNode) {
+      const nearest = floating.reduce((best, node) => {
+        if (!best) return node
+        return distance(startNode, node) < distance(startNode, best) ? node : best
+      }, null)
+      addEdge(startNode.id, nearest.id, 'connect-start')
+    }
+    if (endNode) {
+      const nearest = floating.reduce((best, node) => {
+        if (!best) return node
+        return distance(endNode, node) < distance(endNode, best) ? node : best
+      }, null)
+      addEdge(nearest.id, endNode.id, 'connect-end')
+    }
+    actions.push({
+      code: 'connect-floating',
+      count: floating.length,
+      nodeIds: floating.map(n => n.id)
+    })
+  }
+
+  // if start has no outgoing, connect to nearest non-end node
   if (startNode && (outgoing.get(startNode.id) || 0) === 0) {
     const candidates = nodes.filter(n => n.id !== startNode.id && n.type !== 'end')
     if (candidates.length) {
-      const target = candidates[0]
-      validEdges.push({
-        id: createTempId('edge', nextIndex++),
-        source: startNode.id,
-        target: target.id,
-        label: '',
-        style: {}
-      })
-      actions.push({ code: 'connect-start', nodeId: target.id })
+      const target = candidates.reduce((best, node) => {
+        if (!best) return node
+        return distance(startNode, node) < distance(startNode, best) ? node : best
+      }, null)
+      addEdge(startNode.id, target.id, 'connect-start')
     }
   }
 
+  // if end has no incoming, connect from nearest non-start node
   if (endNode && (incoming.get(endNode.id) || 0) === 0) {
     const candidates = nodes.filter(n => n.id !== endNode.id && n.type !== 'start')
     if (candidates.length) {
-      const source = candidates[candidates.length - 1]
-      validEdges.push({
-        id: createTempId('edge', nextIndex++),
-        source: source.id,
-        target: endNode.id,
-        label: '',
-        style: {}
-      })
-      actions.push({ code: 'connect-end', nodeId: source.id })
+      const source = candidates.reduce((best, node) => {
+        if (!best) return node
+        return distance(endNode, node) < distance(endNode, best) ? node : best
+      }, null)
+      addEdge(source.id, endNode.id, 'connect-end')
     }
   }
 
-  const nextData = {
+    const nextData = {
     ...flowchartData,
     nodes,
     edges: validEdges
