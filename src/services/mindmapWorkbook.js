@@ -333,3 +333,43 @@ export const exportMindmapWorkbookToXmind = async (data, fileName = '思维导�
   }
   return out.generateAsync({ type: 'blob' })
 }
+
+
+/**
+ * Export workbook as FreeMind. Single sheet => .mm string/blob text.
+ * Multi sheet => zip of multiple .mm files (blob).
+ */
+export const exportMindmapWorkbookToFreemind = async (data, fileName = '思维导图') => {
+  const { serializeFreemindXml } = await import('@/services/freemindParse')
+  const workbook = ensureMindmapWorkbook(data)
+  if (workbook.sheets.length <= 1) {
+    const sheet = workbook.sheets[0]
+    return {
+      kind: 'text',
+      extension: 'mm',
+      content: serializeFreemindXml(
+        { root: sheet.root, theme: sheet.theme, layout: sheet.layout },
+        { title: sheet.name || fileName }
+      )
+    }
+  }
+  const JSZip = (await import('jszip')).default || (await import('jszip'))
+  const zip = new JSZip()
+  workbook.sheets.forEach((sheet, index) => {
+    const safe =
+      String(sheet.name || 'sheet-' + (index + 1))
+        .replace(/[\/:*?"<>|]/g, '_')
+        .trim() || 'sheet-' + (index + 1)
+    const xml = serializeFreemindXml(
+      { root: sheet.root, theme: sheet.theme, layout: sheet.layout },
+      { title: sheet.name || fileName }
+    )
+    zip.file(safe + '.mm', xml)
+  })
+  const blob = await zip.generateAsync({ type: 'blob' })
+  return {
+    kind: 'zip',
+    extension: 'zip',
+    content: blob
+  }
+}

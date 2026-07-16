@@ -239,7 +239,7 @@ import {
 } from '@/services/flowchartDocument'
 import { buildMindMapHtmlDocument, sanitizeSvgMarkup } from '@/services/htmlExport'
 import { serializeFreemindXml } from '@/services/freemindParse'
-import { snapshotActiveMindmapSheet, ensureMindmapWorkbook, exportMindmapWorkbookToXmind } from '@/services/mindmapWorkbook'
+import { snapshotActiveMindmapSheet, ensureMindmapWorkbook, exportMindmapWorkbookToXmind, exportMindmapWorkbookToFreemind } from '@/services/mindmapWorkbook'
 import {
   validateFlowchartStructure,
   formatFlowchartValidationMessage
@@ -1325,26 +1325,52 @@ export default {
             this.advanceExportProgress(90, 'save')
           } else if (this.exportState.exportType === 'mm') {
             this.advanceExportProgress(60, 'compose')
-            const mindData =
+            const live =
               typeof this.mindMap?.getData === 'function'
-                ? this.mindMap.getData()
+                ? this.mindMap.getData(true)
                 : null
-            const content = serializeFreemindXml(mindData || {}, {
-              title: safeFileName
-            })
+            const base = getData() || {}
+            const workbook = snapshotActiveMindmapSheet(
+              ensureMindmapWorkbook({
+                ...base,
+                ...(live || {})
+              }),
+              live
+            )
+            const exported = await exportMindmapWorkbookToFreemind(
+              workbook,
+              safeFileName
+            )
             this.advanceExportProgress(84, 'save')
-            const fileRef = await platform.saveTextFileAs({
-              suggestedName: safeFileName,
-              content,
-              defaultPath: getLastDirectory(),
-              extension: 'mm',
-              name: this.$t('exportPage.fileTypeMm') || 'FreeMind',
-              mimeType: 'application/x-freemind'
-            })
-            if (!fileRef) {
-              this.finishExportProgress(false)
-              this.exporting = false
-              return
+            if (exported.kind === 'zip') {
+              const buffer = await exported.content.arrayBuffer()
+              const fileRef = await platform.saveBinaryFileAs({
+                suggestedName: safeFileName,
+                content: buffer,
+                defaultPath: getLastDirectory(),
+                extension: 'zip',
+                name: 'FreeMind ZIP',
+                mimeType: 'application/zip'
+              })
+              if (!fileRef) {
+                this.finishExportProgress(false)
+                this.exporting = false
+                return
+              }
+            } else {
+              const fileRef = await platform.saveTextFileAs({
+                suggestedName: safeFileName,
+                content: exported.content,
+                defaultPath: getLastDirectory(),
+                extension: 'mm',
+                name: this.$t('exportPage.fileTypeMm') || 'FreeMind',
+                mimeType: 'application/x-freemind'
+              })
+              if (!fileRef) {
+                this.finishExportProgress(false)
+                this.exporting = false
+                return
+              }
             }
           } else if (this.exportState.exportType === 'html') {
             const svgMarkup = await this.mindMap.export('svg', false, safeFileName)
