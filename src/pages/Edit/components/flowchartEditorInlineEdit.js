@@ -95,7 +95,25 @@ export const flowchartInlineEditMethods = {
     }
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      this.commitInlineTextEditor()
+      void this.commitInlineTextEditor()
+      return
+    }
+    // Tab while editing: commit current node, then create a connected child and edit it.
+    if (event.key === 'Tab') {
+      event.preventDefault()
+      const editorState = this.inlineTextEditorState
+      void this.commitInlineTextEditor().then(() => {
+        if (editorState?.kind === 'node' && editorState.id) {
+          this.selectedNodeIds = [editorState.id]
+          this.selectedEdgeId = ''
+        }
+        const type = event.shiftKey ? 'decision' : 'process'
+        void this.addNodeByType({
+          type,
+          autoConnect: this.selectedNodeIds.length === 1,
+          startInlineEdit: true
+        })
+      })
     }
   },
 

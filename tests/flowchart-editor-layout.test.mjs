@@ -2417,3 +2417,16 @@ test('流程图搜索关键词变化时自动定位首个结果', () => {
   assert.ok(editorSource.includes('flowchartSearchKeyword()'))
   assert.ok(editorSource.includes('jumpToFlowchartSearchResult(0)'))
 })
+
+
+test('流程图文字编辑中 Tab 会确认并新建下级节点', () => {
+  const inlineSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorInlineEdit.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(inlineSource.includes("event.key === 'Tab'"))
+  assert.ok(inlineSource.includes('commitInlineTextEditor'))
+  assert.ok(inlineSource.includes('startInlineEdit: true'))
+  assert.ok(configSource.includes('编辑中确认并新建下级'))
+})
