@@ -283,12 +283,17 @@ test('流程图导出页展示结构检查摘要并支持返回修复', () => {
 })
 
 
-test('导出页提供真实进度条反馈', () => {
+test('导出页提供分阶段进度反馈', () => {
   const exportPageSource = fs.readFileSync(
     path.resolve('src/pages/Export/Index.vue'),
     'utf8'
   )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
   assert.match(exportPageSource, /exportProgressBar/)
   assert.match(exportPageSource, /startExportProgress/)
-  assert.match(exportPageSource, /finishExportProgress/)
+  assert.match(exportPageSource, /advanceExportProgress/)
+  assert.match(exportPageSource, /exportProgressStageLabel/)
+  assert.match(exportPageSource, /exportProgressStage/)
+  assert.match(langSource, /"exportStageWorking"/)
+  assert.match(langSource, /"exportStage"/)
 })

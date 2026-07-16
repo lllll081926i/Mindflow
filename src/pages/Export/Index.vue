@@ -194,11 +194,20 @@
         </div>
 
         <footer class="dialogFooter">
-          <div v-if="exporting" class="exportProgressWrap">
+          <div
+            v-if="exporting"
+            class="exportProgressWrap"
+            role="status"
+            aria-live="polite"
+            :aria-label="exportProgressLabel"
+          >
             <div class="exportProgressBar">
               <div class="exportProgressValue" :style="{ width: exportProgress + '%' }"></div>
             </div>
-            <span class="exportProgressText">{{ exportProgress }}%</span>
+            <div class="exportProgressMeta">
+              <span class="exportProgressStage">{{ exportProgressStageLabel }}</span>
+              <span class="exportProgressText">{{ exportProgress }}%</span>
+            </div>
           </div>
           <el-button
             type="primary"
@@ -425,7 +434,9 @@ export default {
       previewLoading: true,
       exporting: false,
       exportProgress: 0,
+      exportProgressStage: '',
       exportProgressTimer: 0,
+      exportProgressResetTimer: 0,
       mindMap: null,
       flowchartPreviewMarkup: '',
       exportPluginState: {
@@ -443,6 +454,14 @@ export default {
     }
   },
   computed: {
+    exportProgressStageLabel() {
+      const stage = String(this.exportProgressStage || '').trim()
+      if (!stage) return this.$t('exportPage.exportStageWorking')
+      return this.$t('exportPage.exportStage.' + stage)
+    },
+    exportProgressLabel() {
+      return this.exportProgressStageLabel + ' ' + this.exportProgress + '%'
+    },
     ...mapState(useThemeStore, {
       isDark: 'isDark'
     }),
@@ -625,6 +644,7 @@ export default {
     this.unbindPreviewResize()
     this.clearPreviewResizeFrame()
     this.clearExportWarmupTask()
+    this.clearExportProgressTimers()
     if (this.mindMap) {
       this.mindMap.destroy()
       this.mindMap = null
@@ -1049,6 +1069,7 @@ export default {
     async handleFlowchartExport(safeFileName) {
       const exportType = this.exportState.exportType
       const withBackground = !!this.exportState.withBackground
+      this.advanceExportProgress(48, 'render')
       const svgMarkup = buildFlowchartSvgMarkup(this.getFlowchartData(), {
         flowchartConfig: this.getFlowchartConfig(),
         isDark: this.isDark,
@@ -1057,6 +1078,7 @@ export default {
         paddingY: this.exportState.paddingY
       })
       if (exportType === 'svg') {
+        this.advanceExportProgress(78, 'save')
         await platform.saveTextFileAs({
           suggestedName: safeFileName,
           content: svgMarkup,
@@ -1068,12 +1090,14 @@ export default {
         return
       }
       if (exportType === 'json') {
+        this.advanceExportProgress(70, 'compose')
         const content = serializeStoredDocumentContent({
           documentMode: 'flowchart',
           data: this.getFlowchartData(),
           flowchartConfig: this.getFlowchartConfig(),
           isFullDataFile: true
         })
+        this.advanceExportProgress(82, 'save')
         await platform.saveTextFileAs({
           suggestedName: safeFileName,
           content,
@@ -1085,6 +1109,7 @@ export default {
         return
       }
       if (exportType === 'pdf') {
+        this.advanceExportProgress(66, 'compose')
         await this.exportFlowchartAsPdf({
           svgMarkup,
           fileName: safeFileName,
@@ -1092,6 +1117,7 @@ export default {
         })
         return
       }
+      this.advanceExportProgress(66, 'compose')
       await this.exportFlowchartAsRaster({
         svgMarkup,
         fileName: safeFileName,
@@ -1120,28 +1146,47 @@ export default {
       }
     },
 
-    startExportProgress() {
-      this.exportProgress = 8
-      if (this.exportProgressTimer) clearInterval(this.exportProgressTimer)
-      this.exportProgressTimer = window.setInterval(() => {
-        if (this.exportProgress >= 90) return
-        this.exportProgress += Math.max(
-          1,
-          Math.round((92 - this.exportProgress) * 0.08)
-        )
-      }, 160)
-    },
-    finishExportProgress() {
+    clearExportProgressTimers() {
       if (this.exportProgressTimer) {
         clearInterval(this.exportProgressTimer)
         this.exportProgressTimer = 0
       }
-      if (this.exportProgress > 0 && this.exportProgress < 100) {
-        this.exportProgress = 100
+      if (this.exportProgressResetTimer) {
+        clearTimeout(this.exportProgressResetTimer)
+        this.exportProgressResetTimer = 0
       }
-      window.setTimeout(() => {
+    },
+    setExportProgress(percent, stage) {
+      const next = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)))
+      this.exportProgress = next
+      if (stage) this.exportProgressStage = stage
+    },
+    startExportProgress() {
+      this.clearExportProgressTimers()
+      this.setExportProgress(6, 'prepare')
+      this.exportProgressTimer = window.setInterval(() => {
+        if (this.exportProgress >= 92) return
+        const ceiling = Math.min(92, this.exportProgress + 8)
+        this.exportProgress = Math.min(
+          ceiling,
+          this.exportProgress + Math.max(1, Math.round((ceiling - this.exportProgress) * 0.12))
+        )
+      }, 220)
+    },
+    advanceExportProgress(percent, stage) {
+      const target = Math.max(this.exportProgress, Math.round(Number(percent) || 0))
+      this.setExportProgress(Math.min(96, target), stage)
+    },
+    finishExportProgress(success = true) {
+      this.clearExportProgressTimers()
+      if (success) {
+        this.setExportProgress(100, 'done')
+      }
+      this.exportProgressResetTimer = window.setTimeout(() => {
         this.exportProgress = 0
-      }, 300)
+        this.exportProgressStage = ''
+        this.exportProgressResetTimer = 0
+      }, 420)
     },
     async handleExport() {
       if (!this.canExportCurrentDocument || this.isDisabledFormat || this.exporting) {
@@ -1157,7 +1202,9 @@ export default {
           : getResolvedExportType(this.exportState.exportType, this.documentMode)
       this.exporting = true
       this.startExportProgress()
+      let exportSucceeded = false
       try {
+        this.advanceExportProgress(18, 'prepare')
         if ((this.getFlowchartData?.().nodes?.length || 0) >= 80 || this.documentMode !== 'flowchart') {
           this.$message.info(
             this.documentMode === 'flowchart'
@@ -1166,6 +1213,7 @@ export default {
           )
         }
         if (this.documentMode === 'flowchart') {
+          this.advanceExportProgress(28, 'validate')
           const validation = validateFlowchartStructure(this.getFlowchartData())
           if (validation.issues.length) {
             const message = formatFlowchartValidationMessage(
@@ -1177,19 +1225,23 @@ export default {
             } else {
               this.$message.error(message)
               if (validation.issues.some(item => item.severity === 'error')) {
-                this.finishExportProgress()
-        this.exporting = false
+                this.finishExportProgress(false)
+                this.exporting = false
                 return
               }
             }
           }
+          this.advanceExportProgress(42, 'render')
           await this.handleFlowchartExport(safeFileName)
+          this.advanceExportProgress(88, 'save')
         } else if (resolvedType === 'pdf') {
+          this.advanceExportProgress(30, 'plugins')
           await this.ensureExportPluginsInstalled(resolvedType)
           this.mindMap.updateConfig({
             exportPaddingX: Number(this.exportState.paddingX) || 0,
             exportPaddingY: Number(this.exportState.paddingY) || 0
           })
+          this.advanceExportProgress(58, 'render')
           await this.mindMap.export(
             resolvedType,
             true,
@@ -1197,18 +1249,23 @@ export default {
             this.exportState.isTransparent,
             this.exportState.isFitBg
           )
+          this.advanceExportProgress(90, 'save')
         } else {
+          this.advanceExportProgress(30, 'plugins')
           await this.ensureExportPluginsInstalled(resolvedType)
           this.mindMap.updateConfig({
             exportPaddingX: Number(this.exportState.paddingX) || 0,
             exportPaddingY: Number(this.exportState.paddingY) || 0
           })
+          this.advanceExportProgress(55, 'render')
           if (this.exportState.exportType === 'html') {
             const svgMarkup = await this.mindMap.export('svg', false, safeFileName)
+            this.advanceExportProgress(72, 'compose')
             const htmlContent = buildMindMapHtmlDocument({
               fileName: safeFileName,
               svgMarkup
             })
+            this.advanceExportProgress(84, 'save')
             const fileRef = await platform.saveTextFileAs({
               suggestedName: safeFileName,
               content: htmlContent,
@@ -1218,6 +1275,8 @@ export default {
               mimeType: 'text/html;charset=utf-8'
             })
             if (!fileRef) {
+              this.finishExportProgress(false)
+              this.exporting = false
               return
             }
           } else if (['smm', 'json'].includes(this.exportState.exportType)) {
@@ -1227,6 +1286,7 @@ export default {
               safeFileName,
               this.exportState.withConfig
             )
+            this.advanceExportProgress(90, 'save')
           } else if (['png', 'jpg'].includes(resolvedType)) {
             await this.mindMap.export(
               resolvedType,
@@ -1236,6 +1296,7 @@ export default {
               null,
               this.exportState.isFitBg
             )
+            this.advanceExportProgress(90, 'save')
           } else if (resolvedType === 'svg') {
             await this.mindMap.export(
               resolvedType,
@@ -1247,10 +1308,13 @@ export default {
                 box-sizing: border-box;
               }`
             )
+            this.advanceExportProgress(90, 'save')
           } else {
             await this.mindMap.export(resolvedType, true, safeFileName)
+            this.advanceExportProgress(90, 'save')
           }
         }
+        exportSucceeded = true
         this.$notify.success({
           title: this.$t('exportPage.exportDoneTitle'),
           message: this.$t('exportPage.exportDoneMessage', {
@@ -1264,7 +1328,7 @@ export default {
           error?.i18nKey ? this.$t(error.i18nKey) : (error?.message || this.$t('exportPage.exportFailed'))
         )
       } finally {
-        this.finishExportProgress()
+        this.finishExportProgress(exportSucceeded)
         this.exporting = false
       }
     }
@@ -1282,33 +1346,12 @@ export default {
   &.isDark {
     color: hsla(0, 0%, 100%, 0.9);
 
-    .exportDialog,
-    .exportProgressWrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 180px;
-  margin-right: auto;
-}
-.exportProgressBar {
-  flex: 1;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(15,23,42,0.08);
-  overflow: hidden;
-}
-.exportProgressValue {
-  height: 100%;
-  background: #2563eb;
-  transition: width 0.16s linear;
-}
-.exportProgressText {
-  min-width: 40px;
-  font-size: 12px;
-  color: inherit;
-  opacity: 0.8;
-}
-.dialogFooter {
+    .exportDialog {
+      background: #171b22;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .dialogFooter {
       background: #171b22;
       border-color: rgba(255, 255, 255, 0.08);
     }
@@ -1470,6 +1513,48 @@ export default {
       backdrop-filter: blur(18px) saturate(0.82);
     }
   }
+}
+
+.exportProgressWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  margin-right: auto;
+}
+.exportProgressBar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+.exportPage.isDark .exportProgressBar {
+  background: rgba(255, 255, 255, 0.12);
+}
+.exportProgressValue {
+  height: 100%;
+  background: #2563eb;
+  transition: width 0.16s linear;
+}
+.exportProgressMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 84px;
+}
+.exportProgressStage {
+  font-size: 11px;
+  opacity: 0.72;
+  white-space: nowrap;
+}
+.exportProgressText {
+  min-width: 36px;
+  font-size: 12px;
+  color: inherit;
+  opacity: 0.88;
+  text-align: right;
 }
 
 .exportOverlay {

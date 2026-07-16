@@ -996,6 +996,16 @@ const zh = {
   },
   "exportPage": {
     "exportingTip": "正在导出，请稍候…",
+    "exportStageWorking": "导出中",
+    "exportStage": {
+      "prepare": "准备导出",
+      "validate": "结构检查",
+      "plugins": "加载导出组件",
+      "render": "渲染内容",
+      "compose": "生成文件",
+      "save": "保存文件",
+      "done": "导出完成"
+    },
     "structureCheck": "结构检查",
     "backToFix": "返回编辑修复",
     "eyebrow": "Export Center",

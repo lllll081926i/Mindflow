@@ -2173,3 +2173,12 @@ test('自动修复结果可聚焦到变更节点，并展示具体 diff 文案',
   assert.match(langSource, /"autofixDiffAddNode"/)
   assert.match(langSource, /"autofixDiffAddEdge"/)
 })
+
+
+test('自动修复结果面板展示具体节点/连线变更', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  const lessSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.less'), 'utf8')
+  assert.match(editorSource, /lastAutofixDiffLines/)
+  assert.match(editorSource, /lastAutofixDiff/)
+  assert.match(lessSource, /flowchartAutofixDiffList/)
+})

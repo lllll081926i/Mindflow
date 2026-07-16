@@ -122,6 +122,15 @@
             }}
           </span>
         </div>
+        <div v-if="lastAutofixDiffLines.length" class="flowchartAutofixDiffList">
+          <div
+            v-for="(line, index) in lastAutofixDiffLines"
+            :key="'diff-' + index"
+            class="flowchartAutofixDiffLine"
+          >
+            {{ line }}
+          </div>
+        </div>
         <button
           v-for="(action, index) in lastAutofixActions.slice(0, 6)"
           :key="action.code + '-' + index"
@@ -661,6 +670,7 @@ export default {
       lastAutofixSnapshot: null,
       lastAutofixActions: [],
       lastAutofixScoreDelta: 0,
+      lastAutofixDiff: null,
       isFlowchartDragOver: false,
       isValidatingFlowchart: false,
       isAutofixingFlowchart: false,
@@ -674,6 +684,43 @@ export default {
     }
   },
   computed: {
+    lastAutofixDiffLines() {
+      const diff = this.lastAutofixDiff || {}
+      const lines = []
+      ;(diff.addedNodes || []).slice(0, 4).forEach(node => {
+        lines.push(
+          this.$t('flowchart.autofixDiffAddNode', {
+            text: node.text || node.type || node.id
+          })
+        )
+      })
+      ;(diff.removedEdges || []).slice(0, 3).forEach(edge => {
+        lines.push(
+          this.$t('flowchart.autofixDiffRemoveEdge', {
+            source: edge.source,
+            target: edge.target
+          })
+        )
+      })
+      ;(diff.addedEdges || []).slice(0, 4).forEach(edge => {
+        lines.push(
+          this.$t('flowchart.autofixDiffAddEdge', {
+            source: edge.source,
+            target: edge.target
+          })
+        )
+      })
+      ;(diff.labeledEdges || []).slice(0, 3).forEach(edge => {
+        lines.push(
+          this.$t('flowchart.autofixDiffLabelEdge', {
+            label: edge.label,
+            source: edge.source,
+            target: edge.target
+          })
+        )
+      })
+      return lines
+    },
     ...mapState(useThemeStore, {
       isDark: 'isDark'
     }),
@@ -1465,6 +1512,7 @@ export default {
         edges: cloneJson(this.flowchartData.edges || [])
       }
       this.lastAutofixActions = plan.actions
+      this.lastAutofixDiff = plan.diff || null
       this.lastAutofixScoreDelta =
         Number(plan.after?.summary?.score || 0) -
         Number(plan.before?.summary?.score || 0)
@@ -1554,6 +1602,7 @@ export default {
       this.lastAutofixSnapshot = null
       this.lastAutofixActions = []
       this.lastAutofixScoreDelta = 0
+      this.lastAutofixDiff = null
       void this.persistFlowchartState()
       this.validateCurrentFlowchart({ openPanel: true })
       this.$message.success(this.$t('flowchart.autofixUndoDone'))
