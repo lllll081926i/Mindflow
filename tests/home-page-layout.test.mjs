@@ -169,3 +169,15 @@ test('首页导图模板中心覆盖周报面试与读书笔记场景', () => {
   assert.match(langSource, /"starterMindMapInterview"/)
   assert.match(langSource, /"starterMindMapReading"/)
 })
+
+
+test('首页流程图模板中心覆盖升级销售与审核场景', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /createFlowchartFromTemplate\('supportEscalation'\)/)
+  assert.match(source, /createFlowchartFromTemplate\('salesPipeline'\)/)
+  assert.match(source, /createFlowchartFromTemplate\('contentReview'\)/)
+  assert.match(langSource, /"starterFlowSupport"/)
+  assert.match(langSource, /"starterFlowSales"/)
+  assert.match(langSource, /"starterFlowReviewFlow"/)
+})

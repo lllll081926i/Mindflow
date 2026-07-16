@@ -235,6 +235,33 @@
               <strong>{{ $t('home.starterFlowEnterprise') }}</strong>
               <span>{{ $t('home.starterFlowEnterpriseDesc') }}</span>
             </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('supportEscalation')"
+            >
+              <strong>{{ $t('home.starterFlowSupport') }}</strong>
+              <span>{{ $t('home.starterFlowSupportDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('salesPipeline')"
+            >
+              <strong>{{ $t('home.starterFlowSales') }}</strong>
+              <span>{{ $t('home.starterFlowSalesDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('contentReview')"
+            >
+              <strong>{{ $t('home.starterFlowReviewFlow') }}</strong>
+              <span>{{ $t('home.starterFlowReviewFlowDesc') }}</span>
+            </button>
           </div>
         </section>
 
