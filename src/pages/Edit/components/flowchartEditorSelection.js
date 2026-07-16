@@ -543,15 +543,19 @@ export const flowchartSelectionMethods = {
         size.height / 2 +
         96
     }
-    void this.addNodeByType({
-      type: 'process',
-      worldPoint,
-      autoConnect: false,
-      startInlineEdit: true
-    }).then(() => {
+    // Capture parent before async create replaces selection.
+    const parentId = parentEdge?.source || ''
+    Promise.resolve(
+      this.addNodeByType({
+        type: 'process',
+        worldPoint,
+        autoConnect: false,
+        startInlineEdit: true
+      })
+    ).then(() => {
       const nextId = this.selectedNodeIds[0]
-      if (parentEdge?.source && nextId && typeof this.ensureFlowchartEdge === 'function') {
-        this.ensureFlowchartEdge(parentEdge.source, nextId)
+      if (parentId && nextId && typeof this.ensureFlowchartEdge === 'function') {
+        this.ensureFlowchartEdge(parentId, nextId)
         void this.persistFlowchartState?.()
       }
     })
