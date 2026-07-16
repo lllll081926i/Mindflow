@@ -1737,5 +1737,141 @@ export const flowchartNodeMethods = {
       this.dragFrameId = 0
     }
     this.pendingDragPoint = null
+  },
+
+  async readClipboardText() {
+    const clipboard = globalThis.navigator?.clipboard
+    if (!clipboard || typeof clipboard.readText !== 'function') {
+      throw new Error('Clipboard readText is unavailable')
+    }
+    return clipboard.readText()
+  },
+
+  parsePastedOutlineText(text) {
+    return String(text || '')
+      .replace(/\r\n?/g, '\n')
+      .split('\n')
+      .map(rawLine => {
+        const indentText = rawLine.match(/^[\t ]*/)?.[0] || ''
+        const content = rawLine
+          .trim()
+          .replace(/^([-*+]|[•])\s+/, '')
+          .replace(/^\d+[.)]\s+/, '')
+          .trim()
+        return {
+          indent: Array.from(indentText).reduce((total, char) => {
+            return total + (char === '\t' ? 2 : 1)
+          }, 0),
+          content
+        }
+      })
+      .filter(item => item.content)
+      .reduce(
+        (state, item) => {
+          const node = {
+            text: item.content,
+            children: []
+          }
+          while (
+            state.stack.length > 0 &&
+            item.indent <= state.stack[state.stack.length - 1].indent
+          ) {
+            state.stack.pop()
+          }
+          const parent = state.stack[state.stack.length - 1]
+          if (parent) {
+            parent.node.children.push(node)
+          } else {
+            state.roots.push(node)
+          }
+          state.stack.push({
+            indent: item.indent,
+            node
+          })
+          return state
+        },
+        {
+          roots: [],
+          stack: []
+        }
+      ).roots
+  },
+
+  async pasteOutlineFromClipboard() {
+    let text
+    try {
+      text = await this.readClipboardText()
+    } catch (error) {
+      console.error('readClipboardText failed', error)
+      this.$message.warning(this.$t('flowchart.pasteOutlineFailed'))
+      return
+    }
+    const roots = this.parsePastedOutlineText(text)
+    if (!roots.length) {
+      this.$message.warning(this.$t('flowchart.pasteOutlineEmpty'))
+      return
+    }
+    const origin = this.selectedNodeIds.length === 1
+      ? this.getNodeById(this.selectedNodeIds[0])
+      : null
+    const baseX = origin
+      ? Number(origin.x || 0) + Number(origin.width || 0) + 80
+      : Number(this.flowchartData?.viewport?.x || 0) * -1 + 160
+    const baseY = origin
+      ? Number(origin.y || 0)
+      : Number(this.flowchartData?.viewport?.y || 0) * -1 + 140
+    const createdIds = []
+    const walk = (outlineNode, depth, parentId, indexInLevel) => {
+      const size = this.getDefaultNodeSizeByType(
+        depth === 0 && !origin ? 'start' : 'process'
+      )
+      let type =
+        depth === 0 && !origin
+          ? 'start'
+          : outlineNode.children?.length > 1
+            ? 'decision'
+            : outlineNode.children?.length
+              ? 'process'
+              : origin || depth > 0
+                ? 'process'
+                : 'end'
+      if (depth > 0 && type === 'start') type = 'process'
+      if (depth === 0 && origin) type = 'process'
+      const id = createNodeId(type)
+      const node = {
+        id,
+        type,
+        text: outlineNode.text,
+        x: baseX + depth * 220,
+        y: baseY + indexInLevel * 110,
+        width: size.width,
+        height: size.height,
+        style: {}
+      }
+      this.flowchartData.nodes.push(node)
+      createdIds.push(id)
+      if (parentId) {
+        this.ensureFlowchartEdge(parentId, id)
+      } else if (origin) {
+        this.ensureFlowchartEdge(origin.id, id)
+      }
+      let childIndex = 0
+      ;(outlineNode.children || []).forEach(child => {
+        walk(child, depth + 1, id, indexInLevel + childIndex)
+        childIndex += 1
+      })
+    }
+    let rootIndex = 0
+    roots.forEach(root => {
+      walk(root, 0, null, rootIndex)
+      rootIndex += Math.max(1, (root.children || []).length)
+    })
+    this.markNodesAsNew(createdIds)
+    this.selectedNodeIds = createdIds.slice(0, 1)
+    this.selectedEdgeId = ''
+    await this.persistFlowchartState()
+    this.$message.success(
+      this.$t('flowchart.pasteOutlineSuccess', { count: createdIds.length })
+    )
   }
 }

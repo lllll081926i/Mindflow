@@ -32,6 +32,7 @@
       @open-command-palette="openCommandPalette"
       @open-search="openFlowchartSearch"
       @open-outline="openFlowchartOutline"
+      @paste-outline="pasteOutlineFromClipboard"
     />
 
     <FlowchartCommandPalette
@@ -1045,6 +1046,7 @@ export default {
         commandPalette: this.$t('toolbar.commandPaletteAction'),
         search: this.$t('toolbar.searchAction'),
         outline: this.$t('flowchart.outlineShort'),
+        pasteOutline: this.$t('flowchart.pasteOutlineShort'),
         shortcuts: this.$t('shortcutKey.title'),
         exportCenter: this.$t('toolbar.exportCenter'),
         convertMindMap: this.$t('flowchart.convertMindMapShort'),
@@ -1169,6 +1171,7 @@ export default {
         { key: 'duplicate', label: this.$t('flowchart.duplicateSelection'), shortcut: 'Ctrl D', disabled: !hasNodeSelection, action: () => this.duplicateSelectedNodes() },
         { key: 'copy', label: this.$t('flowchart.copySelection'), shortcut: 'Ctrl C', disabled: !hasNodeSelection, action: () => this.copySelectedNodes() },
         { key: 'paste', label: this.$t('flowchart.pasteSelection'), shortcut: 'Ctrl V', action: () => this.pasteCopiedNodes() },
+        { key: 'pasteOutline', label: this.$t('flowchart.pasteOutline'), action: () => this.pasteOutlineFromClipboard() },
         { key: 'delete', label: this.$t('flowchart.delete'), shortcut: 'Delete', disabled: !hasSelection, action: () => this.removeSelection() },
         { key: 'openLink', label: this.$t('flowchart.openNodeLink'), disabled: !this.selectedNode?.link, action: () => this.openSelectedNodeLink() },
         { key: 'alignLeft', label: this.$t('flowchart.alignLeft'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesLeft() },

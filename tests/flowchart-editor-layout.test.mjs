@@ -2228,3 +2228,16 @@ test('流程图提供大纲面板并支持定位节点', () => {
   assert.ok(panelSource.includes('flowchartOutlinePanel'))
   assert.match(langSource, /"outlineTitle"/)
 })
+
+
+test('流程图支持粘贴大纲生成节点树', () => {
+  const nodeSource = fs.readFileSync(path.resolve('src/pages/Edit/components/flowchartEditorNode.js'), 'utf8')
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartToolbar.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(nodeSource.includes('pasteOutlineFromClipboard'))
+  assert.ok(nodeSource.includes('parsePastedOutlineText'))
+  assert.ok(editorSource.includes('pasteOutline'))
+  assert.ok(toolbarSource.includes('paste-outline'))
+  assert.match(langSource, /"pasteOutline"/)
+})
