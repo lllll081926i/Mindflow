@@ -665,7 +665,7 @@ export default {
   },
   data() {
     return {
-      flowchartData: createDefaultFlowchartData(),
+      flowchartData: ensureFlowchartWorkbook(createDefaultFlowchartData()),
       flowchartConfig: {
         snapToGrid: false,
         gridSize: 24,
