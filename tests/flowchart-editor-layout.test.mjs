@@ -2430,3 +2430,16 @@ test('流程图文字编辑中 Tab 会确认并新建下级节点', () => {
   assert.ok(inlineSource.includes('startInlineEdit: true'))
   assert.ok(configSource.includes('编辑中确认并新建下级'))
 })
+
+
+test('流程图选中节点后可直接输入进入编辑', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes('Type-to-edit'))
+  assert.ok(selectionSource.includes('event.key.length === 1'))
+  assert.ok(selectionSource.includes('openInlineTextEditor'))
+  assert.ok(configSource.includes('直接输入开始编辑'))
+})

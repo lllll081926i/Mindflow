@@ -770,6 +770,7 @@ export const flowchartShortcutKeyList = [
     type: '节点操作',
     list: [
       { name: '编辑节点文字', value: 'Enter | F2' },
+      { name: '直接输入开始编辑', value: '选中节点后直接打字' },
       { name: '编辑中确认并新建下级', value: 'Tab（编辑文字时）' },
       { name: '空白处新建节点', value: 'Enter | F2（无选中时）' },
       { name: '打开/关闭属性面板', value: 'Space（有选中时）' },

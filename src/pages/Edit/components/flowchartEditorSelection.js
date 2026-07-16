@@ -329,6 +329,40 @@ export const flowchartSelectionMethods = {
       }
       event.preventDefault()
       this.nudgeSelectedNodes(event.key, event)
+      return
+    }
+    // Type-to-edit: printable character with one selected node opens editor and seeds text.
+    if (
+      !isMetaKey &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      this.selectedNodeIds.length === 1 &&
+      !this.selectedEdgeId &&
+      event.key.length === 1 &&
+      !event.repeat &&
+      !/^[ -]$/.test(event.key) &&
+      event.key !== ' '
+    ) {
+      event.preventDefault()
+      const nodeId = this.selectedNodeIds[0]
+      this.openInlineTextEditor({ kind: 'node', id: nodeId })
+      this.$nextTick(() => {
+        if (this.inlineTextEditorState?.id === nodeId) {
+          this.inlineTextEditorState = {
+            ...this.inlineTextEditorState,
+            value: event.key
+          }
+          const editor = this.$refs.inlineTextEditorRef
+          const inputEl = Array.isArray(editor) ? editor[0] : editor
+          if (inputEl) {
+            inputEl.value = event.key
+            inputEl.focus?.()
+            // caret at end
+            const len = event.key.length
+            inputEl.setSelectionRange?.(len, len)
+          }
+        }
+      })
     }
   },
 
