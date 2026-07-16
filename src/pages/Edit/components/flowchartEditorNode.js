@@ -170,7 +170,20 @@ export const flowchartNodeMethods = {
     this.flowchartData.nodes.push(nextNode)
     this.markNodesAsNew([nextNode.id])
     if (sourceNode) {
-      this.ensureFlowchartEdge(sourceNode.id, nextNode.id)
+      let edgeLabel = ''
+      if (sourceNode.type === 'decision') {
+        const outgoing = (this.flowchartData.edges || []).filter(
+          edge => edge.source === sourceNode.id
+        )
+        const unlabeledCount = outgoing.filter(
+          edge => !String(edge.label || '').trim()
+        ).length
+        // Prefer default yes/no labels for first two branches.
+        if (outgoing.length === 0) edgeLabel = '是'
+        else if (outgoing.length === 1) edgeLabel = '否'
+        else if (unlabeledCount === 0) edgeLabel = `分支${outgoing.length + 1}`
+      }
+      this.ensureFlowchartEdge(sourceNode.id, nextNode.id, edgeLabel)
     }
     this.selectedNodeIds = [nextNode.id]
     this.selectedEdgeId = ''
