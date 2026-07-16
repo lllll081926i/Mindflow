@@ -550,3 +550,11 @@ test('思维导图支持 Ctrl+Alt+N 切换子主题编号', () => {
   assert.ok(toolbarSource.includes('toggleChildNumbering'))
   assert.ok(toolbarSource.includes("event.key.toLowerCase() === 'n'"))
 })
+
+
+test('思维导图支持复制为 Markdown/TXT 快捷键', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('copyActiveAs'))
+  assert.ok(toolbarSource.includes('transformToMarkdown'))
+  assert.ok(toolbarSource.includes('transformToTxt'))
+})

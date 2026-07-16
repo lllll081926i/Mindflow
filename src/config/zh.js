@@ -430,6 +430,16 @@ export const shortcutKeyList = [
         value: ctrl + ' + Alt + N'
       },
       {
+        icon: 'iconmarkdown',
+        name: '复制为 Markdown',
+        value: ctrl + ' + Shift + C'
+      },
+      {
+        icon: 'icontxt',
+        name: '复制为 TXT',
+        value: ctrl + ' + Shift + X'
+      },
+      {
         icon: 'icongongshi',
         name: '插入公式',
         value: ctrl + ' + Shift + F'

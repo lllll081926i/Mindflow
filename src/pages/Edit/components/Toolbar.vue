@@ -467,6 +467,8 @@ import platform, {
 } from '@/platform'
 import { createDefaultMindMapData } from '@/platform/shared/configSchema'
 import { convertMindMapToFlowchart } from '@/services/flowchartDocument'
+import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown'
+import { transformToTxt } from 'simple-mind-map/src/parse/toTxt'
 import {
   createDesktopFsError,
   getCurrentFileRef,
@@ -1214,6 +1216,30 @@ export default {
           this.toggleChildNumbering(activeNodes)
           return
         }
+      }
+      // copy selection as markdown Ctrl+Shift+C
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key.toLowerCase() === 'c'
+      ) {
+        event.preventDefault()
+        void this.copyActiveAs('markdown')
+        return
+      }
+      // copy selection as txt Ctrl+Shift+X (cut remains ctrl+x)
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key.toLowerCase() === 'x'
+      ) {
+        event.preventDefault()
+        void this.copyActiveAs('txt')
+        return
       }
       // priority/progress markers
       if (
