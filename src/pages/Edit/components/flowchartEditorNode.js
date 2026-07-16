@@ -211,6 +211,12 @@ export const flowchartNodeMethods = {
     this.selectedEdgeId = ''
     this.edgeToolbarState = null
     this.closeInspector()
+    if (typeof this.centerViewportAt === 'function') {
+      this.centerViewportAt({
+        x: Number(nextNode.x || 0) + Number(nextNode.width || 0) / 2,
+        y: Number(nextNode.y || 0) + Number(nextNode.height || 0) / 2
+      })
+    }
     await this.persistFlowchartState()
     if (startInlineEdit) {
       this.openInlineTextEditor({

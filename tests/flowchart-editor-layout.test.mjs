@@ -2392,3 +2392,18 @@ test('流程图搜索覆盖备注与链接，大纲打开时聚焦搜索框', ()
   assert.ok(panelSource.includes('outlineSearchRef'))
   assert.ok(panelSource.includes('outlineSearchRef?.focus'))
 })
+
+
+test('流程图 Esc 优先取消连线拖拽，新建节点后居中视口', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const nodeSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorNode.js'),
+    'utf8'
+  )
+  assert.ok(selectionSource.includes('connectorDragState || this.edgeReconnectState'))
+  assert.ok(selectionSource.includes('cancelConnectorDrag'))
+  assert.ok(nodeSource.includes('centerViewportAt'))
+})

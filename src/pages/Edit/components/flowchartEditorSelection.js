@@ -99,6 +99,11 @@ export const flowchartSelectionMethods = {
     }
     if (event.key === 'Escape') {
       event.preventDefault()
+      if (this.connectorDragState || this.edgeReconnectState) {
+        this.cancelConnectorDrag?.()
+        this.cancelEdgeReconnect?.()
+        return
+      }
       if (this.commandPaletteVisible) {
         this.closeCommandPalette()
         return
