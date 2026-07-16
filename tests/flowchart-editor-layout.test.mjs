@@ -2407,3 +2407,13 @@ test('流程图 Esc 优先取消连线拖拽，新建节点后居中视口', () 
   assert.ok(selectionSource.includes('cancelConnectorDrag'))
   assert.ok(nodeSource.includes('centerViewportAt'))
 })
+
+
+test('流程图搜索关键词变化时自动定位首个结果', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.ok(editorSource.includes('flowchartSearchKeyword()'))
+  assert.ok(editorSource.includes('jumpToFlowchartSearchResult(0)'))
+})

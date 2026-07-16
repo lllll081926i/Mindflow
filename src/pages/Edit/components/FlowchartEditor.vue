@@ -1250,6 +1250,11 @@ export default {
   watch: {
     flowchartSearchKeyword() {
       this.flowchartSearchActiveIndex = 0
+      this.$nextTick(() => {
+        if (this.flowchartSearchVisible && this.flowchartSearchResults.length) {
+          this.jumpToFlowchartSearchResult(0)
+        }
+      })
     }
   },
   created() {
