@@ -283,26 +283,125 @@ export const exportMindmapWorkbookToXmind = async (data, fileName = '思维导�
   if (typeof xmind.transformToXmind !== 'function') {
     throw new Error('XMind export unavailable')
   }
-  // transformToXmind builds a single-sheet zip; for multi we synthesize content.json array.
   if (workbook.sheets.length <= 1) {
-    return xmind.transformToXmind(workbook.root, workbook.sheets[0]?.name || fileName)
+    return xmind.transformToXmind(
+      workbook.root,
+      workbook.sheets[0]?.name || fileName
+    )
   }
+
   const JSZip = (await import('jszip')).default || (await import('jszip'))
-  const imageList = []
-  // Use transformToXmind per sheet then merge content.json entries.
+  const out = new JSZip()
   const sheetTrees = []
-  for (const sheet of workbook.sheets) {
-    const blob = await xmind.transformToXmind(sheet.root, sheet.name || fileName)
+  const resourceMap = new Map() // path -> base64
+  const usedNames = new Set()
+  const manifestEntries = {
+    'content.json': {},
+    'metadata.json': {},
+    'content.xml': {}
+  }
+
+  const uniqueName = (name, sheetIndex) => {
+    const base = String(name || 'image.png').replace(/[\/]/g, '_')
+    if (!usedNames.has(base) && !resourceMap.has('resources/' + base)) {
+      usedNames.add(base)
+      return base
+    }
+    const dot = base.lastIndexOf('.')
+    const stem = dot > 0 ? base.slice(0, dot) : base
+    const ext = dot > 0 ? base.slice(dot) : ''
+    let i = 1
+    let next = stem + '_' + sheetIndex + '_' + i + ext
+    while (usedNames.has(next) || resourceMap.has('resources/' + next)) {
+      i += 1
+      next = stem + '_' + sheetIndex + '_' + i + ext
+    }
+    usedNames.add(next)
+    return next
+  }
+
+  const rewriteResourceRefs = (value, renameMap) => {
+    if (!value || typeof value !== 'object') return
+    if (Array.isArray(value)) {
+      value.forEach(item => rewriteResourceRefs(item, renameMap))
+      return
+    }
+    Object.keys(value).forEach(key => {
+      const current = value[key]
+      if (typeof current === 'string') {
+        Object.keys(renameMap).forEach(from => {
+          if (current.includes(from)) {
+            value[key] = current.split(from).join(renameMap[from])
+          }
+        })
+      } else if (current && typeof current === 'object') {
+        rewriteResourceRefs(current, renameMap)
+      }
+    })
+  }
+
+  for (let sheetIndex = 0; sheetIndex < workbook.sheets.length; sheetIndex += 1) {
+    const sheet = workbook.sheets[sheetIndex]
+    const blob = await xmind.transformToXmind(
+      sheet.root,
+      sheet.name || fileName + '-' + (sheetIndex + 1)
+    )
     const zip = await JSZip.loadAsync(blob)
     const contentJson = await zip.file('content.json').async('string')
     const arr = JSON.parse(contentJson)
-    if (Array.isArray(arr) && arr[0]) sheetTrees.push(arr[0])
-    // copy resources if any
-    Object.keys(zip.files).forEach(name => {
-      if (name.startsWith('resources/')) imageList.push({ zip, name })
-    })
+    const tree = Array.isArray(arr) ? arr[0] : arr
+    if (!tree) continue
+
+    // force stable unique sheet id
+    const sheetId =
+      String(sheet.id || '').replace(/[^a-zA-Z0-9_-]/g, '_') ||
+      'sheet_' + (sheetIndex + 1)
+    tree.id = sheetId
+    tree.title = sheet.name || tree.title || 'Sheet ' + (sheetIndex + 1)
+    tree.class = tree.class || 'sheet'
+
+    const renameMap = {}
+    const resourceFiles = Object.keys(zip.files).filter(name =>
+      name.startsWith('resources/') && !zip.files[name].dir
+    )
+    for (const resourcePath of resourceFiles) {
+      const rawName = resourcePath.slice('resources/'.length)
+      const base64 = await zip.file(resourcePath).async('base64')
+      // de-dupe identical content
+      let existingPath = ''
+      for (const [pathKey, content] of resourceMap.entries()) {
+        if (content === base64) {
+          existingPath = pathKey
+          break
+        }
+      }
+      if (existingPath) {
+        if (existingPath !== resourcePath) {
+          renameMap['xap:resources/' + rawName] =
+            'xap:' + existingPath
+          renameMap['resources/' + rawName] = existingPath
+        }
+        continue
+      }
+      const nextName = uniqueName(rawName, sheetIndex)
+      const nextPath = 'resources/' + nextName
+      resourceMap.set(nextPath, base64)
+      if (nextName !== rawName) {
+        renameMap['xap:resources/' + rawName] = 'xap:resources/' + nextName
+        renameMap['resources/' + rawName] = 'resources/' + nextName
+      }
+    }
+    if (Object.keys(renameMap).length) {
+      rewriteResourceRefs(tree, renameMap)
+    }
+    sheetTrees.push(tree)
   }
-  const out = new JSZip()
+
+  const activeId =
+    sheetTrees.find(item => item.id === workbook.activeSheetId)?.id ||
+    sheetTrees[0]?.id ||
+    ''
+
   out.file('content.json', JSON.stringify(sheetTrees))
   out.file(
     'metadata.json',
@@ -311,34 +410,39 @@ export const exportMindmapWorkbookToXmind = async (data, fileName = '思维导�
       dataStructureVersion: '2',
       creator: { name: 'mind-map' },
       layoutEngineVersion: '3',
-      activeSheetId: sheetTrees[0]?.id || ''
+      activeSheetId: activeId
     })
   )
-  // minimal content.xml/manifest
+  if (typeof xmind.getXmindContentXmlData === 'function') {
+    out.file('content.xml', xmind.getXmindContentXmlData())
+  } else {
+    // fallback minimal xml marker used by library
+    try {
+      const { getXmindContentXmlData } = await import(
+        'simple-mind-map/src/utils/xmind.js'
+      )
+      out.file('content.xml', getXmindContentXmlData())
+    } catch (_error) {
+      out.file(
+        'content.xml',
+        '<?xml version="1.0" encoding="UTF-8" standalone="no"?><xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" version="2.0"></xmap-content>'
+      )
+    }
+  }
+
+  resourceMap.forEach((base64, resourcePath) => {
+    manifestEntries[resourcePath] = {}
+    out.file(resourcePath, base64, { base64: true })
+  })
   out.file(
     'manifest.json',
     JSON.stringify({
-      'file-entries': {
-        'content.json': {},
-        'metadata.json': {}
-      }
+      'file-entries': manifestEntries
     })
   )
-  // best-effort resource copy from first sheet zip resources already limited
-  for (const item of imageList) {
-    try {
-      const data = await item.zip.file(item.name).async('base64')
-      out.file(item.name, data, { base64: true })
-    } catch (_e) {}
-  }
   return out.generateAsync({ type: 'blob' })
 }
 
-
-/**
- * Export workbook as FreeMind. Single sheet => .mm string/blob text.
- * Multi sheet => zip of multiple .mm files (blob).
- */
 export const exportMindmapWorkbookToFreemind = async (data, fileName = '思维导图') => {
   const { serializeFreemindXml } = await import('@/services/freemindParse')
   const workbook = ensureMindmapWorkbook(data)
