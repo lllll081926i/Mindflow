@@ -1196,6 +1196,38 @@ export default {
           event.preventDefault()
           void this.openNodeTagDialog(activeNodes)
         }
+        return
+      }
+      // Ctrl+Shift+I opens image dialog for active node.
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'i' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          void this.openNodeImageDialog(activeNodes)
+        }
+        return
+      }
+      // Ctrl+Shift+A starts associative line from active node.
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'a' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.$bus.$emit('createAssociativeLine')
+        }
       }
     },
 

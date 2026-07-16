@@ -355,6 +355,16 @@ export const shortcutKeyList = [
         value: `${ctrl} + Shift + T`
       },
       {
+        icon: 'iconimage',
+        name: '编辑图片',
+        value: ctrl + ' + Shift + I'
+      },
+      {
+        icon: 'iconguanlianxian',
+        name: '创建关联线',
+        value: ctrl + ' + Shift + A'
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`

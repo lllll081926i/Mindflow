@@ -385,3 +385,15 @@ test('思维导图 Ctrl+Shift+T 打开标签编辑', () => {
   assert.ok(toolbarSource.includes('openNodeTagDialog'))
   assert.ok(configSource.includes('编辑标签'))
 })
+
+
+test('思维导图图片与关联线快捷键可用', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 'i'"))
+  assert.ok(toolbarSource.includes('openNodeImageDialog'))
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 'a'"))
+  assert.ok(toolbarSource.includes("createAssociativeLine"))
+  assert.ok(configSource.includes('编辑图片'))
+  assert.ok(configSource.includes('创建关联线'))
+})
