@@ -1126,13 +1126,25 @@ export default {
       return (this.flowchartData.nodes || [])
         .map(node => {
           const text = String(node.text || '').trim()
+          const note = String(node.note || '').trim()
+          const link = String(node.link || '').trim()
           const typeDef = this.flowchartNodeTypes.find(item => item.type === node.type)
           return {
             id: node.id,
             text: text || typeDef?.label || node.type,
             type: node.type,
             typeLabel: typeDef?.label || node.type,
-            haystack: (text + ' ' + (typeDef?.label || '') + ' ' + node.type).toLowerCase()
+            haystack: (
+              text +
+              ' ' +
+              note +
+              ' ' +
+              link +
+              ' ' +
+              (typeDef?.label || '') +
+              ' ' +
+              node.type
+            ).toLowerCase()
           }
         })
         .filter(item => item.haystack.includes(keyword))

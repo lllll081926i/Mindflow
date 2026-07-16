@@ -2376,3 +2376,19 @@ test('流程图搜索面板可打开并聚焦输入框', () => {
   assert.ok(editorSource.includes('flowchartSearchInputRef'))
   assert.ok(editorSource.includes('el?.focus?.()'))
 })
+
+
+test('流程图搜索覆盖备注与链接，大纲打开时聚焦搜索框', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const panelSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartOutlinePanel.vue'),
+    'utf8'
+  )
+  assert.ok(editorSource.includes('const note = String(node.note'))
+  assert.ok(editorSource.includes('const link = String(node.link'))
+  assert.ok(panelSource.includes('outlineSearchRef'))
+  assert.ok(panelSource.includes('outlineSearchRef?.focus'))
+})

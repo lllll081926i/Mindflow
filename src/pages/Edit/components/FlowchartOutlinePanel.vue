@@ -18,6 +18,7 @@
       </button>
     </div>
     <input
+      ref="outlineSearchRef"
       v-model.trim="keywordProxy"
       class="flowchartOutlineSearch"
       type="search"
@@ -53,6 +54,14 @@ export default {
     keyword: { type: String, default: '' }
   },
   emits: ['close', 'select', 'update:keyword'],
+  watch: {
+    visible(value) {
+      if (!value) return
+      this.$nextTick(() => {
+        this.$refs.outlineSearchRef?.focus?.()
+      })
+    }
+  },
   computed: {
     keywordProxy: {
       get() {
