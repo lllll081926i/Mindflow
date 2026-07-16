@@ -2563,3 +2563,13 @@ test('流程图 Space/Ctrl+Shift+K 聚焦备注与链接字段', () => {
   assert.ok(inspectorSource.includes('nodeLinkInputRef'))
   assert.ok(configSource.includes('编辑节点链接'))
 })
+
+
+test('流程图支持 Ctrl+E 打开导出中心', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.ok(selectionSource.includes("event.key.toLowerCase() === 'e'"))
+  assert.ok(selectionSource.includes('openExportCenter'))
+})

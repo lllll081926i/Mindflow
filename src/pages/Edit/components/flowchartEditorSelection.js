@@ -180,6 +180,11 @@ export const flowchartSelectionMethods = {
       })
       return
     }
+    if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === 'e') {
+      event.preventDefault()
+      void this.openExportCenter?.()
+      return
+    }
     if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === '0') {
       event.preventDefault()
       this.fitCanvasToView()
