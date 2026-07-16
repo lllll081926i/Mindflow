@@ -2264,5 +2264,18 @@ test('流程图支持 Tab/Insert 快速新增下级节点', () => {
   assert.ok(selectionSource.includes("addNodeByType"))
   assert.ok(configSource.includes('新增下级处理节点'))
   assert.ok(configSource.includes('Tab | Insert'))
+  assert.ok(configSource.includes('空白处新建节点'))
+  assert.ok(selectionSource.includes("isEmptyCanvas ? 'start' : 'process'" ) || selectionSource.includes("type: isEmptyCanvas ? 'start'"))
   assert.ok(selectionSource.includes("type: isEmptyCanvas" ) || selectionSource.includes("'start'"))
+})
+
+
+test('流程图无选中时 Enter/F2 会新建节点并进入编辑', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.ok(selectionSource.includes("!this.selectedNodeIds.length && !this.selectedEdgeId"))
+  assert.ok(selectionSource.includes('startInlineEdit: true'))
+  assert.ok(selectionSource.includes("isEmptyCanvas ? 'start' : 'process'"))
 })

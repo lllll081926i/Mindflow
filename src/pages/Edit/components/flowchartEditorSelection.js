@@ -225,6 +225,17 @@ export const flowchartSelectionMethods = {
         this.editEdgeLabel(this.selectedEdgeId)
         return
       }
+      // No selection: create a node and enter edit immediately.
+      if (!this.selectedNodeIds.length && !this.selectedEdgeId) {
+        event.preventDefault()
+        const isEmptyCanvas = !(this.flowchartData?.nodes || []).length
+        void this.addNodeByType({
+          type: isEmptyCanvas ? 'start' : 'process',
+          autoConnect: false,
+          startInlineEdit: true
+        })
+        return
+      }
     }
     // XMind-like structure keys: Tab inserts a connected child process.
     if (event.key === 'Tab' && !isMetaKey) {
