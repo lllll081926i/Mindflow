@@ -1180,6 +1180,22 @@ export default {
           event.preventDefault()
           void this.openNodeLinkDialog(activeNodes)
         }
+        return
+      }
+      // Ctrl+Shift+T opens tag dialog for active node.
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 't' &&
+        !isTypingTarget
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          void this.openNodeTagDialog(activeNodes)
+        }
       }
     },
 

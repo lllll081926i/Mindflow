@@ -350,6 +350,11 @@ export const shortcutKeyList = [
         value: `${ctrl} + Shift + K`
       },
       {
+        icon: 'icontag',
+        name: '编辑标签',
+        value: `${ctrl} + Shift + T`
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`

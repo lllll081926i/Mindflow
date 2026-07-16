@@ -376,3 +376,12 @@ test('思维导图 Ctrl+Shift+K 打开超链接编辑', () => {
   assert.ok(toolbarSource.includes('openNodeLinkDialog'))
   assert.ok(configSource.includes('编辑超链接'))
 })
+
+
+test('思维导图 Ctrl+Shift+T 打开标签编辑', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 't'"))
+  assert.ok(toolbarSource.includes('openNodeTagDialog'))
+  assert.ok(configSource.includes('编辑标签'))
+})
