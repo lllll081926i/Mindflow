@@ -685,3 +685,24 @@ test('范围概要支持画布高亮与直接创建', () => {
   assert.ok(summarySource.includes('createRangeSummary'))
   assert.ok(summarySource.includes('clearRangeHighlight'))
 })
+
+
+test('主题批注支持回复线程与解决状态', () => {
+  const commentsSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/NodeCommentsDialog.vue'),
+    'utf8'
+  )
+  assert.ok(commentsSource.includes('replies'))
+  assert.ok(commentsSource.includes('toggleResolved'))
+  assert.ok(commentsSource.includes('startReply'))
+})
+
+test('XMind 导出会折叠批注并映射标记标签', () => {
+  const workbookSource = fs.readFileSync(
+    path.resolve('src/services/mindmapWorkbook.js'),
+    'utf8'
+  )
+  assert.ok(workbookSource.includes('enrichNodeForXmindExport'))
+  assert.ok(workbookSource.includes('comments'))
+  assert.ok(workbookSource.includes('priority_'))
+})

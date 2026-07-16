@@ -276,6 +276,92 @@ export const createWorkbookFromMindmapList = (list = [], options = {}) => {
  * Export workbook to XMind blob using simple-mind-map transform for each sheet.
  * Falls back to active sheet only if multi transform fails.
  */
+
+const stripHtmlText = value =>
+  String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/s+/g, ' ')
+    .trim()
+
+const NEWLINE = String.fromCharCode(10)
+
+/**
+ * Best-effort XMind fidelity enricher:
+ * - fold local comments into notes
+ * - keep tags as labels (library already maps)
+ * - surface icon markers into labels for XMind consumers without icon packs
+ */
+const enrichNodeForXmindExport = root => {
+  const clone = (() => {
+    try {
+      return JSON.parse(JSON.stringify(root || {}))
+    } catch (_error) {
+      return root || {}
+    }
+  })()
+  const walk = node => {
+    if (!node || typeof node !== 'object') return
+    if (!node.data || typeof node.data !== 'object') node.data = {}
+    const data = node.data
+    const noteParts = []
+    const existingNote = stripHtmlText(data.note)
+    if (existingNote) noteParts.push(existingNote)
+
+    const comments = Array.isArray(data.comments) ? data.comments : []
+    if (comments.length) {
+      const commentLines = comments.map((item, index) => {
+        const text = stripHtmlText(item?.text || item)
+        const status = item?.resolved ? '[已解决]' : '[未解决]'
+        const replies = Array.isArray(item?.replies)
+          ? item.replies
+              .map(reply => '  - ' + stripHtmlText(reply?.text || reply))
+              .filter(Boolean)
+              .join(NEWLINE)
+          : ''
+        return (
+          status +
+          ' 批注' +
+          (index + 1) +
+          ': ' +
+          text +
+          (replies ? NEWLINE + replies : '')
+        )
+      })
+      noteParts.push(commentLines.join(NEWLINE))
+    }
+
+    if (noteParts.length) {
+      data.note = noteParts.join(NEWLINE + NEWLINE)
+    }
+
+    // icons -> labels for portability
+    const icons = Array.isArray(data.icon) ? data.icon : []
+    const tags = Array.isArray(data.tag)
+      ? data.tag.map(item =>
+          typeof item === 'object' && item !== null ? item.text : item
+        )
+      : []
+    const iconLabels = icons
+      .map(key => {
+        const raw = String(key || '')
+        if (raw.startsWith('priority_')) return 'P' + raw.slice('priority_'.length)
+        if (raw.startsWith('progress_')) return 'G' + raw.slice('progress_'.length)
+        if (raw.startsWith('expression_')) return 'E' + raw.slice('expression_'.length)
+        if (raw.startsWith('sign_')) return 'S' + raw.slice('sign_'.length)
+        return raw
+      })
+      .filter(Boolean)
+    const mergedLabels = [...new Set([...tags, ...iconLabels].filter(Boolean))]
+    if (mergedLabels.length) {
+      data.tag = mergedLabels
+    }
+
+    if (Array.isArray(node.children)) node.children.forEach(walk)
+  }
+  walk(clone)
+  return clone
+}
+
 export const exportMindmapWorkbookToXmind = async (data, fileName = '思维导图') => {
   const workbook = ensureMindmapWorkbook(data)
   const xmindMod = await import('simple-mind-map/src/parse/xmind.js')
@@ -285,7 +371,7 @@ export const exportMindmapWorkbookToXmind = async (data, fileName = '思维导�
   }
   if (workbook.sheets.length <= 1) {
     return xmind.transformToXmind(
-      workbook.root,
+      enrichNodeForXmindExport(workbook.root),
       workbook.sheets[0]?.name || fileName
     )
   }
@@ -343,7 +429,7 @@ export const exportMindmapWorkbookToXmind = async (data, fileName = '思维导�
   for (let sheetIndex = 0; sheetIndex < workbook.sheets.length; sheetIndex += 1) {
     const sheet = workbook.sheets[sheetIndex]
     const blob = await xmind.transformToXmind(
-      sheet.root,
+      enrichNodeForXmindExport(sheet.root),
       sheet.name || fileName + '-' + (sheetIndex + 1)
     )
     const zip = await JSZip.loadAsync(blob)

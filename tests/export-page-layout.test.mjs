@@ -346,3 +346,9 @@ test('多画布 XMind 导出会合并资源并写入完整清单', () => {
   assert.ok(workbookSource.includes('content.xml'))
   assert.ok(workbookSource.includes('uniqueName'))
 })
+
+
+test('XMind 导出增强会映射批注与标记', () => {
+  const workbookSource = fs.readFileSync(path.resolve('src/services/mindmapWorkbook.js'), 'utf8')
+  assert.ok(workbookSource.includes('enrichNodeForXmindExport'))
+})
