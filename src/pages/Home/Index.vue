@@ -131,6 +131,18 @@
             </button>
           </div>
           <div class="starterSectionTitle">{{ starterSectionTitle }}</div>
+          <div v-if="favoriteStarterKeys.length" class="recentStarterChips favoriteStarterChips">
+            <span class="recentStarterLabel">{{ $t('home.favoriteStarters') }}</span>
+            <button
+              v-for="key in favoriteStarterKeys"
+              :key="'fav-' + key"
+              type="button"
+              class="recentStarterChip isFavorite"
+              @click="openRecentStarter(key)"
+            >
+              {{ formatRecentStarter(key) }}
+            </button>
+          </div>
           <div v-if="recentStarterKeys.length" class="recentStarterChips">
             <span class="recentStarterLabel">{{ $t('home.recentStarters') }}</span>
             <button
@@ -153,6 +165,12 @@
             >
               <strong>{{ $t('home.starterMindMapBlank') }}</strong>
               <span>{{ $t('home.starterMindMapBlankDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap-layout:blank') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap-layout:blank')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -163,6 +181,12 @@
             >
               <strong>{{ $t('home.starterMindMapOrg') }}</strong>
               <span>{{ $t('home.starterMindMapOrgDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap-layout:mindMap') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap-layout:mindMap')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -173,6 +197,12 @@
             >
               <strong>{{ $t('home.starterMindMapTree') }}</strong>
               <span>{{ $t('home.starterMindMapTreeDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap-layout:organizationStructure') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap-layout:organizationStructure')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -183,6 +213,12 @@
             >
               <strong>{{ $t('home.starterMindMapMeeting') }}</strong>
               <span>{{ $t('home.starterMindMapMeetingDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:meeting') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:meeting')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -193,6 +229,12 @@
             >
               <strong>{{ $t('home.starterMindMapProject') }}</strong>
               <span>{{ $t('home.starterMindMapProjectDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:project') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:project')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -203,6 +245,12 @@
             >
               <strong>{{ $t('home.starterMindMapLearning') }}</strong>
               <span>{{ $t('home.starterMindMapLearningDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:learning') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:learning')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -213,6 +261,12 @@
             >
               <strong>{{ $t('home.starterMindMapReview') }}</strong>
               <span>{{ $t('home.starterMindMapReviewDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:review') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:review')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -223,6 +277,12 @@
             >
               <strong>{{ $t('home.starterMindMapOkr') }}</strong>
               <span>{{ $t('home.starterMindMapOkrDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:okr') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:okr')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -233,6 +293,12 @@
             >
               <strong>{{ $t('home.starterMindMapWeekly') }}</strong>
               <span>{{ $t('home.starterMindMapWeeklyDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:weekly') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:weekly')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -243,6 +309,12 @@
             >
               <strong>{{ $t('home.starterMindMapInterview') }}</strong>
               <span>{{ $t('home.starterMindMapInterviewDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:interview') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:interview')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -253,6 +325,12 @@
             >
               <strong>{{ $t('home.starterMindMapReading') }}</strong>
               <span>{{ $t('home.starterMindMapReadingDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:reading') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:reading')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -263,6 +341,12 @@
             >
               <strong>{{ $t('home.starterMindMapBusiness') }}</strong>
               <span>{{ $t('home.starterMindMapBusinessDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:business') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:business')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -273,6 +357,12 @@
             >
               <strong>{{ $t('home.starterMindMapKnowledge') }}</strong>
               <span>{{ $t('home.starterMindMapKnowledgeDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:knowledge') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:knowledge')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -283,6 +373,12 @@
             >
               <strong>{{ $t('home.starterMindMapCompetitor') }}</strong>
               <span>{{ $t('home.starterMindMapCompetitorDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:competitor') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:competitor')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -293,6 +389,12 @@
             >
               <strong>{{ $t('home.starterMindMapRetro') }}</strong>
               <span>{{ $t('home.starterMindMapRetroDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:retro') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:retro')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -303,6 +405,12 @@
             >
               <strong>{{ $t('home.starterMindMapRoadmap') }}</strong>
               <span>{{ $t('home.starterMindMapRoadmapDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:roadmap') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:roadmap')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -313,6 +421,12 @@
             >
               <strong>{{ $t('home.starterMindMapContent') }}</strong>
               <span>{{ $t('home.starterMindMapContentDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:content') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:content')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -323,6 +437,12 @@
             >
               <strong>{{ $t('home.starterMindMapPitch') }}</strong>
               <span>{{ $t('home.starterMindMapPitchDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('mindmap:pitch') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('mindmap:pitch')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -333,6 +453,12 @@
             >
               <strong>{{ $t('home.starterFlowApproval') }}</strong>
               <span>{{ $t('home.starterFlowApprovalDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:approval') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:approval')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -343,6 +469,12 @@
             >
               <strong>{{ $t('home.starterFlowRelease') }}</strong>
               <span>{{ $t('home.starterFlowReleaseDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:release') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:release')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -353,6 +485,12 @@
             >
               <strong>{{ $t('home.starterFlowEnterprise') }}</strong>
               <span>{{ $t('home.starterFlowEnterpriseDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:enterpriseDelivery') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:enterpriseDelivery')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -363,6 +501,12 @@
             >
               <strong>{{ $t('home.starterFlowSupport') }}</strong>
               <span>{{ $t('home.starterFlowSupportDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:supportEscalation') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:supportEscalation')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -373,6 +517,12 @@
             >
               <strong>{{ $t('home.starterFlowSales') }}</strong>
               <span>{{ $t('home.starterFlowSalesDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:salesPipeline') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:salesPipeline')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -383,6 +533,12 @@
             >
               <strong>{{ $t('home.starterFlowReviewFlow') }}</strong>
               <span>{{ $t('home.starterFlowReviewFlowDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:contentReview') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:contentReview')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -393,6 +549,12 @@
             >
               <strong>{{ $t('home.starterFlowIncident') }}</strong>
               <span>{{ $t('home.starterFlowIncidentDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:incident') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:incident')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -403,6 +565,12 @@
             >
               <strong>{{ $t('home.starterFlowJourney') }}</strong>
               <span>{{ $t('home.starterFlowJourneyDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:customerJourney') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:customerJourney')"
+              >★</em>
             </button>
             <button
               type="button"
@@ -413,6 +581,108 @@
             >
               <strong>{{ $t('home.starterFlowProcurement') }}</strong>
               <span>{{ $t('home.starterFlowProcurementDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:procurement') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:procurement')"
+              >★</em>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowTroubleshooting'), $t('home.starterFlowTroubleshootingDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('troubleshooting')"
+            >
+              <strong>{{ $t('home.starterFlowTroubleshooting') }}</strong>
+              <span>{{ $t('home.starterFlowTroubleshootingDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:troubleshooting') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:troubleshooting')"
+              >★</em>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowTicket'), $t('home.starterFlowTicketDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('ticket')"
+            >
+              <strong>{{ $t('home.starterFlowTicket') }}</strong>
+              <span>{{ $t('home.starterFlowTicketDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:ticket') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:ticket')"
+              >★</em>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowOnboarding'), $t('home.starterFlowOnboardingDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('onboarding')"
+            >
+              <strong>{{ $t('home.starterFlowOnboarding') }}</strong>
+              <span>{{ $t('home.starterFlowOnboardingDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:onboarding') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:onboarding')"
+              >★</em>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowDataPipeline'), $t('home.starterFlowDataPipelineDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('dataPipeline')"
+            >
+              <strong>{{ $t('home.starterFlowDataPipeline') }}</strong>
+              <span>{{ $t('home.starterFlowDataPipelineDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:dataPipeline') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:dataPipeline')"
+              >★</em>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowProjectPlan'), $t('home.starterFlowProjectPlanDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('projectPlan')"
+            >
+              <strong>{{ $t('home.starterFlowProjectPlan') }}</strong>
+              <span>{{ $t('home.starterFlowProjectPlanDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:projectPlan') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:projectPlan')"
+              >★</em>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowCrossApproval'), $t('home.starterFlowCrossApprovalDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('crossFunctionalApproval')"
+            >
+              <strong>{{ $t('home.starterFlowCrossApproval') }}</strong>
+              <span>{{ $t('home.starterFlowCrossApprovalDesc') }}</span>
+              <em
+                class="starterFavoriteBtn"
+                :class="{ isOn: isFavoritePref('flowchart:crossFunctionalApproval') }"
+                :title="$t('home.toggleFavoriteStarter')"
+                @click.stop="toggleFavoritePref('flowchart:crossFunctionalApproval')"
+              >★</em>
             </button>
           </div>
             <div v-if="!hasVisibleStarters" class="starterEmpty">
@@ -519,6 +789,13 @@ import { useThemeStore } from '@/stores/theme'
 import { createDefaultMindMapData } from '@/platform/shared/configSchema'
 import { createScenarioMindMapData as createSharedScenarioMindMapData } from '@/services/scenarioMindMapFactory'
 import {
+  loadRecentStarterKeys,
+  rememberRecentStarter,
+  loadFavoriteStarterKeys,
+  toggleFavoriteStarter,
+  resolveStarterLabelKey
+} from '@/services/starterPrefs'
+import {
   getPreferredMindMapThemeValue,
   toggleThemeMode
 } from '@/stores/runtime'
@@ -543,6 +820,7 @@ export default {
       starterKeyword: '',
       starterCategory: 'all',
       recentStarterKeys: [],
+      favoriteStarterKeys: [],
       busy: false,
       homeRefreshFrame: 0,
       homeRefreshTimer: 0,
@@ -557,9 +835,9 @@ export default {
     },
     starterCategoryCounts() {
       return {
-        all: 27,
+        all: 33,
         mindmap: 18,
-        flowchart: 9
+        flowchart: 15
       }
     },
     hasVisibleStarters() {
@@ -590,7 +868,13 @@ export default {
         ['flowchart', 'home.starterFlowReviewFlow', 'home.starterFlowReviewFlowDesc'],
         ['flowchart', 'home.starterFlowIncident', 'home.starterFlowIncidentDesc'],
         ['flowchart', 'home.starterFlowJourney', 'home.starterFlowJourneyDesc'],
-        ['flowchart', 'home.starterFlowProcurement', 'home.starterFlowProcurementDesc']
+        ['flowchart', 'home.starterFlowProcurement', 'home.starterFlowProcurementDesc'],
+        ['flowchart', 'home.starterFlowTroubleshooting', 'home.starterFlowTroubleshootingDesc'],
+        ['flowchart', 'home.starterFlowTicket', 'home.starterFlowTicketDesc'],
+        ['flowchart', 'home.starterFlowOnboarding', 'home.starterFlowOnboardingDesc'],
+        ['flowchart', 'home.starterFlowDataPipeline', 'home.starterFlowDataPipelineDesc'],
+        ['flowchart', 'home.starterFlowProjectPlan', 'home.starterFlowProjectPlanDesc'],
+        ['flowchart', 'home.starterFlowCrossApproval', 'home.starterFlowCrossApprovalDesc']
       ]
       return labels.some(([category, titleKey, descKey]) =>
         this.isStarterVisible(category, this.$t(titleKey), this.$t(descKey))
@@ -613,6 +897,7 @@ export default {
   },
   mounted() {
     this.loadRecentStarters()
+    this.loadFavoriteStarters()
 
     this.scheduleRefreshHomeData()
     this.scheduleWarmupWorkspaceActions()
@@ -703,6 +988,7 @@ export default {
     },
 
     async createBlankProject() {
+      this.rememberStarter('mindmap-layout:blank')
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceLocalFile } = await loadWorkspaceActions()
         return createWorkspaceLocalFile({
@@ -788,6 +1074,55 @@ export default {
         const { clearWorkspaceRecentFiles } = await loadWorkspaceActions()
         await clearWorkspaceRecentFiles()
       })
+    },
+
+
+    loadRecentStarters() {
+      this.recentStarterKeys = loadRecentStarterKeys()
+    },
+
+    loadFavoriteStarters() {
+      this.favoriteStarterKeys = loadFavoriteStarterKeys()
+    },
+
+    rememberStarter(key) {
+      this.recentStarterKeys = rememberRecentStarter(key)
+    },
+
+    isFavoritePref(key) {
+      return this.favoriteStarterKeys.includes(key)
+    },
+
+    toggleFavoritePref(key) {
+      this.favoriteStarterKeys = toggleFavoriteStarter(key)
+    },
+
+    formatRecentStarter(key) {
+      const labelKey = resolveStarterLabelKey(key)
+      if (labelKey) return this.$t(labelKey)
+      if (String(key).startsWith('mindmap:')) return this.$t('home.starterCategoryMindmap')
+      if (String(key).startsWith('flowchart:')) return this.$t('home.starterCategoryFlowchart')
+      return key
+    },
+
+    async openRecentStarter(key) {
+      const value = String(key || '')
+      if (value.startsWith('flowchart:')) {
+        await this.createFlowchartFromTemplate(value.slice('flowchart:'.length))
+        return
+      }
+      if (value.startsWith('mindmap-layout:')) {
+        const layout = value.slice('mindmap-layout:'.length)
+        if (layout === 'blank') {
+          await this.createBlankProject()
+          return
+        }
+        await this.createMindMapWithLayout(layout)
+        return
+      }
+      if (value.startsWith('mindmap:')) {
+        await this.createMindMapScenario(value.slice('mindmap:'.length))
+      }
     },
 
     isStarterVisible(category, ...labels) {
@@ -1239,6 +1574,10 @@ export default {
   font: inherit;
   font-size: 12px;
 }
+.recentStarterChip.isFavorite {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.28);
+}
 .homePage.isDark .recentStarterLabel {
   color: rgba(255,255,255,0.55);
 }
@@ -1260,6 +1599,7 @@ export default {
   gap: 12px;
 }
 .starterCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1273,6 +1613,26 @@ export default {
   text-align: left;
   cursor: pointer;
   font: inherit;
+}
+.starterFavoriteBtn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-style: normal;
+  font-size: 14px;
+  color: rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+  line-height: 1;
+  user-select: none;
+}
+.starterFavoriteBtn.isOn {
+  color: #f59e0b;
+}
+.homePage.isDark .starterFavoriteBtn {
+  color: rgba(255, 255, 255, 0.35);
+}
+.homePage.isDark .starterFavoriteBtn.isOn {
+  color: #fbbf24;
 }
 .starterCard:hover {
   border-color: rgba(0, 117, 222, 0.28);

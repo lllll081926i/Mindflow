@@ -170,16 +170,16 @@ export const buildFlowchartAutofixPlan = (flowchartData = {}) => {
 
   // remove dangling edges first
   const validEdges = []
-  let removedEdges = 0
+  let removedDanglingEdgeCount = 0
   edges.forEach(edge => {
     if (nodeMap.has(edge.source) && nodeMap.has(edge.target)) {
       validEdges.push(edge)
     } else {
-      removedEdges += 1
+      removedDanglingEdgeCount += 1
     }
   })
-  if (removedEdges > 0) {
-    actions.push({ code: 'remove-dangling-edges', count: removedEdges })
+  if (removedDanglingEdgeCount > 0) {
+    actions.push({ code: 'remove-dangling-edges', count: removedDanglingEdgeCount })
   }
 
   // recompute after edge cleanup
@@ -374,10 +374,49 @@ export const buildFlowchartAutofixPlan = (flowchartData = {}) => {
     edges: validEdges
   }
   const nextResult = validateFlowchartStructure(nextData)
+  const beforeNodes = Array.isArray(flowchartData?.nodes) ? flowchartData.nodes : []
+  const beforeEdges = Array.isArray(flowchartData?.edges) ? flowchartData.edges : []
+  const beforeNodeIds = new Set(beforeNodes.map(n => String(n.id || '')))
+  const afterNodeIds = new Set(nodes.map(n => String(n.id || '')))
+  const beforeEdgeIds = new Set(beforeEdges.map(e => String(e.id || '')))
+  const afterEdgeIds = new Set(validEdges.map(e => String(e.id || '')))
+  const addedNodes = nodes.filter(n => !beforeNodeIds.has(String(n.id || '')))
+  const removedNodes = beforeNodes.filter(n => !afterNodeIds.has(String(n.id || '')))
+  const addedEdges = validEdges.filter(e => !beforeEdgeIds.has(String(e.id || '')))
+  const removedEdges = beforeEdges.filter(e => !afterEdgeIds.has(String(e.id || '')))
+  const labeledEdges = validEdges.filter(e => {
+    const prev = beforeEdges.find(p => String(p.id || '') === String(e.id || ''))
+    return prev && !String(prev.label || '').trim() && String(e.label || '').trim()
+  })
   return {
     actions,
     flowchartData: nextData,
     before: result,
-    after: nextResult
+    after: nextResult,
+    diff: {
+      addedNodes: addedNodes.map(n => ({ id: n.id, type: n.type, text: n.text })),
+      removedNodes: removedNodes.map(n => ({ id: n.id, type: n.type, text: n.text })),
+      addedEdges: addedEdges.map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        label: e.label
+      })),
+      removedEdges: removedEdges.map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target
+      })),
+      labeledEdges: labeledEdges.map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        label: e.label
+      })),
+      nodeDelta: nodes.length - beforeNodes.length,
+      edgeDelta: validEdges.length - beforeEdges.length,
+      scoreDelta:
+        Number(nextResult?.summary?.score || 0) - Number(result?.summary?.score || 0)
+    }
   }
 }

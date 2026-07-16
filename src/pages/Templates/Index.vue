@@ -43,6 +43,14 @@
       >
         {{ $t('home.starterCategoryFlowchart') }} ({{ counts.flowchart }})
       </button>
+      <button
+        type="button"
+        class="categoryChip"
+        :class="{ isActive: category === 'favorites' }"
+        @click="category = 'favorites'"
+      >
+        {{ $t('home.favoriteStarters') }} ({{ counts.favorites }})
+      </button>
     </div>
 
     <section v-if="showMindmap" class="templateSection">
@@ -58,6 +66,12 @@
         >
           <strong>{{ $t(item.titleKey) }}</strong>
           <span>{{ $t(item.descKey) }}</span>
+          <em
+            class="templateFavoriteBtn"
+            :class="{ isOn: isFavoritePref('mindmap:' + item.key) }"
+            :title="$t('home.toggleFavoriteStarter')"
+            @click.stop="toggleFavoritePref('mindmap:' + item.key)"
+          >★</em>
         </button>
       </div>
     </section>
@@ -75,6 +89,12 @@
         >
           <strong>{{ $t(item.titleKey) }}</strong>
           <span>{{ $t(item.descKey) }}</span>
+          <em
+            class="templateFavoriteBtn"
+            :class="{ isOn: isFavoritePref('flowchart:' + item.key) }"
+            :title="$t('home.toggleFavoriteStarter')"
+            @click.stop="toggleFavoritePref('flowchart:' + item.key)"
+          >★</em>
         </button>
       </div>
     </section>
@@ -93,6 +113,11 @@ import {
   MIND_MAP_SCENARIO_STARTERS
 } from '@/services/templateCatalog'
 import { createScenarioMindMapData } from '@/services/scenarioMindMapFactory'
+import {
+  loadFavoriteStarterKeys,
+  toggleFavoriteStarter,
+  rememberRecentStarter
+} from '@/services/starterPrefs'
 
 let workspaceActionsPromise = null
 const loadWorkspaceActions = async () => {
@@ -112,6 +137,7 @@ export default {
       busy: false,
       keyword: '',
       category: 'all',
+      favoriteStarterKeys: [],
       mindmapStarters: MIND_MAP_SCENARIO_STARTERS,
       flowchartStarters: FLOWCHART_TEMPLATE_STARTERS
     }
@@ -124,33 +150,51 @@ export default {
       return {
         all: this.mindmapStarters.length + this.flowchartStarters.length,
         mindmap: this.mindmapStarters.length,
-        flowchart: this.flowchartStarters.length
+        flowchart: this.flowchartStarters.length,
+        favorites: this.favoriteStarterKeys.length
       }
     },
     showMindmap() {
-      return this.category === 'all' || this.category === 'mindmap'
+      return this.category === 'all' || this.category === 'mindmap' || this.category === 'favorites'
     },
     showFlowchart() {
-      return this.category === 'all' || this.category === 'flowchart'
+      return this.category === 'all' || this.category === 'flowchart' || this.category === 'favorites'
     },
     filteredMindmapStarters() {
-      return this.filterList(this.mindmapStarters)
+      return this.filterList(this.mindmapStarters, 'mindmap')
     },
     filteredFlowchartStarters() {
-      return this.filterList(this.flowchartStarters)
+      return this.filterList(this.flowchartStarters, 'flowchart')
     }
   },
+  mounted() {
+    this.loadFavoriteStarters()
+  },
   methods: {
-    filterList(list) {
+    filterList(list, kind) {
+      let next = list
+      if (this.category === 'favorites') {
+        const prefix = kind === 'flowchart' ? 'flowchart:' : 'mindmap:'
+        next = list.filter(item => this.favoriteStarterKeys.includes(prefix + item.key))
+      }
       const keyword = String(this.keyword || '')
         .trim()
         .toLowerCase()
-      if (!keyword) return list
-      return list.filter(item => {
+      if (!keyword) return next
+      return next.filter(item => {
         const title = String(this.$t(item.titleKey) || '').toLowerCase()
         const desc = String(this.$t(item.descKey) || '').toLowerCase()
         return title.includes(keyword) || desc.includes(keyword)
       })
+    },
+    loadFavoriteStarters() {
+      this.favoriteStarterKeys = loadFavoriteStarterKeys()
+    },
+    isFavoritePref(key) {
+      return this.favoriteStarterKeys.includes(key)
+    },
+    toggleFavoritePref(key) {
+      this.favoriteStarterKeys = toggleFavoriteStarter(key)
     },
     async runWorkspaceAction(task) {
       if (this.busy) return null
@@ -165,14 +209,7 @@ export default {
       }
     },
     rememberStarter(key) {
-      try {
-        const raw = localStorage.getItem('mindflow.recentStarters.v1')
-        const list = raw ? JSON.parse(raw) : []
-        const next = [key, ...(Array.isArray(list) ? list : []).filter(item => item !== key)].slice(0, 8)
-        localStorage.setItem('mindflow.recentStarters.v1', JSON.stringify(next))
-      } catch (_error) {
-        // ignore
-      }
+      rememberRecentStarter(key)
     },
     async createMindMapScenario(scenario) {
       this.rememberStarter('mindmap:' + scenario)
@@ -288,6 +325,7 @@ export default {
   gap: 12px;
 }
 .templateCard {
+  position: relative;
   min-height: 96px;
   padding: 14px 16px;
   border-radius: 12px;
@@ -300,6 +338,26 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.templateFavoriteBtn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-style: normal;
+  font-size: 14px;
+  color: rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+  line-height: 1;
+  user-select: none;
+}
+.templateFavoriteBtn.isOn {
+  color: #f59e0b;
+}
+.templatesPage.isDark .templateFavoriteBtn {
+  color: rgba(255, 255, 255, 0.35);
+}
+.templatesPage.isDark .templateFavoriteBtn.isOn {
+  color: #fbbf24;
 }
 .templateCard span {
   color: #737373;

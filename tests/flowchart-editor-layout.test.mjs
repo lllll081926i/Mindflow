@@ -2161,3 +2161,15 @@ test('XMind 画布对话框打开后聚焦确认按钮', () => {
   assert.ok(editorSource.includes('xmindConfirmBtn'))
   assert.ok(editorSource.includes('xmindConfirmBtn?.focus'))
 })
+
+
+test('自动修复结果可聚焦到变更节点，并展示具体 diff 文案', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  const validationSource = fs.readFileSync(path.resolve('src/pages/Edit/components/flowchartValidation.js'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /focusAutofixAction\(action\) \{/)
+  assert.match(editorSource, /autofixDiffAddNode/)
+  assert.match(validationSource, /diff:\s*\{/)
+  assert.match(langSource, /"autofixDiffAddNode"/)
+  assert.match(langSource, /"autofixDiffAddEdge"/)
+})

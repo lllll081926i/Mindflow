@@ -1391,12 +1391,48 @@ export default {
       const afterEdges = plan.after?.summary?.edges || 0
       const beforeScore = plan.before?.summary?.score || 0
       const afterScore = plan.after?.summary?.score || 0
+      const formatDelta = value => (value > 0 ? '+' + value : String(value))
+      const concrete = []
+      const diff = plan.diff || {}
+      ;(diff.addedNodes || []).slice(0, 3).forEach(node => {
+        concrete.push(
+          this.$t('flowchart.autofixDiffAddNode', {
+            text: node.text || node.type || node.id
+          })
+        )
+      })
+      ;(diff.removedEdges || []).slice(0, 2).forEach(edge => {
+        concrete.push(
+          this.$t('flowchart.autofixDiffRemoveEdge', {
+            source: edge.source,
+            target: edge.target
+          })
+        )
+      })
+      ;(diff.addedEdges || []).slice(0, 3).forEach(edge => {
+        concrete.push(
+          this.$t('flowchart.autofixDiffAddEdge', {
+            source: edge.source,
+            target: edge.target
+          })
+        )
+      })
+      ;(diff.labeledEdges || []).slice(0, 2).forEach(edge => {
+        concrete.push(
+          this.$t('flowchart.autofixDiffLabelEdge', {
+            label: edge.label,
+            source: edge.source,
+            target: edge.target
+          })
+        )
+      })
       const detail = [
         this.$t('flowchart.autofixDiffSummary', {
-          nodes: afterNodes - beforeNodes,
-          edges: afterEdges - beforeEdges,
-          score: afterScore - beforeScore
+          nodes: formatDelta(afterNodes - beforeNodes),
+          edges: formatDelta(afterEdges - beforeEdges),
+          score: formatDelta(afterScore - beforeScore)
         }),
+        ...concrete,
         ...plan.actions
           .map(action =>
             this.$t('flowchart.autofixAction.' + action.code, {
@@ -1404,7 +1440,7 @@ export default {
             })
           )
           .filter(Boolean)
-          .slice(0, 6)
+          .slice(0, 4)
       ].join('\n')
       try {
         await this.$confirm(
@@ -1452,6 +1488,57 @@ export default {
         })
       )
       return plan
+    },
+
+
+    focusAutofixAction(action) {
+      if (!action) return
+      const nodeIds = []
+      if (action.nodeId) nodeIds.push(action.nodeId)
+      if (Array.isArray(action.nodeIds)) nodeIds.push(...action.nodeIds)
+      if (action.sourceId) nodeIds.push(action.sourceId)
+      if (action.targetId) nodeIds.push(action.targetId)
+      const unique = Array.from(new Set(nodeIds.filter(Boolean)))
+      if (unique.length) {
+        this.selectedNodeIds = unique
+        this.selectedEdgeId = ''
+        this.validationHighlightNodeIds = unique
+        const node = this.flowchartNodeLookup.get(unique[0])
+        if (node && typeof this.centerViewportAt === 'function') {
+          this.centerViewportAt({
+            x: Number(node.x || 0) + Number(node.width || 0) / 2,
+            y: Number(node.y || 0) + Number(node.height || 0) / 2
+          })
+        }
+        return
+      }
+      if (action.code === 'add-start' || action.code === 'connect-start') {
+        const start = (this.flowchartData.nodes || []).find(n => n.type === 'start')
+        if (start) {
+          this.selectedNodeIds = [start.id]
+          this.validationHighlightNodeIds = [start.id]
+          if (typeof this.centerViewportAt === 'function') {
+            this.centerViewportAt({
+              x: Number(start.x || 0) + Number(start.width || 0) / 2,
+              y: Number(start.y || 0) + Number(start.height || 0) / 2
+            })
+          }
+        }
+        return
+      }
+      if (action.code === 'add-end' || action.code === 'connect-end') {
+        const end = (this.flowchartData.nodes || []).find(n => n.type === 'end')
+        if (end) {
+          this.selectedNodeIds = [end.id]
+          this.validationHighlightNodeIds = [end.id]
+          if (typeof this.centerViewportAt === 'function') {
+            this.centerViewportAt({
+              x: Number(end.x || 0) + Number(end.width || 0) / 2,
+              y: Number(end.y || 0) + Number(end.height || 0) / 2
+            })
+          }
+        }
+      }
     },
 
     undoLastFlowchartAutofix() {

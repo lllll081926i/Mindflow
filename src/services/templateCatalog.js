@@ -25,5 +25,31 @@ export const FLOWCHART_TEMPLATE_STARTERS = [
   { key: 'contentReview', titleKey: 'home.starterFlowReviewFlow', descKey: 'home.starterFlowReviewFlowDesc' },
   { key: 'incident', titleKey: 'home.starterFlowIncident', descKey: 'home.starterFlowIncidentDesc' },
   { key: 'customerJourney', titleKey: 'home.starterFlowJourney', descKey: 'home.starterFlowJourneyDesc' },
-  { key: 'procurement', titleKey: 'home.starterFlowProcurement', descKey: 'home.starterFlowProcurementDesc' }
+  { key: 'procurement', titleKey: 'home.starterFlowProcurement', descKey: 'home.starterFlowProcurementDesc' },
+  {
+    key: 'troubleshooting',
+    titleKey: 'home.starterFlowTroubleshooting',
+    descKey: 'home.starterFlowTroubleshootingDesc'
+  },
+  { key: 'ticket', titleKey: 'home.starterFlowTicket', descKey: 'home.starterFlowTicketDesc' },
+  {
+    key: 'onboarding',
+    titleKey: 'home.starterFlowOnboarding',
+    descKey: 'home.starterFlowOnboardingDesc'
+  },
+  {
+    key: 'dataPipeline',
+    titleKey: 'home.starterFlowDataPipeline',
+    descKey: 'home.starterFlowDataPipelineDesc'
+  },
+  {
+    key: 'projectPlan',
+    titleKey: 'home.starterFlowProjectPlan',
+    descKey: 'home.starterFlowProjectPlanDesc'
+  },
+  {
+    key: 'crossFunctionalApproval',
+    titleKey: 'home.starterFlowCrossApproval',
+    descKey: 'home.starterFlowCrossApprovalDesc'
+  }
 ]
