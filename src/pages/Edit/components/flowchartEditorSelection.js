@@ -259,6 +259,17 @@ export const flowchartSelectionMethods = {
         return
       }
     }
+    if (
+      event.key === ' ' &&
+      !isMetaKey &&
+      !event.altKey &&
+      (this.selectedNodeIds.length || this.selectedEdgeId)
+    ) {
+      event.preventDefault()
+      this.inspectorPanelSection = 'inspector'
+      this.toggleInspector()
+      return
+    }
     // XMind-like structure keys: Tab inserts a connected child process.
     if (event.key === 'Tab' && !isMetaKey) {
       event.preventDefault()

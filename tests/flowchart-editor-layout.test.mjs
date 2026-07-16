@@ -2337,3 +2337,15 @@ test('流程图删除节点后会选中相邻节点继续编辑', () => {
   assert.ok(selectionSource.includes('fallbackNodeId'))
   assert.ok(selectionSource.includes('neighborScores'))
 })
+
+
+test('流程图 Space 可切换属性面板', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes("event.key === ' '"))
+  assert.ok(selectionSource.includes('toggleInspector()'))
+  assert.ok(configSource.includes('打开/关闭属性面板'))
+})
