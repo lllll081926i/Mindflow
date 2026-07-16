@@ -115,12 +115,29 @@ export default {
     }
   },
   created() {
+    this.$bus.$on('openNodeIconSidebarTab', this.openTab)
+
     this.$bus.$on('node_active', this.handleNodeActive)
   },
   beforeUnmount() {
+    this.$bus.$off('openNodeIconSidebarTab', this.openTab)
+
     this.$bus.$off('node_active', this.handleNodeActive)
   },
   methods: {
+    openTab(tab = 'icon') {
+      this.activeName = tab === 'image' || tab === 'sticker' ? 'image' : 'icon'
+      if (this.activeName === 'image' && !this.imageLoaded) {
+        // trigger existing lazy load path via watcher-like call if present
+        try {
+          import('@/config/image').then(module => {
+            this.nodeImageList = module.default || module.nodeImageList || []
+            this.imageLoaded = true
+          })
+        } catch (_error) {}
+      }
+    },
+
     async ensurePanelAssetsLoaded() {
       const tasks = []
       if (!this.iconLoaded) {

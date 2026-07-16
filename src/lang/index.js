@@ -539,7 +539,7 @@ const zh = {
     "created": "已创建范围概要",
     "canvasEdit": "画布改范围",
     "canvasEditOn": "画布改范围中",
-    "canvasEditHint": "画布改范围：点击同级主题设终点；Alt+点击设起点；Shift+点击扩展包含。"
+    "canvasEditHint": "画布改范围：拖拽起/终手柄，或点击同级主题；Alt+点击设起点；Shift+点击扩展包含。"
   },
   "markerLegend": {
     "title": "标记图例",
@@ -548,7 +548,11 @@ const zh = {
     "hint": "点击图例可筛选画布；再次点击同一图例可取消筛选。选中主题后点图例可直接打标。",
     "usage": "画布使用统计",
     "empty": "当前画布还没有标记",
-    "marked": "已为所选主题打标"
+    "marked": "已为所选主题打标",
+    "openStickers": "打开贴纸",
+    "openTheme": "主题",
+    "clearSelected": "清除所选标记",
+    "clearedSelected": "已清除所选主题标记"
   },
   "nodeIconSidebar": {
     "title": "图标/贴纸",

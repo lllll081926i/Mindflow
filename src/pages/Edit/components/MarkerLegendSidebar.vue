@@ -12,6 +12,19 @@
         <el-button size="small" @click="openIconSidebar">{{
           $t('markerLegend.openIcons') || '打开图标库'
         }}</el-button>
+        <el-button size="small" @click="openStickerSidebar">{{
+          $t('markerLegend.openStickers') || '打开贴纸'
+        }}</el-button>
+        <el-button size="small" @click="openThemeSidebar">{{
+          $t('markerLegend.openTheme') || '主题'
+        }}</el-button>
+        <el-button
+          size="small"
+          :disabled="activeNodes.length <= 0"
+          @click="clearSelectedMarkers"
+        >{{
+          $t('markerLegend.clearSelected') || '清除所选标记'
+        }}</el-button>
       </div>
       <div class="quickFilters">
         <button type="button" class="chip" :class="{ isActive: activeFilter === 'has:comment' }" @click="toggleQuick('has:comment')">批注</button>
@@ -230,6 +243,28 @@ export default {
     },
     openIconSidebar() {
       setActiveSidebar('nodeIconSidebar')
+      this.$bus.$emit('openNodeIconSidebarTab', 'icon')
+    },
+    openStickerSidebar() {
+      setActiveSidebar('nodeIconSidebar')
+      this.$bus.$emit('openNodeIconSidebarTab', 'image')
+    },
+    openThemeSidebar() {
+      setActiveSidebar('theme')
+    },
+    clearSelectedMarkers() {
+      if (!this.activeNodes.length) return
+      this.activeNodes.forEach(node => {
+        if (!node) return
+        if (typeof node.setIcon === 'function') node.setIcon([])
+        else if (node.mindMap?.execCommand) {
+          node.mindMap.execCommand('SET_NODE_ICON', node, [])
+        }
+      })
+      this.$nextTick(() => this.refreshCounts())
+      this.$message?.success?.(
+        this.$t('markerLegend.clearedSelected') || '已清除所选主题标记'
+      )
     },
     toggleQuick(token) {
       if (this.activeFilter === token) this.clearFilter()

@@ -1,5 +1,25 @@
 <template>
   <div
+    v-if="visible && canvasEditMode"
+    class="summaryRangeHandles"
+    :class="{ isDark: isDark }"
+  >
+    <div
+      v-if="startHandle"
+      class="rangeHandle start"
+      :style="{ left: startHandle.left + 'px', top: startHandle.top + 'px' }"
+      @mousedown.stop.prevent="onHandleDown('start', $event)"
+      title="拖拽调整起点"
+    >起</div>
+    <div
+      v-if="endHandle"
+      class="rangeHandle end"
+      :style="{ left: endHandle.left + 'px', top: endHandle.top + 'px' }"
+      @mousedown.stop.prevent="onHandleDown('end', $event)"
+      title="拖拽调整终点"
+    >终</div>
+  </div>
+  <div
     v-if="visible"
     class="summaryRangeBar"
     :class="{ isDark: isDark }"
@@ -37,7 +57,7 @@
       {{
         canvasEditMode
           ? ($t('summaryRange.canvasEditHint') ||
-            '画布改范围：点击同级主题设终点；Alt+点击设起点；Shift+点击扩展包含。')
+            '画布改范围：拖拽起/终手柄，或点击同级主题；Alt+点击设起点；Shift+点击扩展包含。')
           : ($t('summaryRange.hint') ||
             '选中多个同级主题后按 Ctrl+G 可创建范围概要；选中概要节点可在此调整覆盖范围。')
       }}
@@ -65,7 +85,11 @@ export default {
       range: null,
       brotherCount: 0,
       canvasEditMode: false,
-      suppressCloseOnce: false
+      suppressCloseOnce: false,
+      startHandle: null,
+      endHandle: null,
+      draggingEndpoint: '',
+      dragRaf: 0
     }
   },
   computed: {
@@ -96,15 +120,27 @@ export default {
     this.$bus.$on('node_active', this.onNodeActive)
     this.$bus.$on('draw_click', this.onDrawClick)
     this.$bus.$on('node_tree_render_end', this.onRenderEnd)
+    this.$bus.$on('translate', this.updateHandlePositions)
+    this.$bus.$on('scale', this.updateHandlePositions)
+    window.addEventListener('mousemove', this.onHandleMove, true)
+    window.addEventListener('mouseup', this.onHandleUp, true)
   },
   beforeUnmount() {
     this.$bus.$off('node_active', this.onNodeActive)
     this.$bus.$off('draw_click', this.onDrawClick)
     this.$bus.$off('node_tree_render_end', this.onRenderEnd)
+    this.$bus.$off('translate', this.updateHandlePositions)
+    this.$bus.$off('scale', this.updateHandlePositions)
+    window.removeEventListener('mousemove', this.onHandleMove, true)
+    window.removeEventListener('mouseup', this.onHandleUp, true)
+    if (this.dragRaf) cancelAnimationFrame(this.dragRaf)
   },
   methods: {
     onRenderEnd() {
-      if (this.visible) this.applyRangeHighlight()
+      if (this.visible) {
+        this.applyRangeHighlight()
+        this.updateHandlePositions()
+      }
     },
     onDrawClick() {
       if (this.canvasEditMode) return
@@ -119,6 +155,9 @@ export default {
       this.brotherCount = 0
       this.canvasEditMode = false
       this.suppressCloseOnce = false
+      this.startHandle = null
+      this.endHandle = null
+      this.draggingEndpoint = ''
     },
     toggleCanvasEditMode() {
       if (!this.parentNode || !Array.isArray(this.range)) return
@@ -231,6 +270,90 @@ export default {
           this.parentNode._summaryRangeHighlight = true
         }
       } catch (_error) {}
+      this.updateHandlePositions()
+    },
+    updateHandlePositions() {
+      if (!this.visible || !this.canvasEditMode || !this.parentNode || !Array.isArray(this.range)) {
+        this.startHandle = null
+        this.endHandle = null
+        return
+      }
+      try {
+        const children = this.parentNode.children || []
+        const [start, end] = this.range
+        const startNode = children[start]
+        const endNode = children[end]
+        this.startHandle = this.getHandlePoint(startNode, 'start')
+        this.endHandle = this.getHandlePoint(endNode, 'end')
+      } catch (_error) {
+        this.startHandle = null
+        this.endHandle = null
+      }
+    },
+    getHandlePoint(node, which) {
+      if (!node || typeof node.getNodePosInClient !== 'function') return null
+      const pos = node.getNodePosInClient(node.left, node.top)
+      const width = Number(node.width || 0)
+      const height = Number(node.height || 0)
+      const offsetX = which === 'start' ? -10 : width + 10
+      return {
+        left: Math.round(pos.left + offsetX),
+        top: Math.round(pos.top + height / 2)
+      }
+    },
+    onHandleDown(endpoint) {
+      if (!this.canvasEditMode || !Array.isArray(this.range)) return
+      this.draggingEndpoint = endpoint
+      this.suppressCloseOnce = true
+    },
+    onHandleMove(event) {
+      if (!this.draggingEndpoint || !this.parentNode || !Array.isArray(this.range)) return
+      if (this.dragRaf) cancelAnimationFrame(this.dragRaf)
+      this.dragRaf = requestAnimationFrame(() => {
+        this.dragRaf = 0
+        this.dragRangeToPoint(event.clientX, event.clientY)
+      })
+    },
+    onHandleUp() {
+      if (!this.draggingEndpoint) return
+      this.draggingEndpoint = ''
+      this.suppressCloseOnce = true
+    },
+    dragRangeToPoint(clientX, clientY) {
+      const children = this.parentNode?.children || []
+      if (!children.length) return
+      let bestIndex = -1
+      let bestDist = Infinity
+      children.forEach((child, index) => {
+        if (!child || typeof child.getNodePosInClient !== 'function') return
+        const pos = child.getNodePosInClient(child.left, child.top)
+        const cx = pos.left + Number(child.width || 0) / 2
+        const cy = pos.top + Number(child.height || 0) / 2
+        const dist = Math.hypot(clientX - cx, clientY - cy)
+        if (dist < bestDist) {
+          bestDist = dist
+          bestIndex = index
+        }
+      })
+      if (bestIndex < 0) return
+      let [start, end] = this.range
+      if (this.draggingEndpoint === 'start') {
+        start = bestIndex
+        if (start > end) end = start
+      } else {
+        end = bestIndex
+        if (end < start) start = end
+      }
+      if (start === this.range[0] && end === this.range[1]) {
+        this.updateHandlePositions()
+        return
+      }
+      if (this.generalizationNode) {
+        this.updateRange([start, end])
+      } else {
+        this.range = [start, end]
+        this.applyRangeHighlight()
+      }
     },
     onNodeActive(node, nodeList = []) {
       const list = Array.isArray(nodeList) ? nodeList : []
@@ -385,6 +508,45 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.summaryRangeHandles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1390;
+}
+.rangeHandle {
+  position: fixed;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  margin-top: -14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+.rangeHandle:active {
+  cursor: grabbing;
+}
+.rangeHandle.start {
+  background: #2563eb;
+}
+.rangeHandle.end {
+  background: #7c3aed;
+}
+.summaryRangeHandles.isDark .rangeHandle.start {
+  background: #3b82f6;
+}
+.summaryRangeHandles.isDark .rangeHandle.end {
+  background: #8b5cf6;
+}
 .summaryRangeBar {
   position: fixed;
   left: 50%;

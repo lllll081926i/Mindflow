@@ -717,3 +717,29 @@ test('范围概要支持画布点选改范围', () => {
   assert.ok(summarySource.includes('applyCanvasPick'))
   assert.ok(summarySource.includes('toggleCanvasEditMode'))
 })
+
+
+test('范围概要支持拖拽手柄调整', () => {
+  const summarySource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/SummaryRangeBar.vue'),
+    'utf8'
+  )
+  assert.ok(summarySource.includes('summaryRangeHandles'))
+  assert.ok(summarySource.includes('dragRangeToPoint'))
+  assert.ok(summarySource.includes('onHandleDown'))
+})
+
+test('标记图例可联动贴纸与主题侧栏', () => {
+  const legendSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/MarkerLegendSidebar.vue'),
+    'utf8'
+  )
+  const iconSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/NodeIconSidebar.vue'),
+    'utf8'
+  )
+  assert.ok(legendSource.includes('openStickerSidebar'))
+  assert.ok(legendSource.includes('openThemeSidebar'))
+  assert.ok(legendSource.includes('clearSelectedMarkers'))
+  assert.ok(iconSource.includes('openNodeIconSidebarTab'))
+})

@@ -280,7 +280,7 @@ export const createWorkbookFromMindmapList = (list = [], options = {}) => {
 const stripHtmlText = value =>
   String(value || '')
     .replace(/<[^>]*>/g, ' ')
-    .replace(/s+/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim()
 
 const NEWLINE = String.fromCharCode(10)
@@ -288,8 +288,8 @@ const NEWLINE = String.fromCharCode(10)
 /**
  * Best-effort XMind fidelity enricher:
  * - fold local comments into notes
+ * - surface outer-frame / attachment / marker metadata into portable notes/labels
  * - keep tags as labels (library already maps)
- * - surface icon markers into labels for XMind consumers without icon packs
  */
 const enrichNodeForXmindExport = root => {
   const clone = (() => {
@@ -330,6 +330,32 @@ const enrichNodeForXmindExport = root => {
       noteParts.push(commentLines.join(NEWLINE))
     }
 
+    // outer frame / boundary-like metadata
+    const outerFrame = data.outerFrame || data.frame || null
+    if (outerFrame) {
+      const frameText =
+        typeof outerFrame === 'object'
+          ? stripHtmlText(outerFrame.text || outerFrame.title || outerFrame.name || '外框')
+          : stripHtmlText(outerFrame)
+      if (frameText) noteParts.push('[外框] ' + frameText)
+    }
+
+    // attachment names (url already not always portable)
+    if (data.attachmentName || data.attachmentUrl) {
+      noteParts.push(
+        '[附件] ' +
+          stripHtmlText(data.attachmentName || data.attachmentUrl)
+      )
+    }
+
+    // formula / annotation text when present as plain fields
+    if (data.formula) {
+      noteParts.push('[公式] ' + stripHtmlText(data.formula))
+    }
+    if (data.annotation) {
+      noteParts.push('[标注] ' + stripHtmlText(data.annotation))
+    }
+
     if (noteParts.length) {
       data.note = noteParts.join(NEWLINE + NEWLINE)
     }
@@ -354,6 +380,11 @@ const enrichNodeForXmindExport = root => {
     const mergedLabels = [...new Set([...tags, ...iconLabels].filter(Boolean))]
     if (mergedLabels.length) {
       data.tag = mergedLabels
+    }
+
+    // ensure hyperlink retained (library maps data.hyperlink)
+    if (!data.hyperlink && data.link) {
+      data.hyperlink = data.link
     }
 
     if (Array.isArray(node.children)) node.children.forEach(walk)
