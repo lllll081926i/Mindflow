@@ -16,6 +16,11 @@ const routes = [
     component: () => import('./pages/Edit/Index.vue')
   },
   {
+    path: '/templates',
+    name: 'Templates',
+    component: () => import('./pages/Templates/Index.vue')
+  },
+  {
     path: '/export',
     name: 'Export',
     component: () => import('./pages/Edit/Index.vue')

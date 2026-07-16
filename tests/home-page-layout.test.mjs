@@ -284,3 +284,18 @@ test('首页模板中心记录并展示最近使用模板', () => {
   assert.match(source, /openRecentStarter/)
   assert.match(langSource, /"recentStarters"/)
 })
+
+
+test('首页提供模板中心独立入口', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const routerSource = fs.readFileSync(path.resolve('src/router.js'), 'utf8')
+  const templatesSource = fs.readFileSync(
+    path.resolve('src/pages/Templates/Index.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /\/templates/)
+  assert.match(routerSource, /path: '\/templates'/)
+  assert.match(templatesSource, /TemplatesPage|templatesPage/)
+  assert.match(langSource, /"templatesCenterTitle"/)
+})

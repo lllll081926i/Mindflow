@@ -107,12 +107,17 @@
         <section class="starterSection">
           <div class="resumeHeader">
             <h2>{{ $t('home.starterTitle') }}</h2>
-            <input
-              v-model.trim="starterKeyword"
-              class="starterSearch"
-              type="search"
-              :placeholder="$t('home.starterSearchPlaceholder')"
-            />
+            <div class="starterHeaderActions">
+              <input
+                v-model.trim="starterKeyword"
+                class="starterSearch"
+                type="search"
+                :placeholder="$t('home.starterSearchPlaceholder')"
+              />
+              <button type="button" class="templatesCenterBtn" @click="$router.push('/templates')">
+                {{ $t('home.openTemplatesCenter') }}
+              </button>
+            </div>
           </div>
           <div class="starterCategoryChips">
             <button type="button" class="starterCategoryChip" :class="{ isActive: starterCategory === 'all' }" @click="starterCategory = 'all'">
