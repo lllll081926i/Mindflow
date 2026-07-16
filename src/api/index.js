@@ -26,9 +26,28 @@ export const storeData = data => {
     if (!originData) {
       originData = {}
     }
+    // workbook-aware merge: keep sheets unless explicitly replaced
     originData = {
       ...originData,
       ...data
+    }
+    if (
+      Array.isArray(originData.sheets) &&
+      originData.sheets.length &&
+      data &&
+      data.root &&
+      !Array.isArray(data.sheets)
+    ) {
+      originData.sheets = originData.sheets.map(sheet => {
+        if (sheet.id !== originData.activeSheetId) return sheet
+        return {
+          ...sheet,
+          root: data.root,
+          theme: data.theme || sheet.theme,
+          layout: data.layout || sheet.layout,
+          view: data.view !== undefined ? data.view : sheet.view
+        }
+      })
     }
     void saveBootstrapStatePatch({
       mindMapData: originData

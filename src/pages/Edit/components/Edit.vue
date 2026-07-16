@@ -17,12 +17,12 @@
       </div>
     </div>
     <div v-if="mindmapSheets.length && !isZenMode" class="mindmapSheetBar" @mousedown.stop>
-      <div class="mindmapSheetList">
+      <div class="mindmapSheetList" role="tablist" :aria-label="$t('edit.sheets') || '画布'">
         <button
           v-for="sheet in mindmapSheets"
           :key="sheet.id"
           type="button"
-          class="mindmapSheetTab"
+          class="mindmapSheetTab" role="tab" :aria-selected="sheet.active ? 'true' : 'false'"
           :class="{ isActive: sheet.active }"
           @click="switchMindmapSheetById(sheet.id)"
           @dblclick.stop="startRenameMindmapSheet(sheet)"

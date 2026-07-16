@@ -426,6 +426,11 @@ export const shortcutKeyList = [
         name: '新建画布',
         value: ctrl + ' + T'
       },
+      {
+        icon: 'iconcopy',
+        name: '复制当前画布',
+        value: ctrl + ' + Shift + N'
+      },
       name: '切换到下一画布',
         value: ctrl + ' + Tab'
       },

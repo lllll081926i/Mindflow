@@ -448,6 +448,7 @@ const zh = {
   },
   "edit": {
     "sheetSwitched": "已切换画布",
+    "sheets": "画布",
     "addSheet": "新建画布",
     "sheetAdded": "已新建画布",
     "sheetDeleted": "已删除画布",

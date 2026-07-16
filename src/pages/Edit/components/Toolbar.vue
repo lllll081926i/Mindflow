@@ -1321,6 +1321,17 @@ export default {
         this.$bus.$emit('mindmapAddSheet')
         return
       }
+      // Ctrl+Shift+N duplicate sheet
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'n' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('mindmapDuplicateSheet')
+        return
+      }
       // Ctrl+ toggle zen mode
       if (
         (event.ctrlKey || event.metaKey) &&

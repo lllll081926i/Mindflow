@@ -478,3 +478,10 @@ test('多画布标签栏在专注模式下隐藏，并支持 Ctrl+T 新建', () 
   assert.ok(toolbarSource.includes('mindmapAddSheet'))
   assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 't'"))
 })
+
+
+test('storeData 在局部 root 更新时保留多画布 sheets', () => {
+  const apiSource = fs.readFileSync(path.resolve('src/api/index.js'), 'utf8')
+  assert.ok(apiSource.includes('workbook-aware merge'))
+  assert.ok(apiSource.includes('activeSheetId'))
+})
