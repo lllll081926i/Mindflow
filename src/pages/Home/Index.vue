@@ -412,7 +412,17 @@
               </div>
               <span>{{ item.path }}</span>
             </div>
-            <time class="recentMeta">{{ formatUpdatedAt(item.updatedAt) }}</time>
+            <div class="recentSide">
+              <time class="recentMeta">{{ formatUpdatedAt(item.updatedAt) }}</time>
+              <button
+                type="button"
+                class="recentRemoveBtn"
+                :title="$t('home.removeRecent')"
+                @click.stop="removeRecent(item)"
+              >
+                ×
+              </button>
+            </div>
           </button>
         </div>
 
@@ -626,6 +636,14 @@ export default {
       await this.runWorkspaceAction(async () => {
         const { openWorkspaceRecentFile } = await loadWorkspaceActions()
         return openWorkspaceRecentFile(item, this.$router)
+      })
+    },
+
+    async removeRecent(item) {
+      if (!item?.path) return
+      await this.runWorkspaceAction(async () => {
+        const { removeWorkspaceRecentFile } = await loadWorkspaceActions()
+        await removeWorkspaceRecentFile(item)
       })
     },
 
@@ -1222,7 +1240,27 @@ export default {
       color: #fcd34d;
     }
 
-    .recentItem {
+    .recentSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.recentRemoveBtn {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.06);
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+.recentRemoveBtn:hover {
+  background: rgba(220,38,38,0.12);
+  color: #b91c1c;
+}
+.recentItem {
       border-bottom-color: hsla(0, 0%, 100%, 0.08);
 
       &:hover:not(:disabled) {

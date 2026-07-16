@@ -138,6 +138,36 @@
                   <el-switch v-model="exportState.isFitBg" />
                 </div>
               </template>
+              <div
+                v-if="documentMode === 'flowchart' && flowchartExportValidation"
+                class="exportValidationBox"
+                :class="{
+                  isError: !flowchartExportValidation.ok,
+                  isWarn: flowchartExportValidation.ok && flowchartExportValidation.issues.length
+                }"
+              >
+                <div class="exportValidationTitle">
+                  {{ $t('exportPage.structureCheck') }}
+                  <span v-if="flowchartExportValidation.summary">
+                    · {{ $t('flowchart.validateSummary', {
+                      nodes: flowchartExportValidation.summary.nodes,
+                      edges: flowchartExportValidation.summary.edges,
+                      issues: flowchartExportValidation.issues.length,
+                      score: flowchartExportValidation.summary.score || 0
+                    }) }}
+                  </span>
+                </div>
+                <div class="exportValidationMessage">
+                  {{ flowchartExportValidationMessage }}
+                </div>
+                <button
+                  type="button"
+                  class="exportValidationAction"
+                  @click="goEditForValidation"
+                >
+                  {{ $t('exportPage.backToFix') }}
+                </button>
+              </div>
             </div>
           </section>
 
@@ -490,6 +520,17 @@ export default {
         this.documentMode !== 'flowchart' &&
         ['png', 'pdf', 'pdf-hd'].includes(this.exportState.exportType) &&
         !this.exportState.isTransparent
+      )
+    },
+    flowchartExportValidation() {
+      if (this.documentMode !== 'flowchart') return null
+      return validateFlowchartStructure(this.getFlowchartData())
+    },
+    flowchartExportValidationMessage() {
+      if (!this.flowchartExportValidation) return ''
+      return formatFlowchartValidationMessage(
+        this.flowchartExportValidation,
+        this.$t.bind(this)
       )
     },
     canExportCurrentDocument() {
@@ -1224,7 +1265,43 @@ export default {
       background: #15181e;
     }
 
-    .settingsPanel {
+    .exportValidationBox {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(15,23,42,0.08);
+  background: rgba(15,23,42,0.03);
+}
+.exportValidationBox.isWarn {
+  border-color: rgba(217,119,6,0.35);
+  background: rgba(217,119,6,0.08);
+}
+.exportValidationBox.isError {
+  border-color: rgba(220,38,38,0.35);
+  background: rgba(220,38,38,0.08);
+}
+.exportValidationTitle {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.exportValidationMessage {
+  font-size: 12px;
+  line-height: 1.45;
+  color: inherit;
+  opacity: 0.9;
+}
+.exportValidationAction {
+  margin-top: 8px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+.settingsPanel {
       background: #171b22;
     }
 

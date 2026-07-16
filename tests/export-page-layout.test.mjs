@@ -267,3 +267,17 @@ test('流程图 PDF 预览显示纸张框示意', () => {
   assert.match(exportPageSource, /showFlowchartPdfPaperFrame/)
   assert.match(exportPageSource, /flowchartPdfPaperFrameStyle/)
 })
+
+
+test('流程图导出页展示结构检查摘要并支持返回修复', () => {
+  const exportPageSource = fs.readFileSync(
+    path.resolve('src/pages/Export/Index.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(exportPageSource, /exportValidationBox/)
+  assert.match(exportPageSource, /flowchartExportValidation/)
+  assert.match(exportPageSource, /goEditForValidation/)
+  assert.match(langSource, /"structureCheck"/)
+  assert.match(langSource, /"backToFix"/)
+})

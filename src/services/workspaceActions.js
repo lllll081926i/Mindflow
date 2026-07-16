@@ -158,6 +158,15 @@ export const clearWorkspaceRecentFiles = async () => {
   return []
 }
 
+export const removeWorkspaceRecentFile = async target => {
+  const path = String(target?.path || target || '').trim()
+  if (!path) return getRecentFiles()
+  const next = (getRecentFiles() || []).filter(item => String(item?.path || '') !== path)
+  await setWorkspaceRecentFiles(next)
+  syncRuntimeFromWorkspaceMeta(getWorkspaceMetaState())
+  return next
+}
+
 export const openWorkspaceFileRef = async (fileRef, router) => {
   try {
     const result = await platform.readMindMapFile(fileRef)

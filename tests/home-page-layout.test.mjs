@@ -215,3 +215,17 @@ test('首页模板中心支持搜索，并覆盖产品路线图与内容日历',
   assert.match(langSource, /"starterMindMapRoadmap"/)
   assert.match(langSource, /"starterMindMapContent"/)
 })
+
+
+test('首页最近文件支持单项移除', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const actionsSource = fs.readFileSync(
+    path.resolve('src/services/workspaceActions.js'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /removeRecent\(/)
+  assert.match(source, /recentRemoveBtn/)
+  assert.match(actionsSource, /removeWorkspaceRecentFile/)
+  assert.match(langSource, /"removeRecent"/)
+})

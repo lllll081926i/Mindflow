@@ -906,6 +906,7 @@ const zh = {
     "openLocalFolder": "打开文件夹...",
     "recentTitle": "最近打开",
     "clearRecents": "清除记录",
+    "removeRecent": "从最近中移除",
     "emptyTitle": "暂无最近打开的项目",
     "documentModeMindmap": "导图",
     "documentModeFlowchart": "流程图",
@@ -940,6 +941,8 @@ const zh = {
     "clearRecentsConfirmMessage": "清除后首页将不再展示最近项目记录，是否继续？"
   },
   "exportPage": {
+    "structureCheck": "结构检查",
+    "backToFix": "返回编辑修复",
     "eyebrow": "Export Center",
     "title": "导出中心",
     "backHome": "返回首页",
