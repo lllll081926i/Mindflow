@@ -23,20 +23,37 @@ export const createDefaultMindMapData = (
   title = '思维导图',
   themeTemplate = DEFAULT_MIND_MAP_THEME_TEMPLATE,
   layout = DEFAULT_MIND_MAP_LAYOUT
-) => ({
-  root: {
+) => {
+  const root = {
     data: {
       text: String(title || '思维导图')
     },
     children: []
-  },
-  theme: {
+  }
+  const theme = {
     template:
       String(themeTemplate || '').trim() || DEFAULT_MIND_MAP_THEME_TEMPLATE,
     config: {}
-  },
-  layout: String(layout || '').trim() || DEFAULT_MIND_MAP_LAYOUT
-})
+  }
+  const resolvedLayout = String(layout || '').trim() || DEFAULT_MIND_MAP_LAYOUT
+  const sheetId = 'sheet_default'
+  return {
+    root,
+    theme,
+    layout: resolvedLayout,
+    sheets: [
+      {
+        id: sheetId,
+        name: '画布 1',
+        root,
+        theme,
+        layout: resolvedLayout,
+        view: null
+      }
+    ],
+    activeSheetId: sheetId
+  }
+}
 
 export const DEFAULT_BOOTSTRAP_STATE = () => ({
   version: DESKTOP_STATE_VERSION,
