@@ -226,6 +226,26 @@ export const flowchartSelectionMethods = {
         return
       }
     }
+    // XMind-like structure keys: Tab inserts a connected child process.
+    if (event.key === 'Tab' && !isMetaKey) {
+      event.preventDefault()
+      const type = event.shiftKey ? 'decision' : 'process'
+      void this.addNodeByType({
+        type,
+        autoConnect: this.selectedNodeIds.length === 1,
+        startInlineEdit: true
+      })
+      return
+    }
+    if (!isMetaKey && !event.altKey && !event.shiftKey && event.key === 'Insert') {
+      event.preventDefault()
+      void this.addNodeByType({
+        type: 'process',
+        autoConnect: this.selectedNodeIds.length === 1,
+        startInlineEdit: true
+      })
+      return
+    }
     if (isMetaKey && event.key.toLowerCase() === 'c') {
       event.preventDefault()
       this.copySelectedNodes()

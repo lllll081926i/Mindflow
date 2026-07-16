@@ -2250,3 +2250,18 @@ test('流程图拖入/导入支持 FreeMind .mm 并转换为流程', () => {
   assert.ok(documentSource.includes('.mm'))
   assert.ok(langSource.includes('.mm'))
 })
+
+
+test('流程图支持 Tab/Insert 快速新增下级节点', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes("event.key === 'Tab'"))
+  assert.ok(selectionSource.includes("event.key === 'Insert'"))
+  assert.ok(selectionSource.includes("'decision'"))
+  assert.ok(selectionSource.includes("addNodeByType"))
+  assert.ok(configSource.includes('新增下级处理节点'))
+  assert.ok(configSource.includes('Tab | Insert'))
+})

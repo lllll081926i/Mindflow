@@ -770,12 +770,22 @@ export const flowchartShortcutKeyList = [
     type: '节点操作',
     list: [
       { name: '编辑节点文字', value: 'Enter | F2' },
+      { name: '新增下级处理节点', value: 'Tab | Insert' },
+      { name: '新增下级判断节点', value: 'Shift + Tab' },
       { name: '删除所选', value: 'Delete | Backspace' },
       { name: '全选节点', value: ctrl + ' + A' },
       { name: '复制节点', value: ctrl + ' + C' },
       { name: '粘贴节点', value: ctrl + ' + V' },
       { name: '复制一份', value: ctrl + ' + D' },
+      { name: '快速克隆并连线', value: 'Alt + Shift + 方向键' },
       { name: '微调节点', value: '方向键' }
+    ]
+  },
+  {
+    type: '结构导航',
+    list: [
+      { name: '流程大纲', value: ctrl + ' + Shift + O' },
+      { name: '粘贴大纲生成流程', value: '工具栏 / 命令面板' }
     ]
   },
   {
