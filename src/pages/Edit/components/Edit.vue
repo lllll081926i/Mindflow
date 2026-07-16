@@ -826,6 +826,7 @@ export default {
       this.$bus.$on('mindmapMoveSheetLeft', () => this.moveActiveMindmapSheet(-1))
       this.$bus.$on('mindmapMoveSheetRight', () => this.moveActiveMindmapSheet(1))
       this.$bus.$on('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
+      this.$bus.$on('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$on(
         'createAssociativeLine',
         this.handleCreateLineFromActiveNode
@@ -858,6 +859,7 @@ export default {
       this.$bus.$off('mindmapMoveSheetLeft')
       this.$bus.$off('mindmapMoveSheetRight')
       this.$bus.$off('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
+      this.$bus.$off('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)

@@ -501,3 +501,11 @@ test('思维导图支持 Shift+F2 重命名当前画布', () => {
   assert.ok(toolbarSource.includes('mindmapRenameActiveSheet'))
   assert.ok(editSource.includes('handleMindmapRenameActiveSheet'))
 })
+
+
+test('思维导图搜索可命中其他画布结果', () => {
+  const searchSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Search.vue'), 'utf8')
+  assert.ok(searchSource.includes('collectWorkbookSheetMatches'))
+  assert.ok(searchSource.includes('jumpToCrossSheetResult'))
+  assert.ok(searchSource.includes('isCrossSheet'))
+})

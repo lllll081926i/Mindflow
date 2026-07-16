@@ -91,6 +91,8 @@
 import { mapState } from 'pinia'
 import { isUndef, getTextFromHtml } from 'simple-mind-map/src/utils/index'
 import { onShowSearch } from '@/services/appEvents'
+import { ensureMindmapWorkbook } from '@/services/mindmapWorkbook'
+import { getData } from '@/api'
 import { useAppStore } from '@/stores/app'
 import { useThemeStore } from '@/stores/theme'
 
@@ -117,7 +119,8 @@ export default {
       showSearchInfo: false,
       searchResultListHeight: 0,
       searchResultList: [],
-      showSearchResultList: false
+      showSearchResultList: false,
+      crossSheetResults: []
     }
   },
   computed: {
@@ -329,9 +332,56 @@ export default {
       this.resetSearchState()
     },
 
+    collectWorkbookSheetMatches(keyword) {
+      const results = []
+      try {
+        const workbook = ensureMindmapWorkbook(getData() || {})
+        const activeId = workbook.activeSheetId
+        const walk = (node, sheet, path = []) => {
+          if (!node) return
+          const data = node.data || {}
+          let text = data.text || ''
+          if (data.richText) {
+            try {
+              text = getTextFromHtml(text)
+            } catch (_error) {}
+          }
+          const plain = String(text || '')
+          if (plain.toLowerCase().includes(keyword.toLowerCase())) {
+            results.push({
+              id: (data.uid || plain) + '@' + sheet.id,
+              sheetId: sheet.id,
+              sheetName: sheet.name,
+              name: plain,
+              text: this.highlightText(
+                '[' + sheet.name + '] ' + plain,
+                keyword
+              ),
+              isCrossSheet: sheet.id !== activeId
+            })
+          }
+          ;(node.children || []).forEach(child => walk(child, sheet, path))
+        }
+        workbook.sheets.forEach(sheet => {
+          if (sheet.id === activeId) return
+          walk(sheet.root, sheet)
+        })
+      } catch (_error) {}
+      return results
+    },
+    async jumpToCrossSheetResult(item) {
+      if (!item?.sheetId) return
+      this.$bus.$emit('mindmapSwitchSheet', item.sheetId)
+      // After sheet switch, re-search current sheet for the same keyword and jump first match.
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.executeSearch({ restart: true })
+        }, 80)
+      })
+    },
     onSearchMatchNodeListChange(list) {
       const keyword = this.searchText.trim()
-      this.searchResultList = list.map(item => {
+      const currentSheetResults = list.map(item => {
         const data = item.data || item.nodeData.data
         let name = data.text
         const id = data.uid
@@ -342,9 +392,14 @@ export default {
           data: item,
           id,
           text: this.highlightText(name, keyword),
-          name
+          name,
+          isCrossSheet: false
         }
       })
+      this.crossSheetResults = keyword
+        ? this.collectWorkbookSheetMatches(keyword)
+        : []
+      this.searchResultList = currentSheetResults.concat(this.crossSheetResults)
       if (this.searchResultList.length <= 0) {
         this.activeResultIndex = -1
         this.currentIndex = 0
@@ -380,7 +435,7 @@ export default {
           ? this.searchResultList.length - 1
           : this.activeResultIndex - 1
       this.syncActiveSearchResult(nextIndex)
-      this.mindMap.search.jump(nextIndex)
+      this.onSearchResultItemClick(nextIndex)
     },
 
     jumpToNextResult() {
@@ -395,12 +450,22 @@ export default {
           ? 0
           : this.activeResultIndex + 1
       this.syncActiveSearchResult(nextIndex)
-      this.mindMap.search.jump(nextIndex)
+      this.onSearchResultItemClick(nextIndex)
     },
 
     onSearchResultItemClick(index) {
       this.syncActiveSearchResult(index)
-      this.mindMap.search.jump(index)
+      const item = this.searchResultList[index]
+      if (item?.isCrossSheet) {
+        void this.jumpToCrossSheetResult(item)
+        return
+      }
+      // Jump only among current-sheet matches
+      const currentOnly = this.searchResultList.filter(result => !result.isCrossSheet)
+      const localIndex = currentOnly.findIndex(result => result.id === item?.id)
+      if (localIndex >= 0) {
+        this.mindMap.search.jump(localIndex)
+      }
     }
   }
 }
