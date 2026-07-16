@@ -1211,11 +1211,29 @@ export default {
         this.applyFocusMode()
         return
       }
-      const token = this.activeMarkerFilter
+      const token = String(this.activeMarkerFilter || '').trim()
       const walk = node => {
         if (!node) return
         const icons = node.getData?.('icon') || []
-        const match = !token || (Array.isArray(icons) && icons.includes(token))
+        const tags = node.getData?.('tag') || []
+        const tagText = (Array.isArray(tags) ? tags : [])
+          .map(item => (typeof item === 'object' ? item.text : item))
+          .join(' ')
+        const note = String(node.getData?.('note') || '')
+        const comments = node.getData?.('comments')
+        const commentText = Array.isArray(comments)
+          ? comments.map(item => item?.text || item).join(' ')
+          : ''
+        let match = !token
+        if (!match) {
+          if (Array.isArray(icons) && icons.includes(token)) match = true
+          else if (token.startsWith('priority_') || token.startsWith('progress_')) {
+            match = Array.isArray(icons) && icons.includes(token)
+          } else {
+            const hay = (tagText + ' ' + note + ' ' + commentText).toLowerCase()
+            match = hay.includes(token.toLowerCase())
+          }
+        }
         try {
           if (node.group && typeof node.group.opacity === 'function') {
             node.group.opacity(match ? 1 : 0.18)

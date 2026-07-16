@@ -629,3 +629,16 @@ test('思维导图提供源码编辑面板与快捷键', () => {
   assert.ok(toolbarSource.includes('openSourceCodeEdit'))
   assert.ok(navSource.includes('openSourceCodeEdit()'))
 })
+
+
+test('主题批注与概要删除、增强标记筛选可用', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const commentsSource = fs.readFileSync(path.resolve('src/pages/Edit/components/NodeCommentsDialog.vue'), 'utf8')
+  const contextSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Contextmenu.vue'), 'utf8')
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('NodeCommentsDialog'))
+  assert.ok(toolbarSource.includes('openNodeComments'))
+  assert.ok(commentsSource.includes('showNodeComments'))
+  assert.ok(contextSource.includes('REMOVE_GENERALIZATION'))
+  assert.ok(editSource.includes('progress_') || editSource.includes('comments'))
+})

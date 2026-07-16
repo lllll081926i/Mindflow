@@ -431,6 +431,7 @@
     ></NodeHyperlink>
     <NodeNote v-if="mountedPanels.nodeNote" ref="NodeNoteRef"></NodeNote>
     <NodeTag v-if="mountedPanels.nodeTag" ref="NodeTagRef"></NodeTag>
+    <NodeCommentsDialog />
     <Import v-if="mountedPanels.import" ref="ImportRef"></Import>
   </div>
 </template>
@@ -509,6 +510,9 @@ const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
 const NodeHyperlink = defineAsyncComponent(() => import('./NodeHyperlink.vue'))
 const NodeNote = defineAsyncComponent(() => import('./NodeNote.vue'))
 const NodeTag = defineAsyncComponent(() => import('./NodeTag.vue'))
+const NodeCommentsDialog = defineAsyncComponent(() =>
+  import('./NodeCommentsDialog.vue')
+)
 const Import = defineAsyncComponent(() => import('./Import.vue'))
 // 工具栏
 const defaultBtnList = [
@@ -537,6 +541,7 @@ export default {
     NodeHyperlink,
     NodeNote,
     NodeTag,
+    NodeCommentsDialog,
     Import,
     EditorToolbarAction,
     ToolbarNodeBtnList
@@ -807,6 +812,12 @@ export default {
           label: this.$t('toolbar.tag'),
           disabled: this.activeNodes.length <= 0,
           action: () => this.openNodeTagDialog(this.getActiveNodesSnapshot())
+        },
+        {
+          key: 'nodeComments',
+          label: this.$t('toolbar.nodeComments') || '主题批注',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.openNodeComments(this.getActiveNodesSnapshot())
         },
         {
           key: 'fitCanvas',
@@ -1350,6 +1361,47 @@ export default {
       ) {
         event.preventDefault()
         setActiveSidebar('structure')
+        return
+      }
+      // Ctrl+Alt+M node comments
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'm'
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.openNodeComments(activeNodes)
+          return
+        }
+      }
+      // Ctrl+Alt+F filter markers
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'f'
+      ) {
+        event.preventDefault()
+        void this.promptMarkerFilter()
+        return
+      }
+      // Ctrl+Alt+0 clear filter
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key === '0'
+      ) {
+        event.preventDefault()
+        this.clearMarkerFilter()
         return
       }
       // Ctrl+Alt+F filter by priority marker

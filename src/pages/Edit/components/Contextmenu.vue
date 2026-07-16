@@ -39,6 +39,14 @@
         <span class="name">{{ $t('contextmenu.insertSummary') }}</span>
         <span class="desc">Ctrl + G</span>
       </div>
+      <div
+        class="item"
+        v-if="isGeneralization"
+        @click="exec('REMOVE_GENERALIZATION')"
+      >
+        <span class="name">{{ $t('contextmenu.removeSummary') || '删除概要' }}</span>
+        <span class="desc">Delete</span>
+      </div>
       <div class="splitLine"></div>
       <div
         class="item"

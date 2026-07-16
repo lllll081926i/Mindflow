@@ -520,6 +520,11 @@ export const shortcutKeyList = [
         value: ctrl + ' + Alt + C'
       },
       {
+        icon: 'iconcomment',
+        name: '主题批注',
+        value: ctrl + ' + Alt + M'
+      },
+      {
         icon: 'iconroot',
         name: '回到根节点',
         value: ctrl + ' + Shift + B'
