@@ -430,6 +430,11 @@ export const shortcutKeyList = [
         value: 'Alt + D'
       },
       {
+        icon: 'iconhand',
+        name: '切换手绘风格',
+        value: 'Alt + H'
+      },
+      {
         icon: 'iconnumber',
         name: '切换子主题编号',
         value: ctrl + ' + Alt + N'

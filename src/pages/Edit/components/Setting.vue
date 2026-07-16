@@ -175,6 +175,34 @@
           >
         </div>
       </div>
+      <!-- 手绘风格 -->
+      <div class="row">
+        <div class="rowItem">
+          <el-checkbox
+            v-model="config.isUseHandDrawnLikeStyle"
+            @change="
+              value => {
+                updateOtherConfig('isUseHandDrawnLikeStyle', value)
+              }
+            "
+            >{{ $t('setting.isUseHandDrawnLikeStyle') }}</el-checkbox
+          >
+        </div>
+      </div>
+      <!-- 拖动画布动量 -->
+      <div class="row">
+        <div class="rowItem">
+          <el-checkbox
+            v-model="config.isUseMomentum"
+            @change="
+              value => {
+                updateOtherConfig('isUseMomentum', value)
+              }
+            "
+            >{{ $t('setting.isUseMomentum') }}</el-checkbox
+          >
+        </div>
+      </div>
       <!-- 配置是否启用富文本编辑 -->
       <div class="row">
         <div class="rowItem">
@@ -452,6 +480,8 @@ export default {
       config: {
         openPerformance: true,
         enableFreeDrag: false,
+        isUseHandDrawnLikeStyle: false,
+        isUseMomentum: true,
         mousewheelAction: 'zoom',
         mousewheelZoomActionReverse: false,
         createNewNodeBehavior: 'default',
@@ -527,6 +557,7 @@ export default {
   created() {
     this.$bus.$on('toggleWatermark', this.toggleWatermarkShortcut)
     this.$bus.$on('toggleFreeDrag', this.toggleFreeDragShortcut)
+    this.$bus.$on('toggleHandDrawn', this.toggleHandDrawnShortcut)
     
     this.initLoacalConfig()
     this.$bus.$on('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
@@ -534,6 +565,7 @@ export default {
   beforeUnmount() {
     this.$bus.$off('toggleWatermark', this.toggleWatermarkShortcut)
     this.$bus.$off('toggleFreeDrag', this.toggleFreeDragShortcut)
+    this.$bus.$off('toggleHandDrawn', this.toggleHandDrawnShortcut)
     
     this.$bus.$off('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
     clearTimeout(this.storeConfigTimer)
@@ -616,6 +648,16 @@ export default {
     },
 
     // 切换显示水印与否
+    toggleHandDrawnShortcut() {
+      const next = !this.config.isUseHandDrawnLikeStyle
+      this.config.isUseHandDrawnLikeStyle = next
+      this.updateOtherConfig('isUseHandDrawnLikeStyle', next)
+      this.$message?.success?.(
+        next
+          ? this.$t('setting.isUseHandDrawnLikeStyle') || '已开启手绘风格'
+          : this.$t('setting.disableHandDrawn') || '已关闭手绘风格'
+      )
+    },
     toggleFreeDragShortcut() {
       const next = !this.config.enableFreeDrag
       this.config.enableFreeDrag = next

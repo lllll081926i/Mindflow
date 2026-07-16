@@ -579,3 +579,12 @@ test('思维导图支持 Alt+D 切换自由拖拽', () => {
   assert.ok(toolbarSource.includes('toggleFreeDrag'))
   assert.ok(settingSource.includes('toggleFreeDragShortcut'))
 })
+
+
+test('思维导图支持 Alt+H 切换手绘风格', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const settingSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Setting.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('toggleHandDrawn'))
+  assert.ok(settingSource.includes('toggleHandDrawnShortcut'))
+  assert.ok(settingSource.includes('isUseHandDrawnLikeStyle'))
+})

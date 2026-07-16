@@ -1213,6 +1213,19 @@ export default {
         this.$bus.$emit('toggleFreeDrag')
         return
       }
+      // toggle hand-drawn Alt+H
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'h'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('toggleHandDrawn')
+        return
+      }
       // toggle child numbering Ctrl+Alt+N
       if (
         !isTypingTarget &&

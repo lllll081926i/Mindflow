@@ -68,6 +68,7 @@ const zh = {
     "scrollbarEnabled": "已显示滚动条",
     "scrollbarDisabled": "已隐藏滚动条",
     "showToolbarLabels": "顶部工具栏是否显示文字",
+    "disableHandDrawn": "已关闭手绘风格",
     "isUseHandDrawnLikeStyle": "是否开启手绘风格",
     "isUseMomentum": "是否开启拖动画布的动量效果",
     "openBlankMode": "是否开启演示模式的填空功能",
