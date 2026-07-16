@@ -55,6 +55,12 @@ import { setActiveSidebar, setIsOutlineEdit } from '@/stores/runtime'
 
 // 大纲侧边栏
 export default {
+  created() {
+    this.$bus.$on('printOutline', this.onPrint)
+  },
+  beforeUnmount() {
+    this.$bus.$off('printOutline', this.onPrint)
+  },
   data() {
     return {
       outlineKeyword: ''

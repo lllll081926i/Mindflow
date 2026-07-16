@@ -558,3 +558,16 @@ test('思维导图支持复制为 Markdown/TXT 快捷键', () => {
   assert.ok(toolbarSource.includes('transformToMarkdown'))
   assert.ok(toolbarSource.includes('transformToTxt'))
 })
+
+
+test('右键菜单恢复编号设置，并支持打印大纲/主题结构快捷键', () => {
+  const contextSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Contextmenu.vue'), 'utf8')
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const outlineSource = fs.readFileSync(path.resolve('src/pages/Edit/components/OutlineSidebar.vue'), 'utf8')
+  assert.ok(contextSource.includes('setNodeNumberType'))
+  assert.ok(contextSource.includes('clearNodeNumber'))
+  assert.ok(toolbarSource.includes('printOutline'))
+  assert.ok(toolbarSource.includes("setActiveSidebar('theme')"))
+  assert.ok(toolbarSource.includes("setActiveSidebar('structure')"))
+  assert.ok(outlineSource.includes('printOutline'))
+})

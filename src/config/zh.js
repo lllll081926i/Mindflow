@@ -440,6 +440,21 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + X'
       },
       {
+        icon: 'iconprint',
+        name: '打印大纲',
+        value: ctrl + ' + Alt + P'
+      },
+      {
+        icon: 'icontheme',
+        name: '打开主题面板',
+        value: ctrl + ' + Alt + T'
+      },
+      {
+        icon: 'iconstructure',
+        name: '打开结构面板',
+        value: ctrl + ' + Alt + S'
+      },
+      {
         icon: 'icongongshi',
         name: '插入公式',
         value: ctrl + ' + Shift + F'

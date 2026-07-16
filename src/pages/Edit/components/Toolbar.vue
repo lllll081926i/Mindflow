@@ -1241,6 +1241,43 @@ export default {
         void this.copyActiveAs('txt')
         return
       }
+      // Ctrl+Alt+P print outline
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'p'
+      ) {
+        event.preventDefault()
+        setActiveSidebar('outline')
+        this.$nextTick(() => this.$bus.$emit('printOutline'))
+        return
+      }
+      // Ctrl+Alt+T open theme panel
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 't'
+      ) {
+        event.preventDefault()
+        setActiveSidebar('theme')
+        return
+      }
+      // Ctrl+Alt+S open structure panel
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 's'
+      ) {
+        event.preventDefault()
+        setActiveSidebar('structure')
+        return
+      }
       // priority/progress markers
       if (
         !isTypingTarget &&

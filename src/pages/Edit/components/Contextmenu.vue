@@ -105,6 +105,40 @@
       <div class="item" @click="exec('EXPORT_CUR_NODE_TO_PNG')">
         <span class="name">{{ $t('contextmenu.exportNodeToPng') }}</span>
       </div>
+      <div class="splitLine"></div>
+      <div class="item">
+        <span class="name">{{ $t('contextmenu.number') }}</span>
+        <span class="arrowIndicator">&gt;</span>
+        <div
+          class="subItems listBox"
+          :class="{ isDark: isDark, showLeft: subItemsShowLeft }"
+          style="top: -10px"
+        >
+          <div
+            class="item"
+            v-for="item in numberTypeList"
+            :key="'nt-' + item.value"
+            @click="setNodeNumberType(item.value)"
+          >
+            {{ item.name }}
+            <span v-if="numberType === item.value">√</span>
+          </div>
+          <div class="splitLine"></div>
+          <div
+            class="item"
+            v-for="item in numberLevelList"
+            :key="'nl-' + item.value"
+            @click="setNodeNumberLevel(item.value)"
+          >
+            {{ item.name }}
+            <span v-if="numberLevel === item.value">√</span>
+          </div>
+          <div class="splitLine"></div>
+          <div class="item" @click="clearNodeNumber">
+            {{ $t('contextmenu.removeNumber') || '清除编号' }}
+          </div>
+        </div>
+      </div>
       <div class="splitLine" v-if="enableAi"></div>
       <div class="item" @click="aiCreate" v-if="enableAi">
         <span class="name">{{ $t('contextmenu.aiCreate') }}</span>
@@ -479,6 +513,31 @@ export default {
     },
 
     // 复制到剪贴板
+    setNodeNumberType(type) {
+      if (!this.node) return
+      const level = this.numberLevel === '' ? 1 : this.numberLevel
+      this.numberType = type
+      this.mindMap.execCommand('SET_NODE_DATA', this.node, {
+        number: type ? { type, level } : null
+      })
+      this.hide()
+    },
+    setNodeNumberLevel(level) {
+      if (!this.node) return
+      this.numberLevel = level
+      const type = this.numberType || 1
+      this.mindMap.execCommand('SET_NODE_DATA', this.node, {
+        number: { type, level }
+      })
+      this.hide()
+    },
+    clearNodeNumber() {
+      if (!this.node) return
+      this.numberType = ''
+      this.numberLevel = ''
+      this.mindMap.execCommand('SET_NODE_DATA', this.node, { number: null })
+      this.hide()
+    },
     async copyToClipboard(type) {
       try {
         this.hide()

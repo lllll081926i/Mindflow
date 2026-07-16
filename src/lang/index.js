@@ -166,6 +166,7 @@ const zh = {
     "copyToPng": "图片",
     "copySuccess": "复制成功",
     "copyFail": "复制失败",
+    "removeNumber": "清除编号",
     "number": "编号其子节点",
     "expandNodeChild": "展开所有下级节点",
     "unExpandNodeChild": "收起所有下级节点",
