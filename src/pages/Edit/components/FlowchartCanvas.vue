@@ -15,6 +15,10 @@
       <div class="flowchartCanvasWorld" :style="canvasWorldStyle">
         <slot name="world"></slot>
         <div v-if="!hasNodes" class="canvasEmpty">
+          <div class="canvasEmptyCopy">
+            <div class="canvasEmptyTitle">{{ labels.emptyTitle }}</div>
+            <div class="canvasEmptyDesc">{{ labels.emptyDesc }}</div>
+          </div>
           <div class="canvasEmptyActions">
             <button type="button" class="flowchartPanelBtn" @click="$emit('add-node', 'start')">
               {{ labels.emptyAddStart }}
@@ -30,6 +34,12 @@
             </button>
             <button type="button" class="flowchartPanelBtn" @click="$emit('generate-ai')">
               {{ labels.aiGenerate }}
+            </button>
+            <button type="button" class="flowchartPanelBtn" @click="$emit('import-mind-map-file')">
+              {{ labels.importMindMapFile }}
+            </button>
+            <button type="button" class="flowchartPanelBtn" @click="$emit('validate-structure')">
+              {{ labels.validateStructure }}
             </button>
           </div>
         </div>
@@ -56,8 +66,7 @@
 <script>
 export default {
   name: 'FlowchartCanvas',
-  emits: [
-    'canvas-pointer-down',
+  emits: ['canvas-pointer-down',
     'canvas-double-click',
     'canvas-wheel',
     'zoom-out',
@@ -66,7 +75,9 @@ export default {
     'zoom-in',
     'add-node',
     'apply-template',
-    'generate-ai'
+    'generate-ai',
+    'import-mind-map-file',
+    'validate-structure'
   ],
   props: {
     isPanning: {

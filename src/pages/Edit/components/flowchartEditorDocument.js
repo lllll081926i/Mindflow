@@ -280,26 +280,43 @@ export const flowchartDocumentMethods = {
         defaultPath: getLastDirectory()
       })
       if (!fileRef) return
-      const resolved = await resolveFileContentWithRecovery(fileRef, fileRef.content)
-      const parsedDocument = parseStoredDocumentContent(resolved.content)
-      if (
-        parsedDocument.documentMode === 'flowchart' ||
-        !hasConvertibleMindMapData(parsedDocument.mindMapData)
-      ) {
-        this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
-        return
-      }
-      const nextDocument = convertMindMapToFlowchart(parsedDocument.mindMapData, {
-        title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
-      })
-      this.applyGeneratedFlowchart(nextDocument)
-      this.$message.success(this.$t('flowchart.importMindMapFileDone'))
+      await this.importMindMapContent(fileRef.content, fileRef)
     } catch (error) {
       const normalizedError = createDesktopFsError(error)
       this.$message.error(
         normalizedError.message || this.$t('flowchart.importMindMapFileFailed')
       )
     }
+  },
+
+  async importMindMapFileFromBlob(file) {
+    if (!file) return
+    const content = await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onerror = () => reject(new Error(this.$t('flowchart.importMindMapFileFailed')))
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.readAsText(file)
+    })
+    await this.importMindMapContent(content, {
+      name: file.name || this.$t('flowchart.fileNameFallback')
+    })
+  },
+
+  async importMindMapContent(content, fileRef = null) {
+    const resolved = await resolveFileContentWithRecovery(fileRef || {}, content)
+    const parsedDocument = parseStoredDocumentContent(resolved.content)
+    if (
+      parsedDocument.documentMode === 'flowchart' ||
+      !hasConvertibleMindMapData(parsedDocument.mindMapData)
+    ) {
+      this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
+      return
+    }
+    const nextDocument = convertMindMapToFlowchart(parsedDocument.mindMapData, {
+      title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
+    })
+    this.applyGeneratedFlowchart(nextDocument)
+    this.$message.success(this.$t('flowchart.importMindMapFileDone'))
   },
 
   applyGeneratedFlowchart(result) {

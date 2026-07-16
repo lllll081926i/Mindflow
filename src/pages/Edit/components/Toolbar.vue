@@ -817,6 +817,11 @@ export default {
           action: () => setActiveSidebar('shortcutKey')
         },
         {
+          key: 'scrollbar',
+          label: this.$t('setting.isShowScrollbar'),
+          action: () => this.toggleScrollbar()
+        },
+        {
           key: 'save',
           label: this.$t('toolbar.save'),
           shortcut: 'Ctrl S',
@@ -1070,6 +1075,18 @@ export default {
       applyLocalConfigPatch({
         isZenMode: !this.localConfig.isZenMode
       })
+    },
+
+    toggleScrollbar() {
+      const next = !this.localConfig.isShowScrollbar
+      applyLocalConfigPatch({
+        isShowScrollbar: next
+      })
+      this.$message.success(
+        next
+          ? this.$t("setting.scrollbarEnabled")
+          : this.$t("setting.scrollbarDisabled")
+      )
     },
 
     openOutlinePanel() {

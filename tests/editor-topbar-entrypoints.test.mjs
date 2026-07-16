@@ -290,3 +290,10 @@ test('思维导图命令面板覆盖主题结构与基础样式入口', () => {
   assert.match(toolbarSource, /setActiveSidebar\('structure'\)/)
   assert.match(toolbarSource, /setActiveSidebar\('baseStyle'\)/)
 })
+
+
+test('思维导图命令面板支持切换滚动条显示', () => {
+  assert.match(toolbarSource, /key:\s*'scrollbar'/)
+  assert.match(toolbarSource, /toggleScrollbar/)
+  assert.match(toolbarSource, /isShowScrollbar/)
+})

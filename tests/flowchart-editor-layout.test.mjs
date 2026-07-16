@@ -2033,3 +2033,27 @@ test('流程图快捷键帮助包含诊断修复操作', () => {
   assert.match(selectionSource, /autofixCurrentFlowchart/)
   assert.match(selectionSource, /undoLastFlowchartAutofix/)
 })
+
+
+test('流程图空态引导与拖拽导入入口完整', () => {
+  const canvasSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartCanvas.vue'),
+    'utf8'
+  )
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const documentSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorDocument.js'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(canvasSource, /emptyTitle/)
+  assert.match(canvasSource, /emptyDesc/)
+  assert.match(editorSource, /onFlowchartDrop/)
+  assert.match(editorSource, /importMindMapFileFromBlob|importDroppedFile/)
+  assert.match(documentSource, /importMindMapFileFromBlob/)
+  assert.match(langSource, /"emptyTitle"/)
+  assert.match(langSource, /"dragImportTip"/)
+})

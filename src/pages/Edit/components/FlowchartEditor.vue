@@ -1,5 +1,16 @@
 <template>
-  <div class="flowchartEditor" :class="{ isDark }" :style="flowchartThemeStyleVars">
+  <div
+    class="flowchartEditor"
+    :class="{ isDark, isDragOver: isFlowchartDragOver }"
+    :style="flowchartThemeStyleVars"
+    @dragenter.prevent="onFlowchartDragEnter"
+    @dragover.prevent="onFlowchartDragOver"
+    @dragleave.prevent="onFlowchartDragLeave"
+    @drop.prevent="onFlowchartDrop"
+  >
+    <div v-if="isFlowchartDragOver" class="flowchartDragMask">
+      <div class="flowchartDragTip">{{ $t('flowchart.dragImportTip') }}</div>
+    </div>
     <FlowchartToolbar
       :labels="flowchartToolbarText"
       :is-dark="isDark"
@@ -580,6 +591,7 @@ export default {
       validationHighlightNodeIds: [],
       lastAutofixSnapshot: null,
       lastAutofixActions: [],
+      isFlowchartDragOver: false,
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
@@ -810,6 +822,8 @@ export default {
         distributeVertical: this.$t('flowchart.distributeVertical'),
         arrangeFront: this.$t('flowchart.arrangeFront'),
         arrangeBack: this.$t('flowchart.arrangeBack'),
+        emptyTitle: this.$t('flowchart.emptyTitle'),
+        emptyDesc: this.$t('flowchart.emptyDesc'),
         emptyAddStart: this.$t('flowchart.emptyAddStart'),
         emptyUseTemplate: this.$t('flowchart.emptyUseTemplate'),
         emptyUseReleaseTemplate: this.$t('flowchart.emptyUseReleaseTemplate'),
@@ -1126,6 +1140,39 @@ export default {
     this.pendingCanvasPanPoint = null
   },
   methods: {
+    onFlowchartDragEnter(event) {
+      if (!event?.dataTransfer?.types?.includes?.('Files') && !Array.from(event?.dataTransfer?.types || []).includes('Files')) {
+        // still allow
+      }
+      this.isFlowchartDragOver = true
+    },
+    onFlowchartDragOver() {
+      this.isFlowchartDragOver = true
+    },
+    onFlowchartDragLeave(event) {
+      // only clear when leaving editor root
+      if (event?.currentTarget === event?.target) {
+        this.isFlowchartDragOver = false
+      }
+    },
+    async onFlowchartDrop(event) {
+      this.isFlowchartDragOver = false
+      const file = event?.dataTransfer?.files?.[0]
+      if (!file) return
+      try {
+        await this.importDroppedFile(file)
+      } catch (error) {
+        this.$message.error(error?.message || this.$t('flowchart.importMindMapFileFailed'))
+      }
+    },
+    async importDroppedFile(file) {
+      // Reuse mindmap import conversion path when possible
+      if (typeof this.importMindMapFileFromBlob === 'function') {
+        return this.importMindMapFileFromBlob(file)
+      }
+      // Fallback: open import mind map dialog flow
+      return this.importMindMapFile()
+    },
     validateCurrentFlowchart({ openPanel = true } = {}) {
       const result = validateFlowchartStructure(this.flowchartData)
       this.flowchartValidationResult = result

@@ -1112,6 +1112,43 @@
   padding: 10px 12px;
 }
 
+.flowchartEditor .canvasEmptyCopy {
+  max-width: 420px;
+  margin: 0 auto 14px;
+  text-align: center;
+}
+.flowchartEditor .canvasEmptyTitle {
+  font-size: 18px;
+  font-weight: 650;
+  margin-bottom: 6px;
+}
+.flowchartEditor .canvasEmptyDesc {
+  font-size: 13px;
+  color: var(--flowchart-subtle-text);
+  line-height: 1.5;
+}
+.flowchartEditor.isDragOver {
+  outline: 2px dashed rgba(37, 99, 235, 0.45);
+  outline-offset: -8px;
+}
+.flowchartDragMask {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.28);
+  pointer-events: none;
+}
+.flowchartDragTip {
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.95);
+  color: #0f172a;
+  font-size: 14px;
+  box-shadow: 0 10px 30px rgba(15,23,42,0.18);
+}
 .flowchartEditor .canvasEmpty {
   min-height: 220px;
   display: flex;
