@@ -35,9 +35,20 @@
       ></polygon>
     </svg>
     <span class="nodeText">{{ node.text }}</span>
-    <div v-if="node.note || node.link" class="nodeMetaBadges" aria-hidden="true">
-      <span v-if="node.note" class="nodeMetaBadge isNote" title="note">N</span>
-      <span v-if="node.link" class="nodeMetaBadge isLink" title="link">L</span>
+    <div v-if="node.note || node.link" class="nodeMetaBadges">
+      <span
+        v-if="node.note"
+        class="nodeMetaBadge isNote"
+        :title="node.note"
+      >N</span>
+      <button
+        v-if="node.link"
+        type="button"
+        class="nodeMetaBadge isLink"
+        :title="node.link"
+        @click.stop="$emit('open-node-link', node)"
+        @mousedown.stop
+      >L</button>
     </div>
     <template v-if="showConnectorHandlesForNode(node.id)">
       <button
@@ -87,7 +98,8 @@ export default {
     'select-node',
     'edit-node-text',
     'start-connector-drag',
-    'start-node-resize'
+    'start-node-resize',
+    'open-node-link'
   ],
   props: {
     nodes: {

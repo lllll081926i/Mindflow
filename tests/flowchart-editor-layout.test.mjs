@@ -1902,3 +1902,18 @@ test('流程图节点支持备注和链接编辑与展示', () => {
   assert.match(langSource, /"nodeNote"/)
   assert.match(langSource, /"nodeLink"/)
 })
+
+
+test('流程图节点链接徽章可直接打开', () => {
+  const nodeLayerSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartNodeLayer.vue'),
+    'utf8'
+  )
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.match(nodeLayerSource, /open-node-link/)
+  assert.match(editorSource, /@open-node-link="openNodeLinkFromBadge"/)
+  assert.match(editorSource, /openNodeLinkFromBadge/)
+})

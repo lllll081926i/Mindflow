@@ -238,6 +238,7 @@
             @edit-node-text="editNodeText"
             @start-connector-drag="startConnectorDrag"
             @start-node-resize="startNodeResize"
+            @open-node-link="openNodeLinkFromBadge"
           />
 
           <div
