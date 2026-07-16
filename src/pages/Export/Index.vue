@@ -239,7 +239,7 @@ import {
 } from '@/services/flowchartDocument'
 import { buildMindMapHtmlDocument, sanitizeSvgMarkup } from '@/services/htmlExport'
 import { serializeFreemindXml } from '@/services/freemindParse'
-import { snapshotActiveMindmapSheet, ensureMindmapWorkbook } from '@/services/mindmapWorkbook'
+import { snapshotActiveMindmapSheet, ensureMindmapWorkbook, exportMindmapWorkbookToXmind } from '@/services/mindmapWorkbook'
 import {
   validateFlowchartStructure,
   formatFlowchartValidationMessage
@@ -1284,7 +1284,46 @@ export default {
             exportPaddingY: Number(this.exportState.paddingY) || 0
           })
           this.advanceExportProgress(55, 'render')
-          if (this.exportState.exportType === 'mm') {
+          if (this.exportState.exportType === 'xmind') {
+            this.advanceExportProgress(60, 'compose')
+            try {
+              const live =
+                typeof this.mindMap?.getData === 'function'
+                  ? this.mindMap.getData(true)
+                  : null
+              const base = getData() || {}
+              const workbook = snapshotActiveMindmapSheet(
+                ensureMindmapWorkbook({
+                  ...base,
+                  ...(live || {})
+                }),
+                live
+              )
+              const blob = await exportMindmapWorkbookToXmind(
+                workbook,
+                safeFileName
+              )
+              this.advanceExportProgress(84, 'save')
+              const buffer = await blob.arrayBuffer()
+              const fileRef = await platform.saveBinaryFileAs({
+                suggestedName: safeFileName,
+                content: buffer,
+                defaultPath: getLastDirectory(),
+                extension: 'xmind',
+                name: 'XMind',
+                mimeType: 'application/vnd.xmind.workbook'
+              })
+              if (!fileRef) {
+                this.finishExportProgress(false)
+                this.exporting = false
+                return
+              }
+            } catch (error) {
+              console.error('workbook xmind export fallback', error)
+              await this.mindMap.export('xmind', true, safeFileName)
+            }
+            this.advanceExportProgress(90, 'save')
+          } else if (this.exportState.exportType === 'mm') {
             this.advanceExportProgress(60, 'compose')
             const mindData =
               typeof this.mindMap?.getData === 'function'

@@ -255,3 +255,66 @@ export const createWorkbookFromMindmapList = (list = [], options = {}) => {
     view: active.view
   }
 }
+
+
+/**
+ * Export workbook to XMind blob using simple-mind-map transform for each sheet.
+ * Falls back to active sheet only if multi transform fails.
+ */
+export const exportMindmapWorkbookToXmind = async (data, fileName = '思维导图') => {
+  const workbook = ensureMindmapWorkbook(data)
+  const xmindMod = await import('simple-mind-map/src/parse/xmind.js')
+  const xmind = xmindMod.default || xmindMod
+  if (typeof xmind.transformToXmind !== 'function') {
+    throw new Error('XMind export unavailable')
+  }
+  // transformToXmind builds a single-sheet zip; for multi we synthesize content.json array.
+  if (workbook.sheets.length <= 1) {
+    return xmind.transformToXmind(workbook.root, workbook.sheets[0]?.name || fileName)
+  }
+  const JSZip = (await import('jszip')).default || (await import('jszip'))
+  const imageList = []
+  // Use transformToXmind per sheet then merge content.json entries.
+  const sheetTrees = []
+  for (const sheet of workbook.sheets) {
+    const blob = await xmind.transformToXmind(sheet.root, sheet.name || fileName)
+    const zip = await JSZip.loadAsync(blob)
+    const contentJson = await zip.file('content.json').async('string')
+    const arr = JSON.parse(contentJson)
+    if (Array.isArray(arr) && arr[0]) sheetTrees.push(arr[0])
+    // copy resources if any
+    Object.keys(zip.files).forEach(name => {
+      if (name.startsWith('resources/')) imageList.push({ zip, name })
+    })
+  }
+  const out = new JSZip()
+  out.file('content.json', JSON.stringify(sheetTrees))
+  out.file(
+    'metadata.json',
+    JSON.stringify({
+      modifier: '',
+      dataStructureVersion: '2',
+      creator: { name: 'mind-map' },
+      layoutEngineVersion: '3',
+      activeSheetId: sheetTrees[0]?.id || ''
+    })
+  )
+  // minimal content.xml/manifest
+  out.file(
+    'manifest.json',
+    JSON.stringify({
+      'file-entries': {
+        'content.json': {},
+        'metadata.json': {}
+      }
+    })
+  )
+  // best-effort resource copy from first sheet zip resources already limited
+  for (const item of imageList) {
+    try {
+      const data = await item.zip.file(item.name).async('base64')
+      out.file(item.name, data, { base64: true })
+    } catch (_e) {}
+  }
+  return out.generateAsync({ type: 'blob' })
+}

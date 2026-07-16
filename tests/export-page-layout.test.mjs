@@ -320,3 +320,11 @@ test('导图导出支持 FreeMind .mm 格式', () => {
   assert.ok(exportPageSource.includes("exportState.exportType === 'mm'") || exportPageSource.includes("exportType === 'mm'"))
   assert.ok(exportPageSource.includes('serializeFreemindXml'))
 })
+
+
+test('导图导出支持多画布 XMind 工作簿', () => {
+  const exportPageSource = fs.readFileSync(path.resolve('src/pages/Export/Index.vue'), 'utf8')
+  const workbookSource = fs.readFileSync(path.resolve('src/services/mindmapWorkbook.js'), 'utf8')
+  assert.ok(exportPageSource.includes('exportMindmapWorkbookToXmind'))
+  assert.ok(workbookSource.includes('exportMindmapWorkbookToXmind'))
+})
