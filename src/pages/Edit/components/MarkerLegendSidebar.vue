@@ -13,6 +13,11 @@
           $t('markerLegend.openIcons') || '打开图标库'
         }}</el-button>
       </div>
+      <div class="quickFilters">
+        <button type="button" class="chip" :class="{ isActive: activeFilter === 'has:comment' }" @click="toggleQuick('has:comment')">批注</button>
+        <button type="button" class="chip" :class="{ isActive: activeFilter === 'has:note' }" @click="toggleQuick('has:note')">备注</button>
+        <button type="button" class="chip" :class="{ isActive: activeFilter === 'has:link' }" @click="toggleQuick('has:link')">链接</button>
+      </div>
 
       <div class="legendHint">
         {{
@@ -226,6 +231,10 @@ export default {
     openIconSidebar() {
       setActiveSidebar('nodeIconSidebar')
     },
+    toggleQuick(token) {
+      if (this.activeFilter === token) this.clearFilter()
+      else this.applyFilter(token)
+    },
     onLegendClick(type, name) {
       const key = type + '_' + name
       // If nodes selected, stamp marker first.
@@ -276,6 +285,30 @@ export default {
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
+}
+.quickFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.chip {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.04);
+  color: inherit;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.chip.isActive {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.12);
+}
+.isDark .chip {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
 }
 .legendHint {
   font-size: 12px;

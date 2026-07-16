@@ -398,7 +398,7 @@ const zh = {
     "expandDirectory": "展开目录",
     "exportCenter": "导出中心",
     "markerFilterTitle": "按标记筛选",
-    "markerFilterTip": "输入 p1-p9 / g1-g8 / 标签或备注关键词，留空清除",
+    "markerFilterTip": "输入 p1-p9 / g1-g8 / has:comment|has:note|has:link / 标签关键词，留空清除",
     "markerFilterInvalid": "请输入 1-9 或留空",
     "markerFilterApplied": "已应用筛选",
     "markerFilterCleared": "已清除标记筛选",

@@ -1239,12 +1239,20 @@ export default {
           : ''
         let match = !token
         if (!match) {
-          if (Array.isArray(icons) && icons.includes(token)) match = true
-          else if (token.startsWith('priority_') || token.startsWith('progress_')) {
+          const lower = token.toLowerCase()
+          if (lower === 'has:comment' || lower === 'has:comments') {
+            match = Array.isArray(comments) ? comments.length > 0 : !!commentText
+          } else if (lower === 'has:note') {
+            match = !!String(note || '').trim()
+          } else if (lower === 'has:link') {
+            match = !!(node.getData?.('hyperlink') || node.getData?.('link'))
+          } else if (Array.isArray(icons) && icons.includes(token)) {
+            match = true
+          } else if (token.startsWith('priority_') || token.startsWith('progress_')) {
             match = Array.isArray(icons) && icons.includes(token)
           } else {
             const hay = (tagText + ' ' + note + ' ' + commentText).toLowerCase()
-            match = hay.includes(token.toLowerCase())
+            match = hay.includes(lower)
           }
         }
         try {
