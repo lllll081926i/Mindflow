@@ -1197,6 +1197,7 @@ export default {
     },
 
     async createBlankFlowchartProject(templateId = 'blank') {
+      if (templateId === 'blank') this.rememberStarter('flowchart:blank')
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceFlowchartFile } = await loadWorkspaceActions()
         return createWorkspaceFlowchartFile({
@@ -1209,6 +1210,7 @@ export default {
     },
 
     async createFlowchart() {
+      this.rememberStarter('flowchart:blank')
       await this.createBlankFlowchartProject('blank')
     },
 

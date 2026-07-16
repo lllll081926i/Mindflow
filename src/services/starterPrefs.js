@@ -78,6 +78,7 @@ export const STARTER_LABEL_KEY_MAP = {
   'mindmap:roadmap': 'home.starterMindMapRoadmap',
   'mindmap:content': 'home.starterMindMapContent',
   'mindmap:pitch': 'home.starterMindMapPitch',
+  'flowchart:blank': 'home.createFlowchart',
   'flowchart:approval': 'home.starterFlowApproval',
   'flowchart:release': 'home.starterFlowRelease',
   'flowchart:enterpriseDelivery': 'home.starterFlowEnterprise',
