@@ -2392,3 +2392,72 @@ button.flowchartAutofixResultItem:hover {
   background: var(--flowchart-accent);
   color: #fff;
 }
+
+
+.flowchartSheetBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 4px 10px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+}
+.flowchartEditor.isDark .flowchartSheetBar {
+  background: rgba(24, 28, 34, 0.96);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+.flowchartSheetList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.flowchartSheetTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 160px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: none;
+  background: rgba(15, 23, 42, 0.03);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.flowchartSheetTab.isActive {
+  background: #fff;
+}
+.flowchartEditor.isDark .flowchartSheetTab.isActive {
+  background: #1c2128;
+}
+.flowchartSheetClose {
+  font-style: normal;
+  opacity: 0.55;
+}
+.flowchartSheetRenameInput {
+  width: 100px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.flowchartSheetActions {
+  display: flex;
+  gap: 4px;
+}
+.flowchartSheetActionBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}

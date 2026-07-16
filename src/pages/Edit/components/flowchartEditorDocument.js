@@ -26,6 +26,7 @@ import {
   parseStoredDocumentContent,
   serializeStoredDocumentContent
 } from '@/services/flowchartDocument'
+import { snapshotActiveFlowchartSheet, ensureFlowchartWorkbook } from '@/services/flowchartWorkbook'
 import xmind from 'simple-mind-map/src/parse/xmind.js'
 import markdown from 'simple-mind-map/src/parse/markdown.js'
 import { parseFreemindFile, isFreemindXml } from '@/services/freemindParse'
@@ -87,8 +88,13 @@ export const flowchartDocumentMethods = {
       this.commitFlowchartHistorySnapshot()
     }
     await this.ensureFlowchartDocumentSession()
+    const workbookData = snapshotActiveFlowchartSheet(
+      ensureFlowchartWorkbook(this.flowchartData),
+      this.flowchartData
+    )
+    this.flowchartData = workbookData
     await saveBootstrapStatePatch({
-      flowchartData: cloneJson(this.flowchartData),
+      flowchartData: cloneJson(workbookData),
       flowchartConfig: cloneJson(this.flowchartConfig)
     })
     markDocumentDirty(dirty)

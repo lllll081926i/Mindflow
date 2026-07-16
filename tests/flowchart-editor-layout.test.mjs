@@ -2583,3 +2583,12 @@ test('流程图支持 Ctrl+O 导入导图文件', () => {
   assert.ok(selectionSource.includes("event.key.toLowerCase() === 'o'"))
   assert.ok(selectionSource.includes('importMindMapFile'))
 })
+
+
+test('流程图提供多页面标签栏', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  const serviceSource = fs.readFileSync(path.resolve('src/services/flowchartWorkbook.js'), 'utf8')
+  assert.ok(editorSource.includes('flowchartSheetBar'))
+  assert.ok(editorSource.includes('switchFlowchartSheetById'))
+  assert.ok(serviceSource.includes('ensureFlowchartWorkbook'))
+})

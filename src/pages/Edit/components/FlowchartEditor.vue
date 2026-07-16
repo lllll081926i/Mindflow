@@ -34,6 +34,42 @@
       @open-outline="openFlowchartOutline"
       @paste-outline="pasteOutlineFromClipboard"
     />
+    <div v-if="flowchartSheets.length" class="flowchartSheetBar" @mousedown.stop>
+      <div class="flowchartSheetList" role="tablist">
+        <button
+          v-for="sheet in flowchartSheets"
+          :key="sheet.id"
+          type="button"
+          class="flowchartSheetTab"
+          role="tab"
+          :aria-selected="sheet.active ? 'true' : 'false'"
+          :class="{ isActive: sheet.active }"
+          @click="switchFlowchartSheetById(sheet.id)"
+          @dblclick.stop="startRenameFlowchartSheet(sheet)"
+        >
+          <input
+            v-if="flowSheetEditingId === sheet.id"
+            ref="flowSheetRenameInput"
+            v-model.trim="flowSheetRenameDraft"
+            class="flowchartSheetRenameInput"
+            @click.stop
+            @keydown.enter.prevent="commitRenameFlowchartSheet"
+            @keydown.esc.prevent="flowSheetEditingId = ''"
+            @blur="commitRenameFlowchartSheet"
+          />
+          <span v-else>{{ sheet.name }}</span>
+          <em
+            v-if="flowchartSheets.length > 1"
+            class="flowchartSheetClose"
+            @click.stop="deleteFlowchartSheetById(sheet.id)"
+          >×</em>
+        </button>
+      </div>
+      <div class="flowchartSheetActions">
+        <button type="button" class="flowchartSheetActionBtn" @click="addFlowchartSheet(false)">+</button>
+        <button type="button" class="flowchartSheetActionBtn" @click="addFlowchartSheet(true)">⧉</button>
+      </div>
+    </div>
 
     <FlowchartCommandPalette
       :visible="commandPaletteVisible"
@@ -535,6 +571,15 @@
 import { mapState } from 'pinia'
 import { flowchartShortcutKeyList } from '@/config'
 import {
+  ensureFlowchartWorkbook,
+  listFlowchartSheets,
+  addFlowchartSheet,
+  switchFlowchartSheet,
+  renameFlowchartSheet,
+  deleteFlowchartSheet,
+  snapshotActiveFlowchartSheet
+} from '@/services/flowchartWorkbook'
+import {
   getBootstrapState,
   ensureBootstrapDocumentState
 } from '@/platform'
@@ -704,6 +749,16 @@ export default {
     }
   },
   computed: {
+    flowchartSheets() {
+      try {
+        return listFlowchartSheets(this.flowchartData)
+      } catch (_error) {
+        return []
+      }
+    },
+    activeFlowchartSheetId() {
+      return this.flowchartSheets.find(item => item.active)?.id || ''
+    },
     flowchartOutlineLabels() {
       return {
         title: this.$t('flowchart.outlineTitle'),
@@ -1915,11 +1970,79 @@ export default {
         this.$message.error(error?.message || this.$t('flowchart.saveFailed'))
       }
     },
+    persistActiveFlowchartSheet() {
+      this.flowchartData = snapshotActiveFlowchartSheet(this.flowchartData, this.flowchartData)
+      void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: false })
+    },
+    async switchFlowchartSheetById(sheetId) {
+      if (!sheetId || sheetId === this.activeFlowchartSheetId) return
+      this.flowchartData = switchFlowchartSheet(this.flowchartData, sheetId, this.flowchartData)
+      this.selectedNodeIds = []
+      this.selectedEdgeId = ''
+      this._edgeLayoutCache = new Map()
+      this.initializeFlowchartHistory?.()
+      this.$nextTick(() => this.fitCanvasToView?.({ persist: false }))
+      void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: false })
+      this.$message.success(this.$t('flowchart.sheetSwitched') || '已切换页面')
+    },
+    async addFlowchartSheet(copyActive = false) {
+      this.flowchartData = addFlowchartSheet(this.flowchartData, { copyActive }, this.flowchartData)
+      this.selectedNodeIds = []
+      this.selectedEdgeId = ''
+      this._edgeLayoutCache = new Map()
+      this.initializeFlowchartHistory?.()
+      this.$nextTick(() => this.fitCanvasToView?.({ persist: false }))
+      void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: true })
+      this.$message.success(this.$t('flowchart.sheetAdded') || '已新建页面')
+    },
+    startRenameFlowchartSheet(sheet) {
+      this.flowSheetEditingId = sheet?.id || ''
+      this.flowSheetRenameDraft = sheet?.name || ''
+      this.$nextTick(() => {
+        const input = this.$refs.flowSheetRenameInput
+        const el = Array.isArray(input) ? input[0] : input
+        el?.focus?.()
+        el?.select?.()
+      })
+    },
+    commitRenameFlowchartSheet() {
+      const sheetId = this.flowSheetEditingId
+      const name = this.flowSheetRenameDraft
+      this.flowSheetEditingId = ''
+      this.flowSheetRenameDraft = ''
+      if (!sheetId) return
+      this.flowchartData = renameFlowchartSheet(this.flowchartData, sheetId, name, this.flowchartData)
+      void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: false })
+    },
+    async deleteFlowchartSheetById(sheetId) {
+      if (!sheetId) return
+      if ((this.flowchartSheets || []).length <= 1) {
+        this.$message.warning(this.$t('flowchart.sheetDeleteLast') || '至少保留一个页面')
+        return
+      }
+      try {
+        await this.$confirm(
+          this.$t('flowchart.sheetDeleteConfirm') || '确定删除该页面吗？',
+          this.$t('dialog.confirm') || '提示',
+          { type: 'warning' }
+        )
+      } catch (_error) {
+        return
+      }
+      this.flowchartData = deleteFlowchartSheet(this.flowchartData, sheetId, this.flowchartData)
+      this.selectedNodeIds = []
+      this.selectedEdgeId = ''
+      this._edgeLayoutCache = new Map()
+      this.initializeFlowchartHistory?.()
+      this.$nextTick(() => this.fitCanvasToView?.({ persist: false }))
+      void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: true })
+      this.$message.success(this.$t('flowchart.sheetDeleted') || '已删除页面')
+    },
     loadFlowchartState() {
       const bootstrapState = getBootstrapState()
       this._edgeLayoutCache = new Map()
-      this.flowchartData = cloneJson(
-        bootstrapState.flowchartData || createDefaultFlowchartData()
+      this.flowchartData = ensureFlowchartWorkbook(
+        cloneJson(bootstrapState.flowchartData || createDefaultFlowchartData())
       )
       const nextFlowchartConfig = {
         snapToGrid: false,
