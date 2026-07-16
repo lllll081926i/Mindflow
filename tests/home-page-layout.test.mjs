@@ -229,3 +229,16 @@ test('首页最近文件支持单项移除', () => {
   assert.match(actionsSource, /removeWorkspaceRecentFile/)
   assert.match(langSource, /"removeRecent"/)
 })
+
+
+test('首页模板中心支持导图与流程图分类筛选', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /starterCategory/)
+  assert.match(source, /starterCategoryChips/)
+  assert.match(source, /isStarterVisible\('mindmap'/)
+  assert.match(source, /isStarterVisible\('flowchart'/)
+  assert.match(langSource, /"starterCategoryAll"/)
+  assert.match(langSource, /"starterCategoryMindmap"/)
+  assert.match(langSource, /"starterCategoryFlowchart"/)
+})

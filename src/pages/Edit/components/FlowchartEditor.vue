@@ -9,7 +9,7 @@
     @drop.prevent="onFlowchartDrop"
   >
     <div v-if="isFlowchartDragOver" class="flowchartDragMask">
-      <div class="flowchartDragTip">{{ $t('flowchart.dragImportTip') }}</div>
+      <div class="flowchartDragTip">{{ $t('flowchart.dragImportTip') }} · {{ $t('flowchart.dragImportFormatsTip') }}</div>
     </div>
     <FlowchartToolbar
       :labels="flowchartToolbarText"
@@ -592,6 +592,8 @@ export default {
       lastAutofixSnapshot: null,
       lastAutofixActions: [],
       isFlowchartDragOver: false,
+      isValidatingFlowchart: false,
+      isAutofixingFlowchart: false,
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
@@ -1174,7 +1176,13 @@ export default {
       return this.importMindMapFile()
     },
     validateCurrentFlowchart({ openPanel = true } = {}) {
+      const nodeCount = this.flowchartData?.nodes?.length || 0
+      if (nodeCount >= 80) {
+        this.isValidatingFlowchart = true
+        this.$message.info(this.$t('flowchart.validateProgress'))
+      }
       const result = validateFlowchartStructure(this.flowchartData)
+      this.isValidatingFlowchart = false
       this.flowchartValidationResult = result
       if (openPanel) this.flowchartValidationVisible = true
       const message = formatFlowchartValidationMessage(result, this.$t.bind(this))
@@ -1259,13 +1267,40 @@ export default {
       }
     },
 
-    autofixCurrentFlowchart() {
+    async autofixCurrentFlowchart() {
       const plan = buildFlowchartAutofixPlan(this.flowchartData)
       if (!plan.actions.length) {
         this.$message.success(this.$t('flowchart.autofixNoop'))
         this.validateCurrentFlowchart({ openPanel: true })
         return plan
       }
+      const detail = plan.actions
+        .map(action =>
+          this.$t('flowchart.autofixAction.' + action.code, {
+            count: action.count || 1
+          })
+        )
+        .filter(Boolean)
+        .slice(0, 6)
+        .join('\n')
+      try {
+        await this.$confirm(
+          this.$t('flowchart.autofixPreviewMessage', {
+            count: plan.actions.length,
+            detail: detail || this.$t('flowchart.autofixStructure')
+          }),
+          this.$t('flowchart.autofixPreviewTitle'),
+          {
+            type: 'warning',
+            confirmButtonText: this.$t('flowchart.autofixConfirm'),
+            cancelButtonText: this.$t('flowchart.autofixCancel')
+          }
+        )
+      } catch (_error) {
+        this.$message.info(this.$t('flowchart.autofixCancel'))
+        return null
+      }
+
       this.lastAutofixSnapshot = {
         nodes: cloneJson(this.flowchartData.nodes || []),
         edges: cloneJson(this.flowchartData.edges || [])
@@ -1284,23 +1319,15 @@ export default {
           this.fitCanvasToView({ persist: false })
         }
       })
-      const detail = plan.actions
-        .map(action => this.$t('flowchart.autofixAction.' + action.code, {
-          count: action.count || 1
-        }))
-        .filter(Boolean)
-        .slice(0, 4)
-        .join('；')
       this.$message.success(
-        detail
-          ? this.$t('flowchart.autofixDoneDetail', {
-              count: plan.actions.length,
-              detail
-            })
-          : this.$t('flowchart.autofixDone', { count: plan.actions.length })
+        this.$t('flowchart.autofixDoneDetail', {
+          count: plan.actions.length,
+          detail: detail.replace(/\n/g, '；')
+        })
       )
       return plan
     },
+
     undoLastFlowchartAutofix() {
       if (!this.lastAutofixSnapshot) {
         this.$message.info(this.$t('flowchart.autofixUndoEmpty'))

@@ -24,6 +24,8 @@ import {
   parseStoredDocumentContent,
   serializeStoredDocumentContent
 } from '@/services/flowchartDocument'
+import xmind from 'simple-mind-map/src/parse/xmind.js'
+import markdown from 'simple-mind-map/src/parse/markdown.js'
 import {
   FLOWCHART_AUTO_SAVE_INTERVAL,
   cloneJson,
@@ -291,9 +293,50 @@ export const flowchartDocumentMethods = {
 
   async importMindMapFileFromBlob(file) {
     if (!file) return
+    const name = String(file.name || '').toLowerCase()
+
+    if (/\.xmind$/.test(name)) {
+      const mindMapData = await xmind.parseXmindFile(file, content => {
+        if (Array.isArray(content) && content.length) return content[0]
+        return content
+      })
+      if (!hasConvertibleMindMapData(mindMapData)) {
+        this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
+        return
+      }
+      const nextDocument = convertMindMapToFlowchart(mindMapData, {
+        title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
+      })
+      this.applyGeneratedFlowchart(nextDocument)
+      this.$message.success(this.$t('flowchart.importMindMapFileDone'))
+      return
+    }
+
+    if (/\.md$/.test(name)) {
+      const text = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onerror = () =>
+          reject(new Error(this.$t('flowchart.importMindMapFileFailed')))
+        reader.onload = () => resolve(String(reader.result || ''))
+        reader.readAsText(file)
+      })
+      const mindMapData = markdown.transformMarkdownTo(text)
+      if (!hasConvertibleMindMapData(mindMapData)) {
+        this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
+        return
+      }
+      const nextDocument = convertMindMapToFlowchart(mindMapData, {
+        title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
+      })
+      this.applyGeneratedFlowchart(nextDocument)
+      this.$message.success(this.$t('flowchart.importMindMapFileDone'))
+      return
+    }
+
     const content = await new Promise((resolve, reject) => {
       const reader = new FileReader()
-      reader.onerror = () => reject(new Error(this.$t('flowchart.importMindMapFileFailed')))
+      reader.onerror = () =>
+        reject(new Error(this.$t('flowchart.importMindMapFileFailed')))
       reader.onload = () => resolve(String(reader.result || ''))
       reader.readAsText(file)
     })
@@ -304,15 +347,26 @@ export const flowchartDocumentMethods = {
 
   async importMindMapContent(content, fileRef = null) {
     const resolved = await resolveFileContentWithRecovery(fileRef || {}, content)
-    const parsedDocument = parseStoredDocumentContent(resolved.content)
-    if (
-      parsedDocument.documentMode === 'flowchart' ||
-      !hasConvertibleMindMapData(parsedDocument.mindMapData)
-    ) {
+    let mindMapData
+    try {
+      const parsedDocument = parseStoredDocumentContent(resolved.content)
+      if (parsedDocument.documentMode === 'flowchart') {
+        this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
+        return
+      }
+      mindMapData = parsedDocument.mindMapData
+    } catch (_error) {
+      const parsed =
+        typeof resolved.content === 'string'
+          ? JSON.parse(resolved.content)
+          : resolved.content
+      mindMapData = parsed?.root ? parsed : parsed?.mindMapData || parsed
+    }
+    if (!hasConvertibleMindMapData(mindMapData)) {
       this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
       return
     }
-    const nextDocument = convertMindMapToFlowchart(parsedDocument.mindMapData, {
+    const nextDocument = convertMindMapToFlowchart(mindMapData, {
       title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
     })
     this.applyGeneratedFlowchart(nextDocument)

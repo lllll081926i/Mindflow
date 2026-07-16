@@ -2057,3 +2057,33 @@ test('流程图空态引导与拖拽导入入口完整', () => {
   assert.match(langSource, /"emptyTitle"/)
   assert.match(langSource, /"dragImportTip"/)
 })
+
+
+
+
+
+
+
+
+test('流程图拖拽导入支持 smm/json/xmind/md 多格式', () => {
+  const documentSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorDocument.js'),
+    'utf8'
+  )
+  assert.match(documentSource, /parse\/xmind/)
+  assert.match(documentSource, /parse\/markdown/)
+  assert.ok(documentSource.includes('xmind'))
+  assert.ok(documentSource.includes('.md'))
+})
+
+test('流程图一键修复会先预览变更摘要', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /autofixPreviewTitle|autofixPreviewMessage/)
+  assert.match(editorSource, /\$confirm/)
+  assert.match(langSource, /"autofixPreviewTitle"/)
+  assert.match(langSource, /"autofixPreviewMessage"/)
+})

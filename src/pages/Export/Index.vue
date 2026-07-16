@@ -1126,6 +1126,13 @@ export default {
           : getResolvedExportType(this.exportState.exportType, this.documentMode)
       this.exporting = true
       try {
+        if ((this.getFlowchartData?.().nodes?.length || 0) >= 80 || this.documentMode !== 'flowchart') {
+          this.$message.info(
+            this.documentMode === 'flowchart'
+              ? this.$t('flowchart.exportProgress')
+              : this.$t('exportPage.exportingTip') || this.$t('flowchart.exportProgress')
+          )
+        }
         if (this.documentMode === 'flowchart') {
           const validation = validateFlowchartStructure(this.getFlowchartData())
           if (validation.issues.length) {

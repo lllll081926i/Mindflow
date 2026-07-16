@@ -114,11 +114,22 @@
               :placeholder="$t('home.starterSearchPlaceholder')"
             />
           </div>
+          <div class="starterCategoryChips">
+            <button type="button" class="starterCategoryChip" :class="{ isActive: starterCategory === 'all' }" @click="starterCategory = 'all'">
+              {{ $t('home.starterCategoryAll') }}
+            </button>
+            <button type="button" class="starterCategoryChip" :class="{ isActive: starterCategory === 'mindmap' }" @click="starterCategory = 'mindmap'">
+              {{ $t('home.starterCategoryMindmap') }}
+            </button>
+            <button type="button" class="starterCategoryChip" :class="{ isActive: starterCategory === 'flowchart' }" @click="starterCategory = 'flowchart'">
+              {{ $t('home.starterCategoryFlowchart') }}
+            </button>
+          </div>
           <div class="starterGrid">
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapBlank'), $t('home.starterMindMapBlankDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapBlank'), $t('home.starterMindMapBlankDesc'))"
               :disabled="busy"
               @click="createBlankProject"
             >
@@ -128,7 +139,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapOrg'), $t('home.starterMindMapOrgDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapOrg'), $t('home.starterMindMapOrgDesc'))"
               :disabled="busy"
               @click="createMindMapWithLayout('mindMap')"
             >
@@ -138,7 +149,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapTree'), $t('home.starterMindMapTreeDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapTree'), $t('home.starterMindMapTreeDesc'))"
               :disabled="busy"
               @click="createMindMapWithLayout('organizationStructure')"
             >
@@ -148,7 +159,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapMeeting'), $t('home.starterMindMapMeetingDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapMeeting'), $t('home.starterMindMapMeetingDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('meeting')"
             >
@@ -158,7 +169,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapProject'), $t('home.starterMindMapProjectDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapProject'), $t('home.starterMindMapProjectDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('project')"
             >
@@ -168,7 +179,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapLearning'), $t('home.starterMindMapLearningDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapLearning'), $t('home.starterMindMapLearningDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('learning')"
             >
@@ -178,7 +189,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapReview'), $t('home.starterMindMapReviewDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapReview'), $t('home.starterMindMapReviewDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('review')"
             >
@@ -188,7 +199,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapOkr'), $t('home.starterMindMapOkrDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapOkr'), $t('home.starterMindMapOkrDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('okr')"
             >
@@ -198,7 +209,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapWeekly'), $t('home.starterMindMapWeeklyDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapWeekly'), $t('home.starterMindMapWeeklyDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('weekly')"
             >
@@ -208,7 +219,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapInterview'), $t('home.starterMindMapInterviewDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapInterview'), $t('home.starterMindMapInterviewDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('interview')"
             >
@@ -218,7 +229,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapReading'), $t('home.starterMindMapReadingDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapReading'), $t('home.starterMindMapReadingDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('reading')"
             >
@@ -228,7 +239,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapBusiness'), $t('home.starterMindMapBusinessDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapBusiness'), $t('home.starterMindMapBusinessDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('business')"
             >
@@ -238,7 +249,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapKnowledge'), $t('home.starterMindMapKnowledgeDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapKnowledge'), $t('home.starterMindMapKnowledgeDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('knowledge')"
             >
@@ -248,7 +259,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapCompetitor'), $t('home.starterMindMapCompetitorDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapCompetitor'), $t('home.starterMindMapCompetitorDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('competitor')"
             >
@@ -258,7 +269,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapRetro'), $t('home.starterMindMapRetroDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapRetro'), $t('home.starterMindMapRetroDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('retro')"
             >
@@ -268,7 +279,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapRoadmap'), $t('home.starterMindMapRoadmapDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapRoadmap'), $t('home.starterMindMapRoadmapDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('roadmap')"
             >
@@ -278,7 +289,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterMindMapContent'), $t('home.starterMindMapContentDesc'))"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapContent'), $t('home.starterMindMapContentDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('content')"
             >
@@ -288,7 +299,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterFlowApproval'), $t('home.starterFlowApprovalDesc'))"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowApproval'), $t('home.starterFlowApprovalDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
@@ -298,7 +309,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterFlowRelease'), $t('home.starterFlowReleaseDesc'))"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowRelease'), $t('home.starterFlowReleaseDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('release')"
             >
@@ -308,7 +319,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterFlowEnterprise'), $t('home.starterFlowEnterpriseDesc'))"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowEnterprise'), $t('home.starterFlowEnterpriseDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('enterpriseDelivery')"
             >
@@ -318,7 +329,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterFlowSupport'), $t('home.starterFlowSupportDesc'))"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowSupport'), $t('home.starterFlowSupportDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('supportEscalation')"
             >
@@ -328,7 +339,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterFlowSales'), $t('home.starterFlowSalesDesc'))"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowSales'), $t('home.starterFlowSalesDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('salesPipeline')"
             >
@@ -338,7 +349,7 @@
             <button
               type="button"
               class="starterCard"
-              v-show="isStarterVisible($t('home.starterFlowReviewFlow'), $t('home.starterFlowReviewFlowDesc'))"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowReviewFlow'), $t('home.starterFlowReviewFlowDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('contentReview')"
             >
@@ -468,6 +479,7 @@ export default {
   data() {
     return {
       starterKeyword: '',
+      starterCategory: 'all',
       busy: false,
       homeRefreshFrame: 0,
       homeRefreshTimer: 0,
@@ -666,7 +678,10 @@ export default {
       })
     },
 
-    isStarterVisible(...labels) {
+    isStarterVisible(category, ...labels) {
+      if (this.starterCategory !== 'all' && category !== this.starterCategory) {
+        return false
+      }
       const keyword = String(this.starterKeyword || '')
         .trim()
         .toLowerCase()
@@ -677,6 +692,7 @@ export default {
           .includes(keyword)
       )
     },
+
     createBlankProjectContent(layout) {
       const themeTemplate = getPreferredMindMapThemeValue(!!this.isDark)
       return createDefaultMindMapData('思维导图', themeTemplate, layout)
