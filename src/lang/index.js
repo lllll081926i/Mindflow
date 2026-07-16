@@ -877,6 +877,7 @@ const zh = {
     "starterTitle": "快速开始",
     "starterSearchPlaceholder": "搜索模板",
     "starterEmpty": "没有匹配的模板，试试切换分类或清空搜索",
+    "recentStarters": "最近使用",
     "starterCategoryAll": "全部模板",
     "starterCategoryMindmap": "思维导图",
     "starterCategoryFlowchart": "流程图",

@@ -2140,3 +2140,14 @@ test('XMind 画布选择对话框具备可访问性标签', () => {
   assert.match(editorSource, /aria-selected/)
   assert.match(editorSource, /xmindCanvasSelectTitle/)
 })
+
+
+
+test('流程图最近修复动作可点击定位相关节点', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.ok(editorSource.includes('focusAutofixAction'))
+  assert.ok(editorSource.includes('@click="focusAutofixAction(action)"'))
+})

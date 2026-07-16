@@ -122,13 +122,15 @@
             }}
           </span>
         </div>
-        <div
+        <button
           v-for="(action, index) in lastAutofixActions.slice(0, 6)"
           :key="action.code + '-' + index"
+          type="button"
           class="flowchartAutofixResultItem"
+          @click="focusAutofixAction(action)"
         >
           {{ $t('flowchart.autofixAction.' + action.code, { count: action.count || 1 }) }}
-        </div>
+        </button>
       </div>
       <div class="validationFilterChips" v-if="flowchartValidationResult">
         <button type="button" class="validationFilterChip" :class="{ isActive: validationIssueFilter === 'all' }" @click="validationIssueFilter = 'all'">

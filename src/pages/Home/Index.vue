@@ -126,6 +126,18 @@
             </button>
           </div>
           <div class="starterSectionTitle">{{ starterSectionTitle }}</div>
+          <div v-if="recentStarterKeys.length" class="recentStarterChips">
+            <span class="recentStarterLabel">{{ $t('home.recentStarters') }}</span>
+            <button
+              v-for="key in recentStarterKeys"
+              :key="key"
+              type="button"
+              class="recentStarterChip"
+              @click="openRecentStarter(key)"
+            >
+              {{ formatRecentStarter(key) }}
+            </button>
+          </div>
           <div class="starterGrid">
             <button
               type="button"
@@ -504,6 +516,7 @@ export default {
     return {
       starterKeyword: '',
       starterCategory: 'all',
+      recentStarterKeys: [],
       busy: false,
       homeRefreshFrame: 0,
       homeRefreshTimer: 0,
@@ -571,6 +584,8 @@ export default {
     }
   },
   mounted() {
+    this.loadRecentStarters()
+
     this.scheduleRefreshHomeData()
     this.scheduleWarmupWorkspaceActions()
   },
@@ -686,6 +701,7 @@ export default {
     },
 
     async createFlowchartFromTemplate(templateId = 'blank') {
+      this.rememberStarter('flowchart:' + templateId)
       await this.createBlankFlowchartProject(templateId)
     },
 
@@ -798,6 +814,7 @@ export default {
     },
 
     async createMindMapWithLayout(layout = 'logicalStructure') {
+      this.rememberStarter('mindmap-layout:' + layout)
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceLocalFile } = await loadWorkspaceActions()
         return createWorkspaceLocalFile({
@@ -1187,6 +1204,7 @@ export default {
     },
 
     async createMindMapScenario(scenario = 'meeting') {
+      this.rememberStarter('mindmap:' + scenario)
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceLocalFile } = await loadWorkspaceActions()
         return createWorkspaceLocalFile({
@@ -1545,6 +1563,34 @@ export default {
 
 .starterSection {
   margin-bottom: 22px;
+}
+.recentStarterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 12px;
+}
+.recentStarterLabel {
+  font-size: 12px;
+  color: #737373;
+}
+.recentStarterChip {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,0.1);
+  background: rgba(37,99,235,0.08);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.homePage.isDark .recentStarterLabel {
+  color: rgba(255,255,255,0.55);
+}
+.homePage.isDark .recentStarterChip {
+  border-color: rgba(255,255,255,0.12);
 }
 .starterSectionTitle {
   margin: 0 0 10px;

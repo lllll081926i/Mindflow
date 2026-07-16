@@ -274,3 +274,13 @@ test('首页流程图模板覆盖事故响应与客户旅程', () => {
   assert.match(langSource, /"starterFlowIncident"/)
   assert.match(langSource, /"starterFlowJourney"/)
 })
+
+
+test('首页模板中心记录并展示最近使用模板', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /recentStarterKeys/)
+  assert.match(source, /rememberStarter/)
+  assert.match(source, /openRecentStarter/)
+  assert.match(langSource, /"recentStarters"/)
+})
