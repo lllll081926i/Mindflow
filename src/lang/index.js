@@ -136,6 +136,7 @@ const zh = {
     "insertChildNode": "插入子级节点",
     "insertParentNode": "插入父节点",
     "removeSummary": "删除概要",
+    "insertRangeSummary": "插入范围概要",
     "insertSummary": "插入概要",
     "moveUpNode": "上移节点",
     "moveDownNode": "下移节点",
@@ -514,6 +515,21 @@ const zh = {
     "prevResult": "上一条",
     "nextResult": "下一条",
     "idleHint": "输入关键词后按回车开始搜索"
+  },
+  "summaryRange": {
+    "title": "范围概要",
+    "single": "单节点概要",
+    "hint": "选中多个同级主题后按 Ctrl+G 可创建范围概要；选中概要节点可在此调整覆盖范围。",
+    "creatingRange": "正在为所选同级主题创建范围概要"
+  },
+  "markerLegend": {
+    "title": "标记图例",
+    "clearFilter": "清除筛选",
+    "openIcons": "打开图标库",
+    "hint": "点击图例可筛选画布；再次点击同一图例可取消筛选。选中主题后点图例可直接打标。",
+    "usage": "画布使用统计",
+    "empty": "当前画布还没有标记",
+    "marked": "已为所选主题打标"
   },
   "nodeIconSidebar": {
     "title": "图标/贴纸",

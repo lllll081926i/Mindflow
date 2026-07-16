@@ -36,7 +36,7 @@
         @click="exec('ADD_GENERALIZATION')"
         :class="{ disabled: insertNodeBtnDisabled }"
       >
-        <span class="name">{{ $t('contextmenu.insertSummary') }}</span>
+        <span class="name">{{ summaryActionLabel }}</span>
         <span class="desc">Ctrl + G</span>
       </div>
       <div
@@ -351,6 +351,17 @@ export default {
     },
     hasNodeLink() {
       return !!this.node?.getData('nodeLink')
+    },
+    summaryActionLabel() {
+      const list = this.mindMap?.renderer?.activeNodeList || []
+      if (list.length > 1) {
+        const parent = list[0]?.parent
+        const sameParent = parent && list.every(item => item.parent === parent)
+        if (sameParent) {
+          return this.$t('contextmenu.insertRangeSummary') || '插入范围概要'
+        }
+      }
+      return this.$t('contextmenu.insertSummary')
     }
   },
   created() {

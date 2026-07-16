@@ -305,6 +305,11 @@ export const shortcutKeyList = [
         value: `${ctrl} + G`
       },
       {
+        icon: 'icongaikuozonglan',
+        name: '创建范围概要',
+        value: '多选同级后 ' + ctrl + ' + G'
+      },
+      {
         icon: 'iconzhankai',
         name: '展开/收起节点',
         value: '/'
@@ -525,6 +530,11 @@ export const shortcutKeyList = [
         value: ctrl + ' + Alt + M'
       },
       {
+        icon: 'iconbiaoqian',
+        name: '打开标记图例',
+        value: ctrl + ' + Alt + I'
+      },
+      {
         icon: 'iconroot',
         name: '回到根节点',
         value: ctrl + ' + Shift + B'
@@ -735,6 +745,11 @@ export const sidebarTriggerList = [
     name: '大纲',
     value: 'outline',
     icon: 'iconfuhao-dagangshu'
+  },
+  {
+    name: '标记图例',
+    value: 'markerLegend',
+    icon: 'iconbiaoqian'
   },
   {
     name: '设置',

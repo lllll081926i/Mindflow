@@ -110,6 +110,11 @@
       v-if="mindMap && activeSidebar === 'nodeIconSidebar'"
       :mindMap="mindMap"
     ></NodeIconSidebar>
+    <MarkerLegendSidebar
+      v-if="mindMap && activeSidebar === 'markerLegend'"
+      :mindMap="mindMap"
+    ></MarkerLegendSidebar>
+    <SummaryRangeBar v-if="mindMap && !isZenMode" :mindMap="mindMap" />
     <NodeIconToolbar
       v-if="mindMap && secondaryUiReady"
       :mindMap="mindMap"
@@ -205,6 +210,12 @@ const ShortcutKey = defineAsyncComponent(loadShortcutKey)
 const Search = defineAsyncComponent(() => import('./Search.vue'))
 const NodeIconSidebar = defineAsyncComponent(() =>
   import('./NodeIconSidebar.vue')
+)
+const MarkerLegendSidebar = defineAsyncComponent(() =>
+  import('./MarkerLegendSidebar.vue')
+)
+const SummaryRangeBar = defineAsyncComponent(() =>
+  import('./SummaryRangeBar.vue')
 )
 const NodeIconToolbar = defineAsyncComponent(() =>
   import('./NodeIconToolbar.vue')
@@ -563,6 +574,8 @@ export default {
     SidebarTrigger,
     Search,
     NodeIconSidebar,
+    MarkerLegendSidebar,
+    SummaryRangeBar,
     NodeIconToolbar,
     OutlineEdit,
     SourceCodeEdit,

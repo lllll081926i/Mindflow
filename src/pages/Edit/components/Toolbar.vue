@@ -820,6 +820,11 @@ export default {
           action: () => this.openNodeComments(this.getActiveNodesSnapshot())
         },
         {
+          key: 'markerLegend',
+          label: this.$t('markerLegend.title') || '标记图例',
+          action: () => setActiveSidebar('markerLegend')
+        },
+        {
           key: 'fitCanvas',
           label: this.$t('toolbar.fitCanvasAction'),
           action: () => this.emitEditorCommand('FIT_CANVAS')
@@ -1379,6 +1384,18 @@ export default {
           this.openNodeComments(activeNodes)
           return
         }
+      }
+      // Ctrl+Alt+I open marker legend
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'i'
+      ) {
+        event.preventDefault()
+        setActiveSidebar('markerLegend')
+        return
       }
       // Ctrl+Alt+F filter markers
       if (

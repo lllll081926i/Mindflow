@@ -651,3 +651,29 @@ test('支持导入多个 FreeMind .mm 的 zip 工作簿', () => {
   assert.ok(importSource.includes('.zip'))
   assert.ok(desktopSource.includes("'zip'") || desktopSource.includes('.zip'))
 })
+
+
+test('思维导图提供标记图例侧栏与快捷入口', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  const legendSource = fs.readFileSync(path.resolve('src/pages/Edit/components/MarkerLegendSidebar.vue'), 'utf8')
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(editSource.includes('MarkerLegendSidebar'))
+  assert.ok(legendSource.includes('onLegendClick'))
+  assert.ok(legendSource.includes('refreshCounts'))
+  assert.ok(toolbarSource.includes("setActiveSidebar('markerLegend')"))
+  assert.ok(configSource.includes("value: 'markerLegend'"))
+})
+
+
+test('思维导图支持范围概要调整条与标记图例', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  const summarySource = fs.readFileSync(path.resolve('src/pages/Edit/components/SummaryRangeBar.vue'), 'utf8')
+  const contextSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Contextmenu.vue'), 'utf8')
+  assert.ok(editSource.includes('SummaryRangeBar'))
+  assert.ok(editSource.includes('MarkerLegendSidebar'))
+  assert.ok(summarySource.includes('expandStart'))
+  assert.ok(summarySource.includes('updateRange'))
+  assert.ok(contextSource.includes('summaryActionLabel'))
+  assert.ok(contextSource.includes('insertRangeSummary') || contextSource.includes('范围概要'))
+})
