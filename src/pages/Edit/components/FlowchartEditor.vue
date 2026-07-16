@@ -1656,6 +1656,61 @@ export default {
       this.flowchartOutlineVisible = false
       this.flowchartOutlineKeyword = ''
     },
+    openFlowchartSearch() {
+      this.flowchartSearchVisible = true
+      this.commandPaletteVisible = false
+      this.flowchartOutlineVisible = false
+      this.flowchartShortcutVisible = false
+      this.$nextTick(() => {
+        const input = this.$refs.flowchartSearchInputRef
+        const el = Array.isArray(input) ? input[0] : input
+        el?.focus?.()
+        el?.select?.()
+      })
+    },
+    closeFlowchartSearch() {
+      this.flowchartSearchVisible = false
+      this.flowchartSearchKeyword = ''
+      this.flowchartSearchActiveIndex = 0
+    },
+    jumpToFlowchartSearchResult(index = 0) {
+      const list = this.flowchartSearchResults || []
+      if (!list.length) return
+      const nextIndex = Math.max(0, Math.min(list.length - 1, Number(index) || 0))
+      this.flowchartSearchActiveIndex = nextIndex
+      const item = list[nextIndex]
+      if (!item?.id) return
+      this.selectedNodeIds = [item.id]
+      this.selectedEdgeId = ''
+      const node = this.flowchartNodeLookup.get(item.id)
+      if (node && typeof this.centerViewportAt === 'function') {
+        this.centerViewportAt({
+          x: Number(node.x || 0) + Number(node.width || 0) / 2,
+          y: Number(node.y || 0) + Number(node.height || 0) / 2
+        })
+      }
+    },
+    jumpToNextFlowchartSearchResult() {
+      const list = this.flowchartSearchResults || []
+      if (!list.length) return
+      const next = (Number(this.flowchartSearchActiveIndex) + 1) % list.length
+      this.jumpToFlowchartSearchResult(next)
+    },
+    jumpToPrevFlowchartSearchResult() {
+      const list = this.flowchartSearchResults || []
+      if (!list.length) return
+      const prev =
+        (Number(this.flowchartSearchActiveIndex) - 1 + list.length) % list.length
+      this.jumpToFlowchartSearchResult(prev)
+    },
+    openFlowchartShortcuts() {
+      this.flowchartShortcutVisible = true
+      this.commandPaletteVisible = false
+      this.flowchartSearchVisible = false
+    },
+    closeFlowchartShortcuts() {
+      this.flowchartShortcutVisible = false
+    },
     buildFlowchartOutlineItems() {
       const strip = value =>
         String(value || '')

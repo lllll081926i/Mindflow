@@ -2363,3 +2363,16 @@ test('快速新建节点会空文本进入编辑并在取消时回退默认名',
   assert.ok(nodeSource.includes('startInlineEdit ?'))
   assert.ok(inlineSource.includes("typeDef?.label || '新节点'"))
 })
+
+
+test('流程图搜索面板可打开并聚焦输入框', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.ok(editorSource.includes('openFlowchartSearch() {'))
+  assert.ok(editorSource.includes('closeFlowchartSearch() {'))
+  assert.ok(editorSource.includes('jumpToNextFlowchartSearchResult() {'))
+  assert.ok(editorSource.includes('flowchartSearchInputRef'))
+  assert.ok(editorSource.includes('el?.focus?.()'))
+})
