@@ -88,12 +88,11 @@
 <script>
 import { mapState } from 'pinia'
 import { useThemeStore } from '@/stores/theme'
-import { createDefaultMindMapData } from '@/platform/shared/configSchema'
-import { getPreferredMindMapThemeValue } from '@/stores/runtime'
 import {
   FLOWCHART_TEMPLATE_STARTERS,
   MIND_MAP_SCENARIO_STARTERS
 } from '@/services/templateCatalog'
+import { createScenarioMindMapData } from '@/services/scenarioMindMapFactory'
 
 let workspaceActionsPromise = null
 const loadWorkspaceActions = async () => {
@@ -165,52 +164,28 @@ export default {
         this.busy = false
       }
     },
-    createScenarioMindMapData(scenario = 'meeting') {
-      // Reuse home-compatible scenario factory via dynamic import of home logic would be heavy.
-      // Keep a compact set of popular scenarios and fallback to blank seeded structures.
-      const layout =
-        scenario === 'project' || scenario === 'okr' ? 'organizationStructure' : 'mindMap'
-      const themeTemplate = getPreferredMindMapThemeValue(!!this.isDark)
-      const data = createDefaultMindMapData('思维导图', themeTemplate, layout)
-      const titleMap = {
-        meeting: '会议纪要',
-        project: '项目计划',
-        learning: '学习计划',
-        review: '复盘总结',
-        okr: 'OKR',
-        weekly: '周报',
-        interview: '面试准备',
-        reading: '读书笔记',
-        business: '商业计划',
-        knowledge: '知识管理',
-        competitor: '竞品分析',
-        retro: '复盘会',
-        roadmap: '产品路线图',
-        content: '内容日历'
+    rememberStarter(key) {
+      try {
+        const raw = localStorage.getItem('mindflow.recentStarters.v1')
+        const list = raw ? JSON.parse(raw) : []
+        const next = [key, ...(Array.isArray(list) ? list : []).filter(item => item !== key)].slice(0, 8)
+        localStorage.setItem('mindflow.recentStarters.v1', JSON.stringify(next))
+      } catch (_error) {
+        // ignore
       }
-      data.root.data.text = titleMap[scenario] || '思维导图'
-      data.root.children = [
-        {
-          data: { text: '要点一' },
-          children: [{ data: { text: '子要点' }, children: [] }]
-        },
-        {
-          data: { text: '要点二' },
-          children: []
-        }
-      ]
-      return data
     },
     async createMindMapScenario(scenario) {
+      this.rememberStarter('mindmap:' + scenario)
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceLocalFile } = await loadWorkspaceActions()
         return createWorkspaceLocalFile({
           router: this.$router,
-          content: this.createScenarioMindMapData(scenario)
+          content: createScenarioMindMapData(scenario, this.isDark)
         })
       })
     },
     async createFlowchartFromTemplate(templateId) {
+      this.rememberStarter('flowchart:' + templateId)
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceFlowchartFile } = await loadWorkspaceActions()
         return createWorkspaceFlowchartFile({

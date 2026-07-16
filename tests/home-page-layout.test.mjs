@@ -299,3 +299,21 @@ test('首页提供模板中心独立入口', () => {
   assert.match(templatesSource, /TemplatesPage|templatesPage/)
   assert.match(langSource, /"templatesCenterTitle"/)
 })
+
+
+test('模板中心与首页共享完整导图场景工厂', () => {
+  const factorySource = fs.readFileSync(
+    path.resolve('src/services/scenarioMindMapFactory.js'),
+    'utf8'
+  )
+  const homeSource = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const templatesSource = fs.readFileSync(
+    path.resolve('src/pages/Templates/Index.vue'),
+    'utf8'
+  )
+  assert.match(factorySource, /export function createScenarioMindMapData/)
+  assert.match(factorySource, /产品路线图|内容日历|竞品分析/)
+  assert.match(homeSource, /scenarioMindMapFactory/)
+  assert.match(templatesSource, /scenarioMindMapFactory/)
+  assert.match(templatesSource, /rememberStarter/)
+})
