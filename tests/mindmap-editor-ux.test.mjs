@@ -509,3 +509,12 @@ test('思维导图搜索可命中其他画布结果', () => {
   assert.ok(searchSource.includes('jumpToCrossSheetResult'))
   assert.ok(searchSource.includes('isCrossSheet'))
 })
+
+
+test('演示模式支持 F5 进入与方向键翻页', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Edit/components/Demonstrate.vue'), 'utf8')
+  assert.ok(source.includes('handleDemonstrateKeydown'))
+  assert.ok(source.includes("event.key === 'F5'"))
+  assert.ok(source.includes('ArrowRight'))
+  assert.ok(source.includes('ArrowLeft'))
+})

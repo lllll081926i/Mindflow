@@ -73,12 +73,40 @@ export default {
   created() {
     this.$bus.$on('demonstrate_jump', this.onJump)
     this.$bus.$on('exit_demonstrate', this.onExit)
+    this.$bus.$on('enter_demonstrate', this.enterDemoMode)
+    window.addEventListener('keydown', this.handleDemonstrateKeydown)
   },
   beforeUnmount() {
     this.$bus.$off('demonstrate_jump', this.onJump)
     this.$bus.$off('exit_demonstrate', this.onExit)
+    this.$bus.$off('enter_demonstrate', this.enterDemoMode)
+    window.removeEventListener('keydown', this.handleDemonstrateKeydown)
   },
   methods: {
+    handleDemonstrateKeydown(event) {
+      // F5 enter demonstrate when not already in it
+      if (event.key === 'F5' && !this.isEnterDemonstrate) {
+        // allow browser default only if prevented? prevent for app UX
+        event.preventDefault()
+        this.enterDemoMode()
+        return
+      }
+      if (!this.isEnterDemonstrate) return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        this.exit()
+        return
+      }
+      if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') {
+        event.preventDefault()
+        this.next()
+        return
+      }
+      if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+        event.preventDefault()
+        this.prev()
+      }
+    },
     enterDemoMode() {
       this.isEnterDemonstrate = true
       this.$nextTick(() => {

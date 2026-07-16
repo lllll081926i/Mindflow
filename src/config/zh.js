@@ -390,6 +390,16 @@ export const shortcutKeyList = [
         value: ctrl + ' + \'
       },
       {
+        icon: 'iconyanshibofang',
+        name: '进入演示模式',
+        value: 'F5'
+      },
+      {
+        icon: 'iconguanbi',
+        name: '退出演示模式',
+        value: 'Esc'
+      },
+      {
         icon: 'iconxiaolian',
         name: '节点图标',
         value: ctrl + ' + Shift + O'
