@@ -2223,3 +2223,22 @@ test('流程图可转换为思维导图树并保留边标签', async () => {
   assert.ok(Array.isArray(back.root.children))
   assert.ok(back.root.children.length >= 1)
 })
+
+
+test('导图转流程会保留备注与超链接', async () => {
+  const { convertMindMapToFlowchart } = await loadFlowchartDocumentModule()
+  const flow = convertMindMapToFlowchart({
+    root: {
+      data: { text: '根', note: '根备注', hyperlink: 'https://a.example' },
+      children: [
+        {
+          data: { text: '子节点', note: '子备注', hyperlink: 'https://b.example' },
+          children: []
+        }
+      ]
+    }
+  })
+  const nodes = flow.flowchartData.nodes
+  assert.ok(nodes.some(n => n.note === '根备注' && n.link === 'https://a.example'))
+  assert.ok(nodes.some(n => n.note === '子备注' && n.link === 'https://b.example'))
+})

@@ -4422,6 +4422,8 @@ const createFlowNodeFromMindMapNode = ({ node, index, level, column, usedIds }) 
           ? 'process'
           : 'end'
   const sourceId = String(node?.data?.uid || createNodeId('mindmap-node', index))
+  const note = String(node?.data?.note || '').trim()
+  const link = String(node?.data?.hyperlink || node?.data?.link || '').trim()
   return createFlowchartNode({
     id: createUniqueFlowchartId({
       id: sourceId,
@@ -4430,7 +4432,12 @@ const createFlowNodeFromMindMapNode = ({ node, index, level, column, usedIds }) 
       usedIds
     }),
     type,
-    text: String(node?.data?.text || '').trim() || `步骤 ${index + 1}`,
+    text: String(node?.data?.text || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim() || `步骤 ${index + 1}`,
+    note,
+    link,
     x: 120 + column * 240,
     y: 120 + index * 116,
     width: type === 'decision' ? 176 : 168,
