@@ -265,6 +265,7 @@ const zh = {
     "addTip": "请按回车键添加"
   },
   "outline": {
+    "searchPlaceholder": "搜索大纲节点",
     "title": "大纲",
     "nodeDefaultText": "分支节点",
     "print": "打印",
@@ -786,6 +787,20 @@ const zh = {
     "autofixStructure": "一键修复",
     "autofixDone": "已应用 {count} 项修复",
     "autofixNoop": "当前没有可自动修复的问题",
+    "autofixDoneDetail": "已应用 {count} 项修复：{detail}",
+    "autofixUndo": "撤销修复",
+    "autofixUndoDone": "已撤销上次修复",
+    "autofixUndoEmpty": "没有可撤销的修复",
+    "autofixAction": {
+      "remove-dangling-edges": "清理无效连线 x{count}",
+      "add-start": "补充开始节点",
+      "add-end": "补充结束节点",
+      "connect-floating": "串接悬空节点 x{count}",
+      "chain-floating": "串接悬空节点",
+      "connect-start": "连接开始节点",
+      "connect-end": "连接结束节点",
+      "label-decision-edges": "补全判断标签 x{count}"
+    },
     "themeBlueprint": "纸白",
     "themeOpsWarm": "运维暖色",
     "themeServiceMint": "服务薄荷",

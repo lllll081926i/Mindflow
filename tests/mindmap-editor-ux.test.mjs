@@ -279,3 +279,21 @@ test('思维导图核心界面不出现待办或任务管理入口', () => {
   assert.doesNotMatch(projectRoadmapSource, /任务汇总/)
   assert.doesNotMatch(projectRoadmapSource, /任务系统/)
 })
+
+
+test('大纲侧边栏支持节点搜索过滤', () => {
+  const sidebarSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/OutlineSidebar.vue'),
+    'utf8'
+  )
+  const outlineSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/Outline.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(sidebarSource, /outlineKeyword/)
+  assert.match(sidebarSource, /outlineSearch/)
+  assert.match(outlineSource, /filterOutlineNode/)
+  assert.match(outlineSource, /filter-node-method/)
+  assert.match(langSource, /搜索大纲节点/)
+})

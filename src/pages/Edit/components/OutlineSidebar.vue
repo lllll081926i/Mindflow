@@ -30,11 +30,17 @@
         </div>
       </el-tooltip>
     </div>
-    <Outline
+          <input
+        v-model.trim="outlineKeyword"
+        class="outlineSearch"
+        type="search"
+        :placeholder="$t('outline.searchPlaceholder')"
+      />
+      <Outline
       :mindMap="mindMap"
       @scrollTo="onScrollTo"
       ref="outlineRef"
-    ></Outline>
+     :keyword="outlineKeyword"></Outline>
   </Sidebar>
 </template>
 
@@ -49,6 +55,11 @@ import { setActiveSidebar, setIsOutlineEdit } from '@/stores/runtime'
 
 // 大纲侧边栏
 export default {
+  data() {
+    return {
+      outlineKeyword: ''
+    }
+  },
   components: {
     Sidebar,
     Outline
@@ -90,6 +101,18 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.outlineSearch {
+  width: calc(100% - 24px);
+  margin: 10px 12px 8px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(15,23,42,0.1);
+  background: rgba(255,255,255,0.92);
+  color: inherit;
+  font: inherit;
+}
+
 .btnList {
   position: absolute;
   right: 50px;

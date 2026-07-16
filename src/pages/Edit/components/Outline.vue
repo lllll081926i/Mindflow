@@ -17,6 +17,7 @@
     @current-change="onCurrentChange"
     @mouseenter="isInTreArea = true"
     @mouseleave="isInTreArea = false"
+    :filter-node-method="filterOutlineNode"
   >
     <template #default="{ node, data }">
       <span class="customNode" :data-id="data.uid" @click="onClick(data)">
@@ -54,6 +55,10 @@ const OUTLINE_INSERT_ACTIONS = new Set(['insertNode', 'insertChildNode', 'moveUp
 // 大纲树
 export default {
   props: {
+    keyword: {
+      type: String,
+      default: ''
+    },
     mindMap: {
       type: Object
     }
@@ -99,7 +104,19 @@ export default {
     this.$bus.$off('hide_text_edit', this.handleHideTextEdit)
     clearTimeout(this.refreshTimer)
   },
+  watch: {
+    keyword(value) {
+      this.$refs.tree?.filter?.(value)
+    }
+  },
   methods: {
+    filterOutlineNode(value, data) {
+      const keyword = String(value || this.keyword || '').trim().toLowerCase()
+      if (!keyword) return true
+      const text = String(data?.label || data?.data?.text || data?.text || '')
+        .toLowerCase()
+      return text.includes(keyword)
+    },
     scheduleRefresh() {
       clearTimeout(this.refreshTimer)
       this.refreshTimer = setTimeout(() => {

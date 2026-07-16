@@ -148,6 +148,14 @@
         <button type="button" class="flowchartValidationAction isPrimary" @click="autofixCurrentFlowchart">
           {{ $t('flowchart.autofixStructure') }}
         </button>
+        <button
+          type="button"
+          class="flowchartValidationAction"
+          :disabled="!lastAutofixSnapshot"
+          @click="undoLastFlowchartAutofix"
+        >
+          {{ $t('flowchart.autofixUndo') }}
+        </button>
       </div>
     </div>
 
@@ -570,6 +578,8 @@ export default {
       selectedValidationIssueKey: '',
       validationIssueFilter: 'all',
       validationHighlightNodeIds: [],
+      lastAutofixSnapshot: null,
+      lastAutofixActions: [],
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
@@ -976,6 +986,7 @@ export default {
         { key: 'tidyLayout', label: this.$t('flowchart.tidyLayout'), action: () => this.tidyFlowchartLayout() },
         { key: 'validate', label: this.$t('flowchart.validateStructure'), action: () => this.validateCurrentFlowchart({ openPanel: true }) },
         { key: 'autofix', label: this.$t('flowchart.autofixStructure'), action: () => this.autofixCurrentFlowchart() },
+        { key: 'undoAutofix', label: this.$t('flowchart.autofixUndo'), disabled: !this.lastAutofixSnapshot, action: () => this.undoLastFlowchartAutofix() },
         { key: 'undo', label: this.$t('toolbar.undo'), shortcut: 'Ctrl Z', action: () => this.undoFlowchartChange() },
         { key: 'redo', label: this.$t('toolbar.redo'), shortcut: 'Ctrl Y', action: () => this.redoFlowchartChange() },
         { key: 'addStart', label: this.$t('flowchart.addStart'), action: () => this.addNodeByType({ type: 'start', autoConnect: true }) },
@@ -1208,6 +1219,11 @@ export default {
         this.validateCurrentFlowchart({ openPanel: true })
         return plan
       }
+      this.lastAutofixSnapshot = {
+        nodes: cloneJson(this.flowchartData.nodes || []),
+        edges: cloneJson(this.flowchartData.edges || [])
+      }
+      this.lastAutofixActions = plan.actions
       this.flowchartData = {
         ...this.flowchartData,
         nodes: plan.flowchartData.nodes,
@@ -1221,11 +1237,40 @@ export default {
           this.fitCanvasToView({ persist: false })
         }
       })
+      const detail = plan.actions
+        .map(action => this.$t('flowchart.autofixAction.' + action.code, {
+          count: action.count || 1
+        }))
+        .filter(Boolean)
+        .slice(0, 4)
+        .join('；')
       this.$message.success(
-        this.$t('flowchart.autofixDone', { count: plan.actions.length })
+        detail
+          ? this.$t('flowchart.autofixDoneDetail', {
+              count: plan.actions.length,
+              detail
+            })
+          : this.$t('flowchart.autofixDone', { count: plan.actions.length })
       )
       return plan
     },
+    undoLastFlowchartAutofix() {
+      if (!this.lastAutofixSnapshot) {
+        this.$message.info(this.$t('flowchart.autofixUndoEmpty'))
+        return
+      }
+      this.flowchartData = {
+        ...this.flowchartData,
+        nodes: cloneJson(this.lastAutofixSnapshot.nodes || []),
+        edges: cloneJson(this.lastAutofixSnapshot.edges || [])
+      }
+      this.lastAutofixSnapshot = null
+      this.lastAutofixActions = []
+      void this.persistFlowchartState()
+      this.validateCurrentFlowchart({ openPanel: true })
+      this.$message.success(this.$t('flowchart.autofixUndoDone'))
+    },
+
 
     openCommandPalette() {
       this.commandPaletteVisible = true

@@ -2004,3 +2004,17 @@ test('流程图校验面板支持严重级别筛选与仅选错误', () => {
   assert.match(langSource, /"validateFilterAll"/)
   assert.match(langSource, /"validateSelectErrors"/)
 })
+
+
+test('流程图一键修复支持明细反馈与撤销', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /lastAutofixSnapshot/)
+  assert.match(editorSource, /undoLastFlowchartAutofix/)
+  assert.match(editorSource, /autofixDoneDetail/)
+  assert.match(langSource, /"autofixUndo"/)
+  assert.match(langSource, /"autofixDoneDetail"/)
+})
