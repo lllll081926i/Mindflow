@@ -120,7 +120,14 @@ export const flowchartInlineEditMethods = {
     if (kind === 'node') {
       const targetNode = this.getNodeById(id)
       if (targetNode) {
-        targetNode.text = normalizedValue || targetNode.text
+        if (normalizedValue) {
+          targetNode.text = normalizedValue
+        } else if (!String(targetNode.text || '').trim()) {
+          const typeDef = (this.flowchartNodeTypes || []).find(
+            item => item.type === targetNode.type
+          )
+          targetNode.text = typeDef?.label || '新节点'
+        }
         await this.persistFlowchartState()
       }
     } else {

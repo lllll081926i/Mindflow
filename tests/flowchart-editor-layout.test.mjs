@@ -2349,3 +2349,17 @@ test('流程图 Space 可切换属性面板', () => {
   assert.ok(selectionSource.includes('toggleInspector()'))
   assert.ok(configSource.includes('打开/关闭属性面板'))
 })
+
+
+test('快速新建节点会空文本进入编辑并在取消时回退默认名', () => {
+  const nodeSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorNode.js'),
+    'utf8'
+  )
+  const inlineSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorInlineEdit.js'),
+    'utf8'
+  )
+  assert.ok(nodeSource.includes('startInlineEdit ?'))
+  assert.ok(inlineSource.includes("typeDef?.label || '新节点'"))
+})

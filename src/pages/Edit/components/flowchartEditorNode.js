@@ -181,7 +181,8 @@ export const flowchartNodeMethods = {
     const nextNode = {
       id: createNodeId(type),
       type,
-      text: typeDef?.label || '新节点',
+      // Empty seed when entering edit immediately so typing replaces content.
+      text: startInlineEdit ? '' : typeDef?.label || '新节点',
       x: placementPoint.x - size.width / 2,
       y: placementPoint.y - size.height / 2,
       width: size.width,
