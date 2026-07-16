@@ -2514,3 +2514,13 @@ test('流程图搜索支持连线标签命中与定位', () => {
   assert.ok(editorSource.includes('edgeHits'))
   assert.ok(editorSource.includes("item.kind === 'edge'"))
 })
+
+
+test('框选节点按从上到下从左到右稳定排序', () => {
+  const viewportSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorViewport.js'),
+    'utf8'
+  )
+  assert.ok(viewportSource.includes('Keep a stable drafting order'))
+  assert.ok(viewportSource.includes('return ay - by'))
+})

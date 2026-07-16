@@ -447,7 +447,9 @@ export const flowchartViewportMethods = {
   findNodesInSelectionBox() {
     const bounds = this.getSelectionBounds()
     if (!bounds) return []
-    const hitNodeIds = this.flowchartData.nodes
+    // Keep a stable drafting order: top-to-bottom then left-to-right.
+    // This makes L-link source/target predictable after marquee selection.
+    const hitNodes = this.flowchartData.nodes
       .filter(node => {
         const left = Number(node.x || 0)
         const top = Number(node.y || 0)
@@ -460,12 +462,22 @@ export const flowchartViewportMethods = {
           top <= bounds.bottom
         )
       })
-      .map(node => node.id)
+      .slice()
+      .sort((a, b) => {
+        const ay = Number(a.y || 0)
+        const by = Number(b.y || 0)
+        if (ay !== by) return ay - by
+        return Number(a.x || 0) - Number(b.x || 0)
+      })
+    const hitNodeIds = hitNodes.map(node => node.id)
     if (!this.selectionState?.appendSelection) {
       return hitNodeIds
     }
-    return Array.from(
-      new Set([...(this.selectionState.initialSelectedNodeIds || []), ...hitNodeIds])
-    )
+    const initial = this.selectionState.initialSelectedNodeIds || []
+    const merged = [...initial]
+    hitNodeIds.forEach(id => {
+      if (!merged.includes(id)) merged.push(id)
+    })
+    return merged
   }
 }
