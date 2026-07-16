@@ -577,6 +577,7 @@ export default {
     return {
       sheetRenameDraft: '',
       sheetEditingId: '',
+      activeMarkerFilter: '',
       enableShowLoading: true,
       mindMap: null,
       mindMapData: null,
@@ -827,6 +828,7 @@ export default {
       this.$bus.$on('mindmapMoveSheetRight', () => this.moveActiveMindmapSheet(1))
       this.$bus.$on('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$on('mindmapSwitchSheet', this.switchMindmapSheetById)
+      this.$bus.$on('applyMarkerFilter', this.handleApplyMarkerFilter)
       this.$bus.$on(
         'createAssociativeLine',
         this.handleCreateLineFromActiveNode
@@ -860,6 +862,7 @@ export default {
       this.$bus.$off('mindmapMoveSheetRight')
       this.$bus.$off('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$off('mindmapSwitchSheet', this.switchMindmapSheetById)
+      this.$bus.$off('applyMarkerFilter', this.handleApplyMarkerFilter)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)
@@ -1133,6 +1136,26 @@ export default {
       storeData(this.mindMapData)
     },
 
+    handleApplyMarkerFilter(marker = '') {
+      this.activeMarkerFilter = String(marker || '')
+      this.applyActiveMarkerFilter()
+    },
+    applyActiveMarkerFilter() {
+      if (!this.mindMap?.renderer) return
+      const token = this.activeMarkerFilter
+      const walk = node => {
+        if (!node) return
+        const icons = node.getData?.('icon') || []
+        const match = !token || (Array.isArray(icons) && icons.includes(token))
+        try {
+          if (node.group && typeof node.group.opacity === 'function') {
+            node.group.opacity(match ? 1 : 0.18)
+          }
+        } catch (_error) {}
+        ;(node.children || []).forEach(child => walk(child))
+      }
+      walk(this.mindMap.renderer.root)
+    },
     handleMindmapRenameActiveSheet() {
       const active = (this.mindmapSheets || []).find(item => item.active)
       if (active) this.startRenameMindmapSheet(active)

@@ -598,3 +598,13 @@ test('思维导图支持演示填空与展开按钮快捷键', () => {
   assert.ok(settingSource.includes('toggleBlankModeShortcut'))
   assert.ok(settingSource.includes('openBlankMode'))
 })
+
+
+test('思维导图支持按优先级标记筛选', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('promptMarkerFilter'))
+  assert.ok(toolbarSource.includes('clearMarkerFilter'))
+  assert.ok(editSource.includes('handleApplyMarkerFilter'))
+  assert.ok(editSource.includes('applyActiveMarkerFilter'))
+})

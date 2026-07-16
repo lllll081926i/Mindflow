@@ -410,6 +410,16 @@ export const shortcutKeyList = [
         value: 'Alt + 1~9 / Alt + 0清除'
       },
       {
+        icon: 'iconfilter',
+        name: '按优先级筛选',
+        value: ctrl + ' + Alt + F'
+      },
+      {
+        icon: 'iconfilter',
+        name: '清除优先级筛选',
+        value: ctrl + ' + Alt + 0'
+      },
+      {
         icon: 'iconprogress',
         name: '设置进度标记',
         value: ctrl + ' + Alt + 1~8'

@@ -563,6 +563,7 @@ export default {
       commandPaletteKeyword: '',
       commandPaletteActiveIndex: 0,
       activeNodes: [],
+      markerFilterValue: '',
       lastSuccessfulSaveAt: 0,
       lastLocalSaveErrorMessage: '',
       pendingLocalFileRef: null,
@@ -1328,6 +1329,30 @@ export default {
       ) {
         event.preventDefault()
         setActiveSidebar('structure')
+        return
+      }
+      // Ctrl+Alt+F filter by priority marker
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'f'
+      ) {
+        event.preventDefault()
+        void this.promptMarkerFilter()
+        return
+      }
+      // Ctrl+Alt+0 clear marker filter
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key === '0'
+      ) {
+        event.preventDefault()
+        this.clearMarkerFilter()
         return
       }
       // priority/progress markers
