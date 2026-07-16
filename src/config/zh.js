@@ -405,6 +405,16 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + O'
       },
       {
+        icon: 'iconpriority',
+        name: '设置优先级标记',
+        value: 'Alt + 1~9 / Alt + 0清除'
+      },
+      {
+        icon: 'iconprogress',
+        name: '设置进度标记',
+        value: ctrl + ' + Alt + 1~8'
+      },
+      {
         icon: 'icongongshi',
         name: '插入公式',
         value: ctrl + ' + Shift + F'

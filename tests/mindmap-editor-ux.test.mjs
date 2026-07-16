@@ -518,3 +518,12 @@ test('演示模式支持 F5 进入与方向键翻页', () => {
   assert.ok(source.includes('ArrowRight'))
   assert.ok(source.includes('ArrowLeft'))
 })
+
+
+test('思维导图支持优先级与进度标记快捷键', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('applyMarkerIcon'))
+  assert.ok(toolbarSource.includes('priority'))
+  assert.ok(toolbarSource.includes('progress'))
+  assert.ok(toolbarSource.includes('Alt'))
+})

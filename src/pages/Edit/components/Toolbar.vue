@@ -1172,6 +1172,41 @@ export default {
         this.$bus.$emit('mindmapRenameActiveSheet')
         return
       }
+      // priority/progress markers
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        /^[0-9]$/.test(event.key)
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          const level = event.key === '0' ? '' : event.key
+          this.applyMarkerIcon(activeNodes, 'priority', level)
+          return
+        }
+      }
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        /^[1-8]$/.test(event.key)
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.applyMarkerIcon(activeNodes, 'progress', event.key)
+          return
+        }
+      }
       // Space opens note for active mindmap node (core annotation loop).
       if (
         event.key === ' ' &&
