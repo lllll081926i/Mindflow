@@ -706,3 +706,14 @@ test('XMind 导出会折叠批注并映射标记标签', () => {
   assert.ok(workbookSource.includes('comments'))
   assert.ok(workbookSource.includes('priority_'))
 })
+
+
+test('范围概要支持画布点选改范围', () => {
+  const summarySource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/SummaryRangeBar.vue'),
+    'utf8'
+  )
+  assert.ok(summarySource.includes('canvasEditMode'))
+  assert.ok(summarySource.includes('applyCanvasPick'))
+  assert.ok(summarySource.includes('toggleCanvasEditMode'))
+})

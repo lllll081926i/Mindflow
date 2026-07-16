@@ -16,6 +16,16 @@
         type="primary"
         @click="createRangeSummary"
       >{{ $t('summaryRange.create') || '创建范围概要' }}</el-button>
+      <el-button
+        size="small"
+        :type="canvasEditMode ? 'primary' : 'default'"
+        :disabled="!parentNode || !range"
+        @click="toggleCanvasEditMode"
+      >{{
+        canvasEditMode
+          ? ($t('summaryRange.canvasEditOn') || '画布改范围中')
+          : ($t('summaryRange.canvasEdit') || '画布改范围')
+      }}</el-button>
       <el-button size="small" :disabled="!canShrinkStart || !generalizationNode" @click="shrinkStart">收起起点</el-button>
       <el-button size="small" :disabled="!canExpandStart || !generalizationNode" @click="expandStart">扩展起点</el-button>
       <el-button size="small" :disabled="!canShrinkEnd || !generalizationNode" @click="shrinkEnd">收起终点</el-button>
@@ -25,8 +35,11 @@
     </div>
     <div class="hint">
       {{
-        $t('summaryRange.hint') ||
-        '选中多个同级主题后按 Ctrl+G 可创建范围概要；选中概要节点可在此调整覆盖范围。'
+        canvasEditMode
+          ? ($t('summaryRange.canvasEditHint') ||
+            '画布改范围：点击同级主题设终点；Alt+点击设起点；Shift+点击扩展包含。')
+          : ($t('summaryRange.hint') ||
+            '选中多个同级主题后按 Ctrl+G 可创建范围概要；选中概要节点可在此调整覆盖范围。')
       }}
     </div>
   </div>
@@ -50,7 +63,9 @@ export default {
       generalizationNode: null,
       parentNode: null,
       range: null,
-      brotherCount: 0
+      brotherCount: 0,
+      canvasEditMode: false,
+      suppressCloseOnce: false
     }
   },
   computed: {
@@ -79,17 +94,21 @@ export default {
   },
   created() {
     this.$bus.$on('node_active', this.onNodeActive)
-    this.$bus.$on('draw_click', this.close)
+    this.$bus.$on('draw_click', this.onDrawClick)
     this.$bus.$on('node_tree_render_end', this.onRenderEnd)
   },
   beforeUnmount() {
     this.$bus.$off('node_active', this.onNodeActive)
-    this.$bus.$off('draw_click', this.close)
+    this.$bus.$off('draw_click', this.onDrawClick)
     this.$bus.$off('node_tree_render_end', this.onRenderEnd)
   },
   methods: {
     onRenderEnd() {
       if (this.visible) this.applyRangeHighlight()
+    },
+    onDrawClick() {
+      if (this.canvasEditMode) return
+      this.close()
     },
     close() {
       this.clearRangeHighlight()
@@ -98,6 +117,70 @@ export default {
       this.parentNode = null
       this.range = null
       this.brotherCount = 0
+      this.canvasEditMode = false
+      this.suppressCloseOnce = false
+    },
+    toggleCanvasEditMode() {
+      if (!this.parentNode || !Array.isArray(this.range)) return
+      this.canvasEditMode = !this.canvasEditMode
+      if (this.canvasEditMode) {
+        this.$message?.info?.(
+          this.$t('summaryRange.canvasEditHint') ||
+            '画布改范围：点击同级主题设终点；Alt+点击设起点；Shift+点击扩展包含。'
+        )
+        this.applyRangeHighlight()
+      }
+    },
+    getSiblingIndex(node) {
+      if (!node || !this.parentNode) return -1
+      if (node.parent !== this.parentNode) return -1
+      if (typeof node.getIndexInBrothers === 'function') {
+        const index = node.getIndexInBrothers()
+        return Number.isFinite(index) ? index : -1
+      }
+      const children = this.parentNode.children || []
+      return children.indexOf(node)
+    },
+    applyCanvasPick(node) {
+      if (!this.canvasEditMode || !this.parentNode || !Array.isArray(this.range)) {
+        return false
+      }
+      if (node?.isGeneralization) return false
+      const index = this.getSiblingIndex(node)
+      if (index < 0) return false
+      let [start, end] = this.range
+      const ev = window.event || null
+      const isAlt = !!(ev && ev.altKey)
+      const isShift = !!(ev && ev.shiftKey)
+      if (isAlt) {
+        start = index
+        if (start > end) end = start
+      } else if (isShift) {
+        start = Math.min(start, index)
+        end = Math.max(end, index)
+      } else if (index < start) {
+        start = index
+      } else if (index > end) {
+        end = index
+      } else {
+        const distStart = Math.abs(index - start)
+        const distEnd = Math.abs(index - end)
+        if (distStart <= distEnd) start = index
+        else end = index
+      }
+      if (start > end) {
+        const tmp = start
+        start = end
+        end = tmp
+      }
+      if (this.generalizationNode) {
+        this.updateRange([start, end])
+      } else {
+        this.range = [start, end]
+        this.applyRangeHighlight()
+      }
+      this.suppressCloseOnce = true
+      return true
     },
     clearRangeHighlight() {
       try {
@@ -108,6 +191,12 @@ export default {
           if (node._summaryRangeHighlight && node.group?.opacity) {
             node.group.opacity(1)
             node._summaryRangeHighlight = false
+          }
+          if (node._summaryRangeEndpointStroke && node.shapeNode?.stroke) {
+            try {
+              node.shapeNode.stroke({ width: 1 })
+            } catch (_error) {}
+            node._summaryRangeEndpointStroke = false
           }
           ;(node.children || []).forEach(walk)
         }
@@ -123,8 +212,18 @@ export default {
         children.forEach((child, index) => {
           if (!child?.group?.opacity) return
           const inRange = index >= start && index <= end
-          child.group.opacity(inRange ? 1 : 0.22)
+          const isEndpoint = index === start || index === end
+          child.group.opacity(inRange ? (isEndpoint ? 1 : 0.92) : 0.18)
           child._summaryRangeHighlight = true
+          try {
+            if (child.shapeNode?.stroke) {
+              child.shapeNode.stroke({
+                color: isEndpoint ? '#2563eb' : undefined,
+                width: isEndpoint ? 3 : 1
+              })
+              child._summaryRangeEndpointStroke = isEndpoint
+            }
+          } catch (_error) {}
         })
         // keep parent visible
         if (this.parentNode.group?.opacity) {
@@ -135,6 +234,17 @@ export default {
     },
     onNodeActive(node, nodeList = []) {
       const list = Array.isArray(nodeList) ? nodeList : []
+      const target = list[0] || node
+
+      if (this.visible && this.canvasEditMode && target) {
+        const handled = this.applyCanvasPick(target)
+        if (handled) return
+      }
+      if (this.suppressCloseOnce) {
+        this.suppressCloseOnce = false
+        return
+      }
+
       // multi sibling selection hint bar (not a generalization node)
       if (list.length > 1 && list.every(item => !item.isGeneralization)) {
         const parent = list[0]?.parent
@@ -151,13 +261,22 @@ export default {
             : null
           this.brotherCount = parent.children?.length || 0
           this.visible = true
+          this.canvasEditMode = true
           this.$nextTick(() => this.applyRangeHighlight())
           return
         }
       }
 
-      const target = list[0] || node
       if (!target || !target.isGeneralization) {
+        if (
+          this.canvasEditMode &&
+          this.parentNode &&
+          target &&
+          target.parent === this.parentNode
+        ) {
+          this.applyCanvasPick(target)
+          return
+        }
         this.close()
         return
       }
@@ -165,12 +284,9 @@ export default {
       this.parentNode = target.generalizationBelongNode || target.parent || null
       const data = target.getData?.() || {}
       this.range = Array.isArray(data.range) ? [...data.range] : null
-      // if no explicit range, treat as single node index when possible
-      if (!this.range && this.parentNode && target.generalizationBelongNode) {
-        // leave null for single-node summary
-      }
       this.brotherCount = this.parentNode?.children?.length || 0
       this.visible = true
+      this.canvasEditMode = Array.isArray(this.range)
       this.$nextTick(() => this.applyRangeHighlight())
     },
     updateRange(nextRange) {

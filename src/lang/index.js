@@ -527,7 +527,8 @@ const zh = {
     "noPages": "没有可转换的页面",
     "mindToFlowTitle": "选择要转换的导图画布",
     "flowToMindTitle": "选择要转换的流程页面",
-    "confirmConvert": "转换 {count} 项"
+    "confirmConvert": "转换 {count} 项",
+    "noPreview": "暂无结构预览"
   },
   "summaryRange": {
     "title": "范围概要",
@@ -535,7 +536,10 @@ const zh = {
     "hint": "选中多个同级主题后按 Ctrl+G 可创建范围概要；选中概要节点可在此调整覆盖范围。",
     "creatingRange": "正在为所选同级主题创建范围概要",
     "create": "创建范围概要",
-    "created": "已创建范围概要"
+    "created": "已创建范围概要",
+    "canvasEdit": "画布改范围",
+    "canvasEditOn": "画布改范围中",
+    "canvasEditHint": "画布改范围：点击同级主题设终点；Alt+点击设起点；Shift+点击扩展包含。"
   },
   "markerLegend": {
     "title": "标记图例",

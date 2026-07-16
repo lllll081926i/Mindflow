@@ -301,13 +301,31 @@ export const flowchartDocumentMethods = {
       try {
         const result = await this.openDocumentConvertPreview({
           mode: 'mindmap-to-flowchart',
-          items: sheets.map((sheet, index) => ({
-            id: sheet.id || 'sheet_' + (index + 1),
-            name: sheet.name || sheet.root?.data?.text || '画布 ' + (index + 1),
-            meta:
-              (Array.isArray(sheet.root?.children) ? sheet.root.children.length : 0) +
-              ' 个子主题'
-          }))
+          items: sheets.map((sheet, index) => {
+            const root = sheet.root || {}
+            const childCount = Array.isArray(root.children)
+              ? root.children.length
+              : 0
+            const previewLines = []
+            const pushLine = (node, level = 0) => {
+              if (!node || previewLines.length >= 5) return
+              const text = String(node?.data?.text || '')
+                .replace(/<[^>]*>/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+              if (text) previewLines.push({ text, level })
+              ;(Array.isArray(node.children) ? node.children : []).forEach(
+                child => pushLine(child, level + 1)
+              )
+            }
+            pushLine(root, 0)
+            return {
+              id: sheet.id || 'sheet_' + (index + 1),
+              name: sheet.name || root?.data?.text || '画布 ' + (index + 1),
+              meta: childCount + ' 个子主题',
+              previewLines
+            }
+          })
         })
         selectedSheetIds = (result.selected || []).map(item => item.id)
         if (!selectedSheetIds.length) return
@@ -350,12 +368,23 @@ export const flowchartDocumentMethods = {
         try {
           const result = await this.openDocumentConvertPreview({
             mode: 'flowchart-to-mindmap',
-            items: pages.map((sheet, index) => ({
-              id: sheet.id || 'page_' + (index + 1),
-              name: sheet.name || sheet.title || '页面 ' + (index + 1),
-              meta:
-                (Array.isArray(sheet.nodes) ? sheet.nodes.length : 0) + ' 个节点'
-            }))
+            items: pages.map((sheet, index) => {
+              const nodes = Array.isArray(sheet.nodes) ? sheet.nodes : []
+              const edges = Array.isArray(sheet.edges) ? sheet.edges : []
+              const previewLines = nodes.slice(0, 5).map((node, nodeIndex) => ({
+                text: String(node?.text || node?.type || '节点' + (nodeIndex + 1))
+                  .replace(/<[^>]*>/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim(),
+                level: node?.type === 'start' ? 0 : 1
+              }))
+              return {
+                id: sheet.id || 'page_' + (index + 1),
+                name: sheet.name || sheet.title || '页面 ' + (index + 1),
+                meta: nodes.length + ' 个节点 · ' + edges.length + ' 条连线',
+                previewLines
+              }
+            })
           })
           selectedSheetIds = (result.selected || []).map(item => item.id)
           if (!selectedSheetIds.length) return

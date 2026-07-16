@@ -1039,14 +1039,31 @@ export default {
           try {
             const result = await this.openDocumentConvertPreview({
               mode: 'mindmap-to-flowchart',
-              items: sheets.map((sheet, index) => ({
-                id: sheet.id || 'sheet_' + (index + 1),
-                name: sheet.name || sheet.root?.data?.text || '画布 ' + (index + 1),
-                meta:
-                  (Array.isArray(sheet.root?.children)
-                    ? sheet.root.children.length
-                    : 0) + ' 个子主题'
-              }))
+              items: sheets.map((sheet, index) => {
+                const root = sheet.root || {}
+                const childCount = Array.isArray(root.children)
+                  ? root.children.length
+                  : 0
+                const previewLines = []
+                const pushLine = (node, level = 0) => {
+                  if (!node || previewLines.length >= 5) return
+                  const text = String(node?.data?.text || '')
+                    .replace(/<[^>]*>/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                  if (text) previewLines.push({ text, level })
+                  ;(Array.isArray(node.children) ? node.children : []).forEach(
+                    child => pushLine(child, level + 1)
+                  )
+                }
+                pushLine(root, 0)
+                return {
+                  id: sheet.id || 'sheet_' + (index + 1),
+                  name: sheet.name || root?.data?.text || '画布 ' + (index + 1),
+                  meta: childCount + ' 个子主题',
+                  previewLines
+                }
+              })
             })
             selectedSheetIds = (result.selected || []).map(item => item.id)
             if (!selectedSheetIds.length) return

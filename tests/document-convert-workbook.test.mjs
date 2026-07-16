@@ -35,4 +35,7 @@ test('多页转换服务已接入导图/流程图转换入口', () => {
     'utf8'
   )
   assert.ok(dialogSource.includes('openDocumentConvertPreview'))
+  assert.ok(dialogSource.includes('previewLines') || dialogSource.includes('thumbLine'))
+  assert.ok(toolbarSource.includes('previewLines'))
+  assert.ok(documentSource.includes('previewLines'))
 })

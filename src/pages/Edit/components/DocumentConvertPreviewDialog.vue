@@ -3,7 +3,7 @@
     class="documentConvertPreviewDialog"
     :class="{ isDark: isDark }"
     v-model="visible"
-    width="560px"
+    width="680px"
     :title="dialogTitle"
     @close="close"
   >
@@ -24,9 +24,27 @@
       </el-checkbox>
       <el-checkbox-group v-model="selectedIds" class="itemGroup">
         <div class="item" v-for="item in items" :key="item.id">
-          <el-checkbox :label="item.id">
-            <span class="itemName">{{ item.name }}</span>
-            <span class="itemMeta">{{ item.meta }}</span>
+          <el-checkbox :label="item.id" class="itemCheck">
+            <div class="itemBody">
+              <div class="itemHead">
+                <span class="itemName">{{ item.name }}</span>
+                <span class="itemMeta">{{ item.meta }}</span>
+              </div>
+              <div class="thumb" v-if="item.previewLines && item.previewLines.length">
+                <div
+                  class="thumbLine"
+                  v-for="(line, idx) in item.previewLines"
+                  :key="idx"
+                  :style="{ paddingLeft: (line.level || 0) * 12 + 'px' }"
+                >
+                  <span class="dot"></span>
+                  <span class="thumbText">{{ line.text }}</span>
+                </div>
+              </div>
+              <div class="thumb emptyThumb" v-else>
+                {{ $t('documentConvert.noPreview') || '暂无结构预览' }}
+              </div>
+            </div>
           </el-checkbox>
         </div>
       </el-checkbox-group>
@@ -160,17 +178,63 @@ export default {
     margin-top: 10px;
   }
   .item {
-    padding: 8px 10px;
-    border-radius: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
     border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  .itemCheck {
+    width: 100%;
+    align-items: flex-start;
+  }
+  .itemBody {
+    min-width: 0;
+    width: 100%;
+  }
+  .itemHead {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    margin-bottom: 8px;
   }
   .itemName {
     font-weight: 600;
-    margin-right: 8px;
   }
   .itemMeta {
     font-size: 12px;
     opacity: 0.65;
+  }
+  .thumb {
+    border-radius: 10px;
+    border: 1px dashed rgba(37, 99, 235, 0.25);
+    background: rgba(37, 99, 235, 0.04);
+    padding: 8px 10px;
+    max-height: 96px;
+    overflow: hidden;
+  }
+  .emptyThumb {
+    font-size: 12px;
+    opacity: 0.6;
+  }
+  .thumbLine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    min-width: 0;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2563eb;
+    flex: 0 0 auto;
+  }
+  .thumbText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .empty {
     opacity: 0.65;
@@ -179,6 +243,10 @@ export default {
 .isDark {
   .item {
     border-color: rgba(255, 255, 255, 0.08);
+  }
+  .thumb {
+    border-color: rgba(96, 165, 250, 0.35);
+    background: rgba(96, 165, 250, 0.08);
   }
 }
 </style>
