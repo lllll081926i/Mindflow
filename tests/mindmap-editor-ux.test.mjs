@@ -543,3 +543,10 @@ test('思维导图支持 Alt+W 切换水印', () => {
   assert.ok(toolbarSource.includes('toggleWatermark'))
   assert.ok(settingSource.includes('toggleWatermarkShortcut'))
 })
+
+
+test('思维导图支持 Ctrl+Alt+N 切换子主题编号', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('toggleChildNumbering'))
+  assert.ok(toolbarSource.includes("event.key.toLowerCase() === 'n'"))
+})

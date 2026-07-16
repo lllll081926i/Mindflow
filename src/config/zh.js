@@ -425,6 +425,11 @@ export const shortcutKeyList = [
         value: 'Alt + W'
       },
       {
+        icon: 'iconnumber',
+        name: '切换子主题编号',
+        value: ctrl + ' + Alt + N'
+      },
+      {
         icon: 'icongongshi',
         name: '插入公式',
         value: ctrl + ' + Shift + F'

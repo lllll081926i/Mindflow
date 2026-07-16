@@ -1198,6 +1198,23 @@ export default {
         this.$bus.$emit('toggleWatermark')
         return
       }
+      // toggle child numbering Ctrl+Alt+N
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'n'
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          this.toggleChildNumbering(activeNodes)
+          return
+        }
+      }
       // priority/progress markers
       if (
         !isTypingTarget &&
