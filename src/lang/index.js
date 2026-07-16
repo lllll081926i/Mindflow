@@ -803,6 +803,8 @@ const zh = {
     "autofixUndo": "撤销修复",
     "autofixUndoDone": "已撤销上次修复",
     "autofixUndoEmpty": "没有可撤销的修复",
+    "autofixResultTitle": "最近修复",
+    "autofixScoreDelta": "健康度 {delta}",
     "autofixAction": {
       "remove-dangling-edges": "清理无效连线 x{count}",
       "add-start": "补充开始节点",
@@ -868,6 +870,7 @@ const zh = {
     "createFlowchart": "新建流程图",
     "starterTitle": "快速开始",
     "starterSearchPlaceholder": "搜索模板",
+    "starterEmpty": "没有匹配的模板，试试切换分类或清空搜索",
     "starterCategoryAll": "全部模板",
     "starterCategoryMindmap": "思维导图",
     "starterCategoryFlowchart": "流程图",

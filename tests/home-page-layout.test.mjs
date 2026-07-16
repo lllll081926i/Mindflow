@@ -242,3 +242,12 @@ test('首页模板中心支持导图与流程图分类筛选', () => {
   assert.match(langSource, /"starterCategoryMindmap"/)
   assert.match(langSource, /"starterCategoryFlowchart"/)
 })
+
+
+test('首页模板筛选无结果时展示空态提示', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /hasVisibleStarters/)
+  assert.match(source, /starterEmpty/)
+  assert.match(langSource, /"starterEmpty"/)
+})

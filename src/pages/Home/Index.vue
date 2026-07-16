@@ -357,6 +357,9 @@
               <span>{{ $t('home.starterFlowReviewFlowDesc') }}</span>
             </button>
           </div>
+            <div v-if="!hasVisibleStarters" class="starterEmpty">
+              {{ $t('home.starterEmpty') }}
+            </div>
         </section>
 
         <header class="mainHeader">
@@ -487,6 +490,36 @@ export default {
     }
   },
   computed: {
+    hasVisibleStarters() {
+      const labels = [
+        ['mindmap', 'home.starterMindMapBlank', 'home.starterMindMapBlankDesc'],
+        ['mindmap', 'home.starterMindMapOrg', 'home.starterMindMapOrgDesc'],
+        ['mindmap', 'home.starterMindMapTree', 'home.starterMindMapTreeDesc'],
+        ['mindmap', 'home.starterMindMapMeeting', 'home.starterMindMapMeetingDesc'],
+        ['mindmap', 'home.starterMindMapProject', 'home.starterMindMapProjectDesc'],
+        ['mindmap', 'home.starterMindMapLearning', 'home.starterMindMapLearningDesc'],
+        ['mindmap', 'home.starterMindMapReview', 'home.starterMindMapReviewDesc'],
+        ['mindmap', 'home.starterMindMapOkr', 'home.starterMindMapOkrDesc'],
+        ['mindmap', 'home.starterMindMapWeekly', 'home.starterMindMapWeeklyDesc'],
+        ['mindmap', 'home.starterMindMapInterview', 'home.starterMindMapInterviewDesc'],
+        ['mindmap', 'home.starterMindMapReading', 'home.starterMindMapReadingDesc'],
+        ['mindmap', 'home.starterMindMapBusiness', 'home.starterMindMapBusinessDesc'],
+        ['mindmap', 'home.starterMindMapKnowledge', 'home.starterMindMapKnowledgeDesc'],
+        ['mindmap', 'home.starterMindMapCompetitor', 'home.starterMindMapCompetitorDesc'],
+        ['mindmap', 'home.starterMindMapRetro', 'home.starterMindMapRetroDesc'],
+        ['mindmap', 'home.starterMindMapRoadmap', 'home.starterMindMapRoadmapDesc'],
+        ['mindmap', 'home.starterMindMapContent', 'home.starterMindMapContentDesc'],
+        ['flowchart', 'home.starterFlowApproval', 'home.starterFlowApprovalDesc'],
+        ['flowchart', 'home.starterFlowRelease', 'home.starterFlowReleaseDesc'],
+        ['flowchart', 'home.starterFlowEnterprise', 'home.starterFlowEnterpriseDesc'],
+        ['flowchart', 'home.starterFlowSupport', 'home.starterFlowSupportDesc'],
+        ['flowchart', 'home.starterFlowSales', 'home.starterFlowSalesDesc'],
+        ['flowchart', 'home.starterFlowReviewFlow', 'home.starterFlowReviewFlowDesc']
+      ]
+      return labels.some(([category, titleKey, descKey]) =>
+        this.isStarterVisible(category, this.$t(titleKey), this.$t(descKey))
+      )
+    },
     ...mapState(useEditorStore, {
       recentFiles: 'recentFiles',
       resumeEntry: 'resumeEntry',

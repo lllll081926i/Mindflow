@@ -108,6 +108,28 @@
           })
         }}
       </div>
+      <div v-if="lastAutofixActions.length" class="flowchartAutofixResult">
+        <div class="flowchartAutofixResultTitle">
+          {{ $t('flowchart.autofixResultTitle') }}
+          <span v-if="lastAutofixScoreDelta">
+            {{
+              $t('flowchart.autofixScoreDelta', {
+                delta:
+                  lastAutofixScoreDelta > 0
+                    ? '+' + lastAutofixScoreDelta
+                    : String(lastAutofixScoreDelta)
+              })
+            }}
+          </span>
+        </div>
+        <div
+          v-for="(action, index) in lastAutofixActions.slice(0, 6)"
+          :key="action.code + '-' + index"
+          class="flowchartAutofixResultItem"
+        >
+          {{ $t('flowchart.autofixAction.' + action.code, { count: action.count || 1 }) }}
+        </div>
+      </div>
       <div class="validationFilterChips" v-if="flowchartValidationResult">
         <button type="button" class="validationFilterChip" :class="{ isActive: validationIssueFilter === 'all' }" @click="validationIssueFilter = 'all'">
           {{ $t('flowchart.validateFilterAll') }}
@@ -591,6 +613,7 @@ export default {
       validationHighlightNodeIds: [],
       lastAutofixSnapshot: null,
       lastAutofixActions: [],
+      lastAutofixScoreDelta: 0,
       isFlowchartDragOver: false,
       isValidatingFlowchart: false,
       isAutofixingFlowchart: false,
@@ -1306,6 +1329,9 @@ export default {
         edges: cloneJson(this.flowchartData.edges || [])
       }
       this.lastAutofixActions = plan.actions
+      this.lastAutofixScoreDelta =
+        Number(plan.after?.summary?.score || 0) -
+        Number(plan.before?.summary?.score || 0)
       this.flowchartData = {
         ...this.flowchartData,
         nodes: plan.flowchartData.nodes,
@@ -1340,6 +1366,7 @@ export default {
       }
       this.lastAutofixSnapshot = null
       this.lastAutofixActions = []
+      this.lastAutofixScoreDelta = 0
       void this.persistFlowchartState()
       this.validateCurrentFlowchart({ openPanel: true })
       this.$message.success(this.$t('flowchart.autofixUndoDone'))

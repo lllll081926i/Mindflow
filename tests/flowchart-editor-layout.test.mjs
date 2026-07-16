@@ -2087,3 +2087,16 @@ test('流程图一键修复会先预览变更摘要', () => {
   assert.match(langSource, /"autofixPreviewTitle"/)
   assert.match(langSource, /"autofixPreviewMessage"/)
 })
+
+
+test('流程图校验面板展示最近修复动作与健康度变化', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /flowchartAutofixResult/)
+  assert.match(editorSource, /lastAutofixScoreDelta/)
+  assert.match(langSource, /"autofixResultTitle"/)
+  assert.match(langSource, /"autofixScoreDelta"/)
+})
