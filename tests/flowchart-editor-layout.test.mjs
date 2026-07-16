@@ -2327,3 +2327,13 @@ test('判断节点第二分支默认向下扇出', () => {
   assert.ok(nodeSource.includes("sourceNode.type === 'decision'"))
   assert.ok(nodeSource.includes('branchIndex === 1'))
 })
+
+
+test('流程图删除节点后会选中相邻节点继续编辑', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.ok(selectionSource.includes('fallbackNodeId'))
+  assert.ok(selectionSource.includes('neighborScores'))
+})

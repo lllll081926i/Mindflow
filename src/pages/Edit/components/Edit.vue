@@ -894,10 +894,15 @@ export default {
     },
 
     async pasteOutlineFromClipboard() {
-      const activeNodeList = this.mindMap?.renderer?.activeNodeList || []
+      let activeNodeList = this.mindMap?.renderer?.activeNodeList || []
       if (activeNodeList.length <= 0) {
-        this.$message.warning(this.$t('toolbar.pasteOutlineNeedSelection'))
-        return
+        const rootNode = this.mindMap?.renderer?.root
+        if (rootNode) {
+          activeNodeList = [rootNode]
+        } else {
+          this.$message.warning(this.$t('toolbar.pasteOutlineNeedSelection'))
+          return
+        }
       }
       let text
       try {

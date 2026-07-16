@@ -327,3 +327,10 @@ test('思维导图导入支持 FreeMind .mm', () => {
   assert.ok(desktopSource.includes("'mm'") || desktopSource.includes('"mm"') || desktopSource.includes('.mm'))
   assert.ok(parseSource.includes('parseFreemindXml'))
 })
+
+
+test('导图粘贴大纲无选中时回落到根节点', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.ok(editSource.includes('renderer?.root'))
+  assert.ok(editSource.includes('activeNodeList = [rootNode]'))
+})

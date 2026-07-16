@@ -388,6 +388,35 @@ export const flowchartSelectionMethods = {
       this.$message.warning(this.$t('flowchart.selectionEmpty'))
       return
     }
+    const previousNodeIds = [...(this.selectedNodeIds || [])]
+    let fallbackNodeId = ''
+    if (previousNodeIds.length) {
+      const selectedSet = new Set(previousNodeIds)
+      const neighborScores = new Map()
+      ;(this.flowchartData.edges || []).forEach(edge => {
+        if (selectedSet.has(edge.source) && !selectedSet.has(edge.target)) {
+          neighborScores.set(
+            edge.target,
+            (neighborScores.get(edge.target) || 0) + 2
+          )
+        }
+        if (selectedSet.has(edge.target) && !selectedSet.has(edge.source)) {
+          neighborScores.set(
+            edge.source,
+            (neighborScores.get(edge.source) || 0) + 1
+          )
+        }
+      })
+      let bestId = ''
+      let bestScore = -1
+      neighborScores.forEach((score, id) => {
+        if (score > bestScore) {
+          bestScore = score
+          bestId = id
+        }
+      })
+      fallbackNodeId = bestId
+    }
     if (this.selectedEdgeId) {
       this.flowchartData.edges = this.flowchartData.edges.filter(
         edge => edge.id !== this.selectedEdgeId
@@ -397,13 +426,21 @@ export const flowchartSelectionMethods = {
     }
     if (this.selectedNodeIds.length) {
       const selectedSet = new Set(this.selectedNodeIds)
-      this.flowchartData.nodes = this.flowchartData.nodes.filter(node => !selectedSet.has(node.id))
+      this.flowchartData.nodes = this.flowchartData.nodes.filter(
+        node => !selectedSet.has(node.id)
+      )
       this.flowchartData.edges = this.flowchartData.edges.filter(edge => {
         return !selectedSet.has(edge.source) && !selectedSet.has(edge.target)
       })
       this.selectedNodeIds = []
     }
     this.discardInlineTextEditor()
+    if (
+      fallbackNodeId &&
+      (this.flowchartData.nodes || []).some(node => node.id === fallbackNodeId)
+    ) {
+      this.selectedNodeIds = [fallbackNodeId]
+    }
     this.$message.success(this.$t('flowchart.deleteSuccess'))
     void this.persistFlowchartState()
   }
