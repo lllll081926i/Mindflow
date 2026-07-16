@@ -24,6 +24,7 @@
       @import-mind-map-file="importMindMapFile"
       @open-export="openExportCenter"
       @convert-mind-map="convertCurrentMindMap"
+      @convert-flowchart-to-mind-map="convertCurrentFlowchartToMindMap"
       @toggle-dark="toggleAppearance"
       @generate-ai="generateWithAi"
       @tidy-layout="tidyFlowchartLayout"
@@ -929,6 +930,7 @@ export default {
         theme: this.$t('flowchart.theme'),
         templatePanelTitle: this.$t('flowchart.templatePanelTitle'),
         convertMindMap: this.$t('flowchart.convertMindMap'),
+        convertToMindMap: this.$t('flowchart.convertToMindMap'),
         importMindMapFile: this.$t('flowchart.importMindMapFile'),
         aiGenerate: this.$t('flowchart.aiGenerate'),
         exportCenter: this.$t('toolbar.exportCenter'),
@@ -1020,6 +1022,7 @@ export default {
         shortcuts: this.$t('shortcutKey.title'),
         exportCenter: this.$t('toolbar.exportCenter'),
         convertMindMap: this.$t('flowchart.convertMindMapShort'),
+        convertToMindMap: this.$t('flowchart.convertToMindMapShort'),
         tidyLayout: this.$t('flowchart.tidyLayout'),
         validateStructure: this.$t('flowchart.validateStructure'),
         darkMode: this.$t('navigatorToolbar.darkMode'),
@@ -1154,6 +1157,7 @@ export default {
         { key: 'importMindMap', label: this.$t('flowchart.importMindMapFileShort'), action: () => this.importMindMapFile() },
         { key: 'export', label: this.$t('toolbar.exportCenter'), action: () => this.openExportCenter() },
         { key: 'convertMindMap', label: this.$t('flowchart.convertMindMapShort'), action: () => this.convertCurrentMindMap() },
+        { key: 'convertToMindMap', label: this.$t('flowchart.convertToMindMapShort'), action: () => this.convertCurrentFlowchartToMindMap() },
         { key: 'aiGenerate', label: this.$t('flowchart.aiGenerateShort'), disabled: this.isGenerating, action: () => this.generateWithAi() },
         { key: 'templates', label: this.$t('flowchart.templatePanelTitle'), action: () => { this.isInspectorOpen = true; this.inspectorPanelSection = 'templates' } },
         { key: 'toggleInspector', label: this.$t('flowchart.settingsPanelTitle'), action: () => this.toggleInspector() },

@@ -20,6 +20,8 @@ import {
 import {
   createDefaultFlowchartData,
   convertMindMapToFlowchart,
+  convertFlowchartToMindMap,
+  hasConvertibleFlowchartData,
   normalizeFlowchartAiResult,
   parseStoredDocumentContent,
   serializeStoredDocumentContent
@@ -274,6 +276,50 @@ export const flowchartDocumentMethods = {
     })
     this.applyGeneratedFlowchart(nextDocument)
     this.$message.success(this.$t('flowchart.mindMapConverted'))
+  },
+
+  async convertCurrentFlowchartToMindMap() {
+    if (!hasConvertibleFlowchartData(this.flowchartData)) {
+      this.$message.warning(this.$t('flowchart.noFlowchartToConvert'))
+      return
+    }
+    try {
+      await this.flushInteractiveFlowchartPersist()
+      const title =
+        String(this.flowchartData?.title || '').trim() ||
+        this.$t('flowchart.fileNameFallback')
+      const mindMapData = convertFlowchartToMindMap(this.flowchartData, { title })
+      await saveBootstrapStatePatch({
+        mindMapData: cloneJson(mindMapData),
+        mindMapConfig: null,
+        flowchartData: null,
+        flowchartConfig: null
+      })
+      const baseRef = this.currentDocument
+        ? { ...this.currentDocument }
+        : {
+            path: '',
+            name: title + '.smm',
+            isFullDataFile: true
+          }
+      setCurrentFileRef(
+        {
+          ...baseRef,
+          documentMode: 'mindmap',
+          isFullDataFile: true
+        },
+        baseRef.source || 'desktop'
+      )
+      markDocumentDirty(true)
+      await flushDocumentSessionSync()
+      this.$message.success(this.$t('flowchart.flowchartConverted'))
+      if (this.$route.path !== '/edit') {
+        await this.$router.push('/edit')
+      }
+    } catch (error) {
+      console.error('convertCurrentFlowchartToMindMap failed', error)
+      this.$message.error(error?.message || this.$t('home.actionFailed'))
+    }
   },
 
   async importMindMapFile() {

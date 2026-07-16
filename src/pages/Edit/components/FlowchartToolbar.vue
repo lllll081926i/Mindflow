@@ -104,6 +104,23 @@
         <EditorToolbarAction
           action-class="flowchartToolbarBtn"
           icon-class="flowchartToolbarIcon"
+          :label="labels.convertToMindMap"
+          @action="$emit('convert-flowchart-to-mind-map')"
+        >
+          <template #icon>
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="7" r="2"></circle>
+              <circle cx="7" cy="17" r="2"></circle>
+              <circle cx="17" cy="17" r="2"></circle>
+              <path d="M12 9v4"></path>
+              <path d="m10.2 14.2-1.6 1.4"></path>
+              <path d="m13.8 14.2 1.6 1.4"></path>
+            </svg>
+          </template>
+        </EditorToolbarAction>
+        <EditorToolbarAction
+          action-class="flowchartToolbarBtn"
+          icon-class="flowchartToolbarIcon"
           :label="labels.tidyLayout"
           @action="$emit('tidy-layout')"
         >

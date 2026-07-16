@@ -2194,3 +2194,32 @@ test('flowchart 文档服务已拆为 facade + 子模块', () => {
   assert.equal(fs.existsSync(path.resolve('src/services/flowchart/parts/50-export.js')), true)
   assert.equal(fs.existsSync(path.resolve('scripts/build-flowchart-core.mjs')), true)
 })
+
+
+test('流程图可转换为思维导图树并保留边标签', async () => {
+  const {
+    convertFlowchartToMindMap,
+    convertMindMapToFlowchart,
+    hasConvertibleFlowchartData
+  } = await loadFlowchartDocumentModule()
+  const mind = {
+    root: {
+      data: { text: '中心主题' },
+      children: [
+        { data: { text: '分支 A' }, children: [] },
+        { data: { text: '分支 B' }, children: [] }
+      ]
+    }
+  }
+  const flow = convertMindMapToFlowchart(mind)
+  assert.equal(hasConvertibleFlowchartData(flow.flowchartData), true)
+  // decorate an edge label if present
+  if (flow.flowchartData.edges[0]) {
+    flow.flowchartData.edges[0].label = '是'
+  }
+  const back = convertFlowchartToMindMap(flow.flowchartData, { title: '中心主题' })
+  assert.ok(back.root)
+  assert.ok(String(back.root.data.text || '').length > 0)
+  assert.ok(Array.isArray(back.root.children))
+  assert.ok(back.root.children.length >= 1)
+})

@@ -307,3 +307,12 @@ test('导图导入失败会优先展示具体错误信息', () => {
   assert.match(importSource, /error\?\.message \|\| this\.\$t\('import\.fileParsingFailed'\)/)
   assert.match(importSource, /error\?\.i18nKey/)
 })
+
+
+test('思维导图命令面板支持转换为流程图', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(toolbarSource.includes('convertCurrentToFlowchart'))
+  assert.ok(toolbarSource.includes("key: 'convertToFlowchart'"))
+  assert.match(langSource, /"convertToFlowchart"/)
+})

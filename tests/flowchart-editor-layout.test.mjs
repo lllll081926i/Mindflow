@@ -2203,3 +2203,16 @@ test('流程图快捷键浮层具备完整标签与关闭可访问性', () => {
       editorSource.includes(":aria-label=\"$t('dialog.close')\"")
   )
 })
+
+
+test('流程图编辑器支持转回思维导图', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartToolbar.vue'), 'utf8')
+  const documentSource = fs.readFileSync(path.resolve('src/pages/Edit/components/flowchartEditorDocument.js'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(editorSource.includes('convertCurrentFlowchartToMindMap'))
+  assert.ok(toolbarSource.includes('convert-flowchart-to-mind-map'))
+  assert.ok(documentSource.includes('convertFlowchartToMindMap'))
+  assert.match(langSource, /"convertToMindMap"/)
+  assert.match(langSource, /"flowchartConverted"/)
+})

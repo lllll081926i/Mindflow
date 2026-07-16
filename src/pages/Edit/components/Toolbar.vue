@@ -454,6 +454,7 @@ import platform, {
   saveBootstrapStatePatch
 } from '@/platform'
 import { createDefaultMindMapData } from '@/platform/shared/configSchema'
+import { convertMindMapToFlowchart } from '@/services/flowchartDocument'
 import {
   createDesktopFsError,
   getCurrentFileRef,
@@ -710,6 +711,11 @@ export default {
           action: this.openExportDialog
         },
         {
+          key: 'convertToFlowchart',
+          label: this.$t('toolbar.convertToFlowchart'),
+          action: this.convertCurrentToFlowchart
+        },
+        {
           key: 'focus',
           label: this.$t('toolbar.focusModeAction'),
           action: this.toggleZenMode
@@ -961,6 +967,48 @@ export default {
         return
       }
       emitShowImport()
+    },
+
+    async convertCurrentToFlowchart() {
+      try {
+        const mindMapData = getData()
+        if (!mindMapData?.root) {
+          this.$message.warning(this.$t('toolbar.noMindMapToConvert'))
+          return
+        }
+        const nextDocument = convertMindMapToFlowchart(mindMapData, {
+          title:
+            String(mindMapData.root?.data?.text || '').trim() ||
+            this.$t('toolbar.convertToFlowchart')
+        })
+        await saveBootstrapStatePatch({
+          mindMapData: null,
+          mindMapConfig: null,
+          flowchartData: nextDocument.flowchartData,
+          flowchartConfig: nextDocument.flowchartConfig || null
+        })
+        const current = getCurrentFileRef()
+        setCurrentFileRef(
+          {
+            ...(current || {}),
+            path: current?.path || '',
+            name:
+              current?.name ||
+              String(mindMapData.root?.data?.text || '流程图') + '.smm',
+            documentMode: 'flowchart',
+            isFullDataFile: true
+          },
+          current?.mode || current?.source || 'desktop'
+        )
+        markDocumentDirty(true)
+        this.$message.success(this.$t('toolbar.convertToFlowchartDone'))
+        if (this.$route.path !== '/edit') {
+          await this.$router.push('/edit')
+        }
+      } catch (error) {
+        console.error('convertCurrentToFlowchart failed', error)
+        this.$message.error(error?.message || this.$t('home.actionFailed'))
+      }
     },
 
     async openExportDialog() {
