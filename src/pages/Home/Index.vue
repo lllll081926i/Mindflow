@@ -470,12 +470,43 @@ export default {
       return createDefaultMindMapData('思维导图', themeTemplate, layout)
     },
 
+    createSeededMindMapData(layout = 'logicalStructure') {
+      const data = this.createBlankProjectContent(layout)
+      const rootText =
+        layout === 'organizationStructure'
+          ? '组织架构'
+          : layout === 'mindMap'
+            ? '中心主题'
+            : '思维导图'
+      data.root.data.text = rootText
+      data.root.children = [
+        {
+          data: { text: layout === 'organizationStructure' ? '部门 A' : '分支一' },
+          children: [
+            { data: { text: layout === 'organizationStructure' ? '成员 A1' : '要点 1' }, children: [] },
+            { data: { text: layout === 'organizationStructure' ? '成员 A2' : '要点 2' }, children: [] }
+          ]
+        },
+        {
+          data: { text: layout === 'organizationStructure' ? '部门 B' : '分支二' },
+          children: [
+            { data: { text: layout === 'organizationStructure' ? '成员 B1' : '要点 3' }, children: [] }
+          ]
+        },
+        {
+          data: { text: layout === 'organizationStructure' ? '部门 C' : '分支三' },
+          children: []
+        }
+      ]
+      return data
+    },
+
     async createMindMapWithLayout(layout = 'logicalStructure') {
       await this.runWorkspaceAction(async () => {
         const { createWorkspaceLocalFile } = await loadWorkspaceActions()
         return createWorkspaceLocalFile({
           router: this.$router,
-          content: this.createBlankProjectContent(layout)
+          content: this.createSeededMindMapData(layout)
         })
       })
     },

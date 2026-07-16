@@ -126,3 +126,11 @@ test('首页快速开始支持思维导图结构模板', () => {
   assert.match(langSource, /"starterMindMapOrg"/)
   assert.match(langSource, /"starterMindMapTree"/)
 })
+
+
+test('思维导图结构模板会预置示例分支，打开即可见结构', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  assert.match(source, /createSeededMindMapData/)
+  assert.match(source, /中心主题|组织架构/)
+  assert.match(source, /分支一|部门 A/)
+})
