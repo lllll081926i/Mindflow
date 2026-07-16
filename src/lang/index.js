@@ -801,6 +801,8 @@ const zh = {
     "xmindCanvasSelectMessage": "检测到多个画布，请输入编号：\\n{list}",
     "xmindCanvasSelectInvalid": "请输入有效编号",
     "xmindCanvasFallback": "画布 {index}",
+    "xmindCanvasConfirm": "导入所选画布",
+    "autofixDiffSummary": "节点 {nodes} / 连线 {edges} / 健康度 {score}",
     "autofixDone": "已应用 {count} 项修复",
     "autofixNoop": "当前没有可自动修复的问题",
     "autofixDoneDetail": "已应用 {count} 项修复：{detail}",

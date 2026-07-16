@@ -281,3 +281,14 @@ test('流程图导出页展示结构检查摘要并支持返回修复', () => {
   assert.match(langSource, /"structureCheck"/)
   assert.match(langSource, /"backToFix"/)
 })
+
+
+test('导出页提供真实进度条反馈', () => {
+  const exportPageSource = fs.readFileSync(
+    path.resolve('src/pages/Export/Index.vue'),
+    'utf8'
+  )
+  assert.match(exportPageSource, /exportProgressBar/)
+  assert.match(exportPageSource, /startExportProgress/)
+  assert.match(exportPageSource, /finishExportProgress/)
+})

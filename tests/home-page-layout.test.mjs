@@ -258,3 +258,9 @@ test('首页模板分类展示数量', () => {
   assert.match(source, /starterCategoryCounts/)
   assert.match(source, /starterCategoryCounts.all|starterCategoryCounts.mindmap/)
 })
+
+
+test('首页模板中心展示当前分类标题', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  assert.match(source, /starterSectionTitle/)
+})

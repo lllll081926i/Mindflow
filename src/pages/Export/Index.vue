@@ -194,6 +194,12 @@
         </div>
 
         <footer class="dialogFooter">
+          <div v-if="exporting" class="exportProgressWrap">
+            <div class="exportProgressBar">
+              <div class="exportProgressValue" :style="{ width: exportProgress + '%' }"></div>
+            </div>
+            <span class="exportProgressText">{{ exportProgress }}%</span>
+          </div>
           <el-button
             type="primary"
             :loading="exporting"
@@ -418,6 +424,8 @@ export default {
     return {
       previewLoading: true,
       exporting: false,
+      exportProgress: 0,
+      exportProgressTimer: 0,
       mindMap: null,
       flowchartPreviewMarkup: '',
       exportPluginState: {
@@ -1112,6 +1120,27 @@ export default {
       }
     },
 
+    startExportProgress() {
+      this.exportProgress = 8
+      if (this.exportProgressTimer) clearInterval(this.exportProgressTimer)
+      this.exportProgressTimer = window.setInterval(() => {
+        if (this.exportProgress >= 90) return
+        this.exportProgress += Math.max(
+          1,
+          Math.round((92 - this.exportProgress) * 0.08)
+        )
+      }, 160)
+    },
+    finishExportProgress() {
+      if (this.exportProgressTimer) {
+        clearInterval(this.exportProgressTimer)
+        this.exportProgressTimer = 0
+      }
+      this.exportProgress = 100
+      window.setTimeout(() => {
+        this.exportProgress = 0
+      }, 400)
+    },
     async handleExport() {
       if (!this.canExportCurrentDocument || this.isDisabledFormat || this.exporting) {
         return
@@ -1125,6 +1154,7 @@ export default {
           ? this.exportState.imageFormat
           : getResolvedExportType(this.exportState.exportType, this.documentMode)
       this.exporting = true
+      this.startExportProgress()
       try {
         if ((this.getFlowchartData?.().nodes?.length || 0) >= 80 || this.documentMode !== 'flowchart') {
           this.$message.info(
@@ -1145,7 +1175,8 @@ export default {
             } else {
               this.$message.error(message)
               if (validation.issues.some(item => item.severity === 'error')) {
-                this.exporting = false
+                this.finishExportProgress()
+        this.exporting = false
                 return
               }
             }
@@ -1231,6 +1262,7 @@ export default {
           error?.i18nKey ? this.$t(error.i18nKey) : (error?.message || this.$t('exportPage.exportFailed'))
         )
       } finally {
+        this.finishExportProgress()
         this.exporting = false
       }
     }
@@ -1249,7 +1281,32 @@ export default {
     color: hsla(0, 0%, 100%, 0.9);
 
     .exportDialog,
-    .dialogFooter {
+    .exportProgressWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+  margin-right: auto;
+}
+.exportProgressBar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.08);
+  overflow: hidden;
+}
+.exportProgressValue {
+  height: 100%;
+  background: #2563eb;
+  transition: width 0.16s linear;
+}
+.exportProgressText {
+  min-width: 40px;
+  font-size: 12px;
+  color: inherit;
+  opacity: 0.8;
+}
+.dialogFooter {
       background: #171b22;
       border-color: rgba(255, 255, 255, 0.08);
     }

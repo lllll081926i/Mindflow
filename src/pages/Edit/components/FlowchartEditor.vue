@@ -453,6 +453,40 @@ v-if="flowchartShortcutVisible"
         @update-selected-edge-style="updateSelectedEdgeStyle"
       />
     </div>
+    <div
+      v-if="xmindCanvasDialogVisible"
+      class="xmindCanvasDialogOverlay"
+      @mousedown.self="cancelXmindCanvasSelect"
+    >
+      <section class="xmindCanvasDialog" role="dialog" aria-modal="true">
+        <div class="xmindCanvasDialogHeader">
+          <strong>{{ $t('flowchart.xmindCanvasSelectTitle') }}</strong>
+          <button type="button" class="xmindCanvasDialogClose" @click="cancelXmindCanvasSelect">x</button>
+        </div>
+        <div class="xmindCanvasDialogBody">
+          <button
+            v-for="(item, index) in xmindCanvasOptions"
+            :key="item.id || index"
+            type="button"
+            class="xmindCanvasOption"
+            :class="{ isActive: xmindCanvasSelectedIndex === index }"
+            @click="xmindCanvasSelectedIndex = index"
+            @dblclick="confirmXmindCanvasSelect"
+          >
+            <span class="xmindCanvasOptionIndex">{{ index + 1 }}</span>
+            <span class="xmindCanvasOptionTitle">{{ item.title }}</span>
+          </button>
+        </div>
+        <div class="xmindCanvasDialogFooter">
+          <button type="button" class="xmindCanvasDialogBtn" @click="cancelXmindCanvasSelect">
+            {{ $t('flowchart.autofixCancel') }}
+          </button>
+          <button type="button" class="xmindCanvasDialogBtn isPrimary" @click="confirmXmindCanvasSelect">
+            {{ $t('flowchart.xmindCanvasConfirm') }}
+          </button>
+        </div>
+      </section>
+    </div>
     <AiConfigDialog v-model:visible="flowchartAiConfigDialogVisible" />
   </div>
 </template>
@@ -617,6 +651,10 @@ export default {
       isFlowchartDragOver: false,
       isValidatingFlowchart: false,
       isAutofixingFlowchart: false,
+      xmindCanvasDialogVisible: false,
+      xmindCanvasOptions: [],
+      xmindCanvasSelectedIndex: 0,
+      xmindCanvasResolve: null,
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
@@ -1180,6 +1218,40 @@ export default {
         this.isFlowchartDragOver = false
       }
     },
+    selectXmindCanvas(content = []) {
+      const options = (Array.isArray(content) ? content : []).map((item, index) => ({
+        id: item?.id || index,
+        title:
+          item?.title ||
+          item?.rootTopic?.title ||
+          this.$t('flowchart.xmindCanvasFallback', { index: index + 1 }),
+        raw: item
+      }))
+      this.xmindCanvasOptions = options
+      this.xmindCanvasSelectedIndex = 0
+      this.xmindCanvasDialogVisible = true
+      return new Promise(resolve => {
+        this.xmindCanvasResolve = resolve
+      })
+    },
+    confirmXmindCanvasSelect() {
+      const selected =
+        this.xmindCanvasOptions[this.xmindCanvasSelectedIndex]?.raw ||
+        this.xmindCanvasOptions[0]?.raw ||
+        null
+      const resolve = this.xmindCanvasResolve
+      this.xmindCanvasDialogVisible = false
+      this.xmindCanvasResolve = null
+      this.xmindCanvasOptions = []
+      if (typeof resolve === 'function') resolve(selected)
+    },
+    cancelXmindCanvasSelect() {
+      const resolve = this.xmindCanvasResolve
+      this.xmindCanvasDialogVisible = false
+      this.xmindCanvasResolve = null
+      this.xmindCanvasOptions = []
+      if (typeof resolve === 'function') resolve(null)
+    },
     async onFlowchartDrop(event) {
       this.isFlowchartDragOver = false
       const file = event?.dataTransfer?.files?.[0]
@@ -1297,15 +1369,27 @@ export default {
         this.validateCurrentFlowchart({ openPanel: true })
         return plan
       }
-      const detail = plan.actions
-        .map(action =>
-          this.$t('flowchart.autofixAction.' + action.code, {
-            count: action.count || 1
-          })
-        )
-        .filter(Boolean)
-        .slice(0, 6)
-        .join('\n')
+      const beforeNodes = plan.before?.summary?.nodes || 0
+      const afterNodes = plan.after?.summary?.nodes || 0
+      const beforeEdges = plan.before?.summary?.edges || 0
+      const afterEdges = plan.after?.summary?.edges || 0
+      const beforeScore = plan.before?.summary?.score || 0
+      const afterScore = plan.after?.summary?.score || 0
+      const detail = [
+        this.$t('flowchart.autofixDiffSummary', {
+          nodes: afterNodes - beforeNodes,
+          edges: afterEdges - beforeEdges,
+          score: afterScore - beforeScore
+        }),
+        ...plan.actions
+          .map(action =>
+            this.$t('flowchart.autofixAction.' + action.code, {
+              count: action.count || 1
+            })
+          )
+          .filter(Boolean)
+          .slice(0, 6)
+      ].join('\n')
       try {
         await this.$confirm(
           this.$t('flowchart.autofixPreviewMessage', {

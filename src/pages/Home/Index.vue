@@ -125,6 +125,7 @@
               {{ $t('home.starterCategoryFlowchart') }} ({{ starterCategoryCounts.flowchart }})
             </button>
           </div>
+          <div class="starterSectionTitle">{{ starterSectionTitle }}</div>
           <div class="starterGrid">
             <button
               type="button"
@@ -490,6 +491,11 @@ export default {
     }
   },
   computed: {
+    starterSectionTitle() {
+      if (this.starterCategory === 'mindmap') return this.$t('home.starterCategoryMindmap')
+      if (this.starterCategory === 'flowchart') return this.$t('home.starterCategoryFlowchart')
+      return this.$t('home.starterCategoryAll')
+    },
     starterCategoryCounts() {
       return {
         all: 23,
@@ -1517,6 +1523,15 @@ export default {
 
 .starterSection {
   margin-bottom: 22px;
+}
+.starterSectionTitle {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #525252;
+}
+.homePage.isDark .starterSectionTitle {
+  color: rgba(255,255,255,0.7);
 }
 .starterGrid {
   display: grid;

@@ -300,33 +300,11 @@ export const flowchartDocumentMethods = {
         if (!Array.isArray(content) || content.length <= 1) {
           return Array.isArray(content) ? content[0] : content
         }
-        const names = content
-          .map((item, index) => {
-            const title =
-              item?.title ||
-              item?.rootTopic?.title ||
-              this.$t('flowchart.xmindCanvasFallback', { index: index + 1 })
-            return `${index + 1}. ${title}`
-          })
-          .join('\n')
-        try {
-          const { value } = await this.$prompt(
-            this.$t('flowchart.xmindCanvasSelectMessage', { list: names }),
-            this.$t('flowchart.xmindCanvasSelectTitle'),
-            {
-              inputValue: '1',
-              inputPattern: /^[1-9]\d*$/,
-              inputErrorMessage: this.$t('flowchart.xmindCanvasSelectInvalid')
-            }
-          )
-          const index = Math.max(
-            0,
-            Math.min(content.length - 1, Number(value) - 1)
-          )
-          return content[index]
-        } catch (_error) {
-          return content[0]
+        if (typeof this.selectXmindCanvas === 'function') {
+          const selected = await this.selectXmindCanvas(content)
+          return selected || content[0]
         }
+        return content[0]
       })
       if (!hasConvertibleMindMapData(mindMapData)) {
         this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
