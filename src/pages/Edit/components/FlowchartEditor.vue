@@ -1123,7 +1123,7 @@ export default {
         .trim()
         .toLowerCase()
       if (!keyword) return []
-      return (this.flowchartData.nodes || [])
+      const nodeHits = (this.flowchartData.nodes || [])
         .map(node => {
           const text = String(node.text || '').trim()
           const note = String(node.note || '').trim()
@@ -1131,6 +1131,7 @@ export default {
           const typeDef = this.flowchartNodeTypes.find(item => item.type === node.type)
           return {
             id: node.id,
+            kind: 'node',
             text: text || typeDef?.label || node.type,
             type: node.type,
             typeLabel: typeDef?.label || node.type,
@@ -1148,6 +1149,22 @@ export default {
           }
         })
         .filter(item => item.haystack.includes(keyword))
+      const edgeHits = (this.flowchartData.edges || [])
+        .map(edge => {
+          const label = String(edge.label || '').trim()
+          if (!label) return null
+          return {
+            id: edge.id,
+            kind: 'edge',
+            text: label,
+            type: 'edge',
+            typeLabel: this.$t('flowchart.edgeLabel') || '连线',
+            haystack: label.toLowerCase()
+          }
+        })
+        .filter(Boolean)
+        .filter(item => item.haystack.includes(keyword))
+      return [...nodeHits, ...edgeHits]
     },
     flowchartCommandPaletteLabels() {
       return {
@@ -1697,6 +1714,18 @@ export default {
       this.flowchartSearchActiveIndex = nextIndex
       const item = list[nextIndex]
       if (!item?.id) return
+      if (item.kind === 'edge') {
+        this.selectedEdgeId = item.id
+        this.selectedNodeIds = []
+        const edge = (this.edgesWithLayout || []).find(e => e.id === item.id)
+        if (edge && typeof this.centerViewportAt === 'function') {
+          this.centerViewportAt({
+            x: Number(edge.labelX || edge.sourcePoint?.x || 0),
+            y: Number(edge.labelY || edge.sourcePoint?.y || 0)
+          })
+        }
+        return
+      }
       this.selectedNodeIds = [item.id]
       this.selectedEdgeId = ''
       const node = this.flowchartNodeLookup.get(item.id)

@@ -2503,3 +2503,14 @@ test('双击画布空白会新建节点并进入编辑', () => {
   assert.ok(nodeSource.includes('startInlineEdit: true'))
   assert.ok(nodeSource.includes("type: !(this.flowchartData?.nodes || []).length ? 'start' : 'process'"))
 })
+
+
+test('流程图搜索支持连线标签命中与定位', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.ok(editorSource.includes("kind: 'edge'"))
+  assert.ok(editorSource.includes('edgeHits'))
+  assert.ok(editorSource.includes("item.kind === 'edge'"))
+})
