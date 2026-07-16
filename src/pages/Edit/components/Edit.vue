@@ -16,7 +16,7 @@
         </div>
       </div>
     </div>
-    <div v-if="mindmapSheets.length" class="mindmapSheetBar" @mousedown.stop>
+    <div v-if="mindmapSheets.length && !isZenMode" class="mindmapSheetBar" @mousedown.stop>
       <div class="mindmapSheetList">
         <button
           v-for="sheet in mindmapSheets"

@@ -1310,6 +1310,17 @@ export default {
         void this.openImportDialog()
         return
       }
+      // Ctrl+T new sheet
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        event.key?.toLowerCase() === 't' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('mindmapAddSheet')
+        return
+      }
       // Ctrl+ toggle zen mode
       if (
         (event.ctrlKey || event.metaKey) &&

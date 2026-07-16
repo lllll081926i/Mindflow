@@ -421,7 +421,12 @@ export const shortcutKeyList = [
       },
       {
         icon: 'icontab',
-        name: '切换到下一画布',
+        {
+        icon: 'iconadd',
+        name: '新建画布',
+        value: ctrl + ' + T'
+      },
+      name: '切换到下一画布',
         value: ctrl + ' + Tab'
       },
       {

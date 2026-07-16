@@ -469,3 +469,12 @@ test('思维导图支持 Ctrl+Tab 切换画布', () => {
   assert.ok(editSource.includes('handleMindmapNextSheet'))
   assert.ok(editSource.includes('handleMindmapPrevSheet'))
 })
+
+
+test('多画布标签栏在专注模式下隐藏，并支持 Ctrl+T 新建', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  assert.ok(editSource.includes('mindmapSheets.length && !isZenMode'))
+  assert.ok(toolbarSource.includes('mindmapAddSheet'))
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 't'"))
+})
