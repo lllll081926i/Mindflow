@@ -209,6 +209,28 @@ export const flowchartSelectionMethods = {
       this.duplicateSelectedNodes()
       return
     }
+    // Quick type keys (no modifiers): 1 start / 2 process / 3 decision / 4 input / 5 end
+    if (
+      !isMetaKey &&
+      !event.altKey &&
+      !event.shiftKey &&
+      ['1', '2', '3', '4', '5'].includes(event.key)
+    ) {
+      const typeMap = {
+        1: 'start',
+        2: 'process',
+        3: 'decision',
+        4: 'input',
+        5: 'end'
+      }
+      event.preventDefault()
+      void this.addNodeByType({
+        type: typeMap[event.key],
+        autoConnect: this.selectedNodeIds.length === 1,
+        startInlineEdit: true
+      })
+      return
+    }
     if (event.altKey && event.shiftKey && event.key.startsWith('Arrow')) {
       event.preventDefault()
       this.cloneAndConnectSelectedNode(event.key)

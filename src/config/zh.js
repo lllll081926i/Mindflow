@@ -773,6 +773,7 @@ export const flowchartShortcutKeyList = [
       { name: '空白处新建节点', value: 'Enter | F2（无选中时）' },
       { name: '新增下级处理节点', value: 'Tab | Insert' },
       { name: '新增下级判断节点', value: 'Shift + Tab' },
+      { name: '快捷添加节点类型', value: '1开始 2处理 3判断 4输入 5结束' },
       { name: '删除所选', value: 'Delete | Backspace' },
       { name: '全选节点', value: ctrl + ' + A' },
       { name: '复制节点', value: ctrl + ' + C' },

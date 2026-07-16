@@ -2290,3 +2290,16 @@ test('流程图支持 Ctrl+方向键沿连线切换节点', () => {
   assert.ok(selectionSource.includes('navigateConnectedNode'))
   assert.ok(configSource.includes('沿连线切换选中'))
 })
+
+
+test('流程图支持数字键快速添加节点类型', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes("['1', '2', '3', '4', '5']"))
+  assert.ok(selectionSource.includes("1: 'start'"))
+  assert.ok(selectionSource.includes("3: 'decision'"))
+  assert.ok(configSource.includes('快捷添加节点类型'))
+})
