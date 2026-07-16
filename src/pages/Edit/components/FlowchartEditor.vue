@@ -16,6 +16,7 @@
       @toggle-dark="toggleAppearance"
       @generate-ai="generateWithAi"
       @tidy-layout="tidyFlowchartLayout"
+      @validate-structure="validateCurrentFlowchart({ openPanel: true })"
       @open-command-palette="openCommandPalette"
       @open-search="openFlowchartSearch"
     />
@@ -105,7 +106,11 @@
           :class="'is-' + issue.severity"
           @click="focusFlowchartValidationIssue(issue)"
         >
-          <span class="flowchartValidationSeverity">{{ issue.severity }}</span>
+          <span class="flowchartValidationSeverity">{{
+            issue.severity === 'error'
+              ? $t('flowchart.validateSeverityError')
+              : $t('flowchart.validateSeverityWarn')
+          }}</span>
           <span class="flowchartValidationText">{{ $t(issue.messageKey, { count: issue.count || 0 }) }}</span>
         </button>
       </div>
@@ -838,6 +843,7 @@ export default {
         exportCenter: this.$t('toolbar.exportCenter'),
         convertMindMap: this.$t('flowchart.convertMindMapShort'),
         tidyLayout: this.$t('flowchart.tidyLayout'),
+        validateStructure: this.$t('flowchart.validateStructure'),
         darkMode: this.$t('navigatorToolbar.darkMode'),
         lightMode: this.$t('navigatorToolbar.lightMode')
       }

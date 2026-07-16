@@ -141,6 +141,19 @@
         <EditorToolbarAction
           action-class="flowchartToolbarBtn"
           icon-class="flowchartToolbarIcon"
+          :label="labels.validateStructure"
+          @action="$emit('validate-structure')"
+        >
+          <template #icon>
+            <svg viewBox="0 0 24 24">
+              <path d="M9 11.5 11 13.5 15.5 9"></path>
+              <circle cx="12" cy="12" r="8"></circle>
+            </svg>
+          </template>
+        </EditorToolbarAction>
+        <EditorToolbarAction
+          action-class="flowchartToolbarBtn"
+          icon-class="flowchartToolbarIcon"
           :label="labels.search"
           @action="$emit('open-search')"
         >
@@ -208,6 +221,7 @@ export default {
     'open-export',
     'convert-mind-map',
     'tidy-layout',
+    'validate-structure',
     'toggle-dark',
     'generate-ai'
   ],

@@ -772,6 +772,8 @@ const zh = {
     "validateSummary": "节点 {nodes} / 连线 {edges} / 问题 {issues}",
     "validateNoIssues": "未发现问题",
     "validateRefresh": "重新检查",
+    "validateSeverityError": "错误",
+    "validateSeverityWarn": "警告",
     "autofixStructure": "一键修复",
     "autofixDone": "已应用 {count} 项修复",
     "autofixNoop": "当前没有可自动修复的问题",
