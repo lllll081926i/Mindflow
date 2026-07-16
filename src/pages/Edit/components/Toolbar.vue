@@ -467,6 +467,7 @@ import platform, {
 } from '@/platform'
 import { createDefaultMindMapData } from '@/platform/shared/configSchema'
 import { convertMindMapToFlowchart } from '@/services/flowchartDocument'
+import { convertMindmapWorkbookToFlowchartWorkbook } from '@/services/documentConvert'
 import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown'
 import { transformToTxt } from 'simple-mind-map/src/parse/toTxt'
 import {
@@ -1001,11 +1002,14 @@ export default {
           this.$message.warning(this.$t('toolbar.noMindMapToConvert'))
           return
         }
-        const nextDocument = convertMindMapToFlowchart(mindMapData, {
-          title:
-            String(mindMapData.root?.data?.text || '').trim() ||
-            this.$t('toolbar.convertToFlowchart')
+        const flowWorkbook = convertMindmapWorkbookToFlowchartWorkbook(mindMapData, {
+          title: String(mindMapData.root?.data?.text || '流程图')
         })
+        const nextDocument = {
+          documentMode: 'flowchart',
+          flowchartData: flowWorkbook,
+          flowchartConfig: null
+        }
         await saveBootstrapStatePatch({
           mindMapData: null,
           mindMapConfig: null,
@@ -1044,7 +1048,11 @@ export default {
             }
           })
         } catch (_error) {}
-        this.$message.success(this.$t('toolbar.convertToFlowchartDone'))
+        this.$message.success(
+          this.$t('toolbar.convertToFlowchartDoneMulti', {
+            count: flowWorkbook.sheets?.length || 1
+          }) || this.$t('toolbar.convertToFlowchartDone')
+        )
         if (this.$route.path !== '/edit') {
           await this.$router.push('/edit')
         }

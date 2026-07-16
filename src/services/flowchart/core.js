@@ -4637,6 +4637,13 @@ const stripHtmlText = value =>
     .trim()
 
 export const hasConvertibleFlowchartData = flowchartData => {
+  const sheets = Array.isArray(flowchartData?.sheets) ? flowchartData.sheets : []
+  if (sheets.length > 1) {
+    return sheets.some(sheet => {
+      const nodes = Array.isArray(sheet?.nodes) ? sheet.nodes : []
+      return nodes.some(node => stripHtmlText(node?.text || node?.type))
+    })
+  }
   const nodes = Array.isArray(flowchartData?.nodes) ? flowchartData.nodes : []
   if (!nodes.length) return false
   return nodes.some(node => stripHtmlText(node?.text || node?.type))

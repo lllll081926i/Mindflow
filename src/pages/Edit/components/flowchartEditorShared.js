@@ -32,7 +32,17 @@ export const clampNumber = (value, min, max) => {
 }
 
 export const hasConvertibleMindMapData = mindMapData => {
-  const root = mindMapData?.root
+  const sheets = Array.isArray(mindMapData?.sheets) ? mindMapData.sheets : []
+  if (sheets.length > 1) {
+    return sheets.some(sheet => {
+      const root = sheet?.root
+      if (!root || typeof root !== 'object') return false
+      const rootText = String(root.data?.text || '').trim()
+      const hasChildren = Array.isArray(root.children) && root.children.length > 0
+      return hasChildren || (!!rootText && rootText !== '思维导图')
+    })
+  }
+  const root = mindMapData?.root || sheets[0]?.root
   if (!root || typeof root !== 'object') {
     return false
   }

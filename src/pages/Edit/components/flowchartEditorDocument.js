@@ -27,6 +27,10 @@ import {
   serializeStoredDocumentContent
 } from '@/services/flowchartDocument'
 import { snapshotActiveFlowchartSheet, ensureFlowchartWorkbook } from '@/services/flowchartWorkbook'
+import {
+  convertMindmapWorkbookToFlowchartWorkbook,
+  convertFlowchartWorkbookToMindmapWorkbook
+} from '@/services/documentConvert'
 import xmind from 'simple-mind-map/src/parse/xmind.js'
 import markdown from 'simple-mind-map/src/parse/markdown.js'
 import { parseFreemindFile, isFreemindXml } from '@/services/freemindParse'
@@ -278,11 +282,23 @@ export const flowchartDocumentMethods = {
       this.$message.warning(this.$t('flowchart.noMindMapToConvert'))
       return
     }
-    const nextDocument = convertMindMapToFlowchart(bootstrapState.mindMapData, {
-      title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
+    // multi-page: convert each mindmap sheet into a flowchart page
+    const flowWorkbook = convertMindmapWorkbookToFlowchartWorkbook(
+      bootstrapState.mindMapData,
+      {
+        title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
+      }
+    )
+    this.applyGeneratedFlowchart({
+      documentMode: 'flowchart',
+      flowchartData: flowWorkbook,
+      flowchartConfig: this.flowchartConfig || null
     })
-    this.applyGeneratedFlowchart(nextDocument)
-    this.$message.success(this.$t('flowchart.mindMapConverted'))
+    this.$message.success(
+      this.$t('flowchart.mindMapConvertedMulti', {
+        count: flowWorkbook.sheets?.length || 1
+      }) || this.$t('flowchart.mindMapConverted')
+    )
   },
 
   async convertCurrentFlowchartToMindMap() {
@@ -295,7 +311,10 @@ export const flowchartDocumentMethods = {
       const title =
         String(this.flowchartData?.title || '').trim() ||
         this.$t('flowchart.fileNameFallback')
-      const mindMapData = convertFlowchartToMindMap(this.flowchartData, { title })
+      const mindMapData = convertFlowchartWorkbookToMindmapWorkbook(
+        this.flowchartData,
+        { title }
+      )
       await saveBootstrapStatePatch({
         mindMapData: cloneJson(mindMapData),
         mindMapConfig: null,
