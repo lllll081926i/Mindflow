@@ -1990,3 +1990,17 @@ test('流程图校验摘要展示健康度分数', () => {
   assert.match(editorSource, /summary.score/)
   assert.match(langSource, /健康度 {score}/)
 })
+
+
+test('流程图校验面板支持严重级别筛选与仅选错误', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /validationIssueFilter/)
+  assert.match(editorSource, /filteredValidationIssues/)
+  assert.match(editorSource, /highlightValidationErrors/)
+  assert.match(langSource, /"validateFilterAll"/)
+  assert.match(langSource, /"validateSelectErrors"/)
+})

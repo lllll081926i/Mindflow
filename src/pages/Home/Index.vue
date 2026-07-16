@@ -107,11 +107,18 @@
         <section class="starterSection">
           <div class="resumeHeader">
             <h2>{{ $t('home.starterTitle') }}</h2>
+            <input
+              v-model.trim="starterKeyword"
+              class="starterSearch"
+              type="search"
+              :placeholder="$t('home.starterSearchPlaceholder')"
+            />
           </div>
           <div class="starterGrid">
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapBlank'), $t('home.starterMindMapBlankDesc'))"
               :disabled="busy"
               @click="createBlankProject"
             >
@@ -121,6 +128,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapOrg'), $t('home.starterMindMapOrgDesc'))"
               :disabled="busy"
               @click="createMindMapWithLayout('mindMap')"
             >
@@ -130,6 +138,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapTree'), $t('home.starterMindMapTreeDesc'))"
               :disabled="busy"
               @click="createMindMapWithLayout('organizationStructure')"
             >
@@ -139,6 +148,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapMeeting'), $t('home.starterMindMapMeetingDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('meeting')"
             >
@@ -148,6 +158,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapProject'), $t('home.starterMindMapProjectDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('project')"
             >
@@ -157,6 +168,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapLearning'), $t('home.starterMindMapLearningDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('learning')"
             >
@@ -166,6 +178,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapReview'), $t('home.starterMindMapReviewDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('review')"
             >
@@ -175,6 +188,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapOkr'), $t('home.starterMindMapOkrDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('okr')"
             >
@@ -184,6 +198,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapWeekly'), $t('home.starterMindMapWeeklyDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('weekly')"
             >
@@ -193,6 +208,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapInterview'), $t('home.starterMindMapInterviewDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('interview')"
             >
@@ -202,6 +218,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapReading'), $t('home.starterMindMapReadingDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('reading')"
             >
@@ -211,6 +228,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapBusiness'), $t('home.starterMindMapBusinessDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('business')"
             >
@@ -220,6 +238,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapKnowledge'), $t('home.starterMindMapKnowledgeDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('knowledge')"
             >
@@ -229,6 +248,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapCompetitor'), $t('home.starterMindMapCompetitorDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('competitor')"
             >
@@ -238,6 +258,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapRetro'), $t('home.starterMindMapRetroDesc'))"
               :disabled="busy"
               @click="createMindMapScenario('retro')"
             >
@@ -247,6 +268,27 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapRoadmap'), $t('home.starterMindMapRoadmapDesc'))"
+              :disabled="busy"
+              @click="createMindMapScenario('roadmap')"
+            >
+              <strong>{{ $t('home.starterMindMapRoadmap') }}</strong>
+              <span>{{ $t('home.starterMindMapRoadmapDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible($t('home.starterMindMapContent'), $t('home.starterMindMapContentDesc'))"
+              :disabled="busy"
+              @click="createMindMapScenario('content')"
+            >
+              <strong>{{ $t('home.starterMindMapContent') }}</strong>
+              <span>{{ $t('home.starterMindMapContentDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible($t('home.starterFlowApproval'), $t('home.starterFlowApprovalDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
@@ -256,6 +298,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterFlowRelease'), $t('home.starterFlowReleaseDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('release')"
             >
@@ -265,6 +308,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterFlowEnterprise'), $t('home.starterFlowEnterpriseDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('enterpriseDelivery')"
             >
@@ -274,6 +318,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterFlowSupport'), $t('home.starterFlowSupportDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('supportEscalation')"
             >
@@ -283,6 +328,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterFlowSales'), $t('home.starterFlowSalesDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('salesPipeline')"
             >
@@ -292,6 +338,7 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible($t('home.starterFlowReviewFlow'), $t('home.starterFlowReviewFlowDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('contentReview')"
             >
@@ -410,6 +457,7 @@ export default {
   name: 'HomePage',
   data() {
     return {
+      starterKeyword: '',
       busy: false,
       homeRefreshFrame: 0,
       homeRefreshTimer: 0,
@@ -600,6 +648,17 @@ export default {
       })
     },
 
+    isStarterVisible(...labels) {
+      const keyword = String(this.starterKeyword || '')
+        .trim()
+        .toLowerCase()
+      if (!keyword) return true
+      return labels.some(label =>
+        String(label || '')
+          .toLowerCase()
+          .includes(keyword)
+      )
+    },
     createBlankProjectContent(layout) {
       const themeTemplate = getPreferredMindMapThemeValue(!!this.isDark)
       return createDefaultMindMapData('思维导图', themeTemplate, layout)
@@ -947,6 +1006,58 @@ export default {
             children: [
               { data: { text: '负责人' }, children: [] },
               { data: { text: '截止时间' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'roadmap') {
+        data.root.data.text = '产品路线图'
+        data.root.children = [
+          {
+            data: { text: 'Now' },
+            children: [
+              { data: { text: 'P0 功能' }, children: [] },
+              { data: { text: '体验修复' }, children: [] }
+            ]
+          },
+          {
+            data: { text: 'Next' },
+            children: [
+              { data: { text: '增长能力' }, children: [] },
+              { data: { text: '平台能力' }, children: [] }
+            ]
+          },
+          {
+            data: { text: 'Later' },
+            children: [{ data: { text: '探索方向' }, children: [] }]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'content') {
+        data.root.data.text = '内容日历'
+        data.root.children = [
+          {
+            data: { text: '本周选题' },
+            children: [
+              { data: { text: '主题 A' }, children: [] },
+              { data: { text: '主题 B' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '生产安排' },
+            children: [
+              { data: { text: '撰稿' }, children: [] },
+              { data: { text: '设计' }, children: [] },
+              { data: { text: '发布' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '复盘指标' },
+            children: [
+              { data: { text: '阅读/互动' }, children: [] },
+              { data: { text: '转化' }, children: [] }
             ]
           }
         ]

@@ -2107,6 +2107,27 @@ button.nodeMetaBadge {
   cursor: pointer;
 }
 
+.validationFilterChips {
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 8px;
+}
+.validationFilterChip {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--flowchart-floating-border);
+  background: transparent;
+  color: var(--flowchart-subtle-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.validationFilterChip.isActive {
+  color: var(--flowchart-text);
+  background: rgba(37, 99, 235, 0.12);
+  border-color: transparent;
+}
 .flowchartValidationSummary,
 .flowchartValidationEmpty {
   padding: 10px 12px 6px;

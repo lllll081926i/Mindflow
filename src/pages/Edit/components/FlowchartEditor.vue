@@ -97,9 +97,20 @@
           })
         }}
       </div>
-      <div class="flowchartValidationList" v-if="flowchartValidationResult?.issues?.length">
+      <div class="validationFilterChips" v-if="flowchartValidationResult">
+        <button type="button" class="validationFilterChip" :class="{ isActive: validationIssueFilter === 'all' }" @click="validationIssueFilter = 'all'">
+          {{ $t('flowchart.validateFilterAll') }}
+        </button>
+        <button type="button" class="validationFilterChip" :class="{ isActive: validationIssueFilter === 'error' }" @click="validationIssueFilter = 'error'">
+          {{ $t('flowchart.validateFilterError') }}
+        </button>
+        <button type="button" class="validationFilterChip" :class="{ isActive: validationIssueFilter === 'warn' }" @click="validationIssueFilter = 'warn'">
+          {{ $t('flowchart.validateFilterWarn') }}
+        </button>
+      </div>
+      <div class="flowchartValidationList" v-if="filteredValidationIssues.length">
         <button
-          v-for="(issue, index) in flowchartValidationResult.issues"
+          v-for="(issue, index) in filteredValidationIssues"
           :key="issue.code + '-' + index"
           type="button"
           class="flowchartValidationItem"
@@ -118,7 +129,11 @@
         </button>
       </div>
       <div class="flowchartValidationEmpty" v-else>
-        {{ $t('flowchart.validateNoIssues') }}
+        {{
+          flowchartValidationResult?.issues?.length
+            ? $t('flowchart.validateFilterEmpty')
+            : $t('flowchart.validateNoIssues')
+        }}
       </div>
       <div class="flowchartValidationActions">
         <button type="button" class="flowchartValidationAction" @click="validateCurrentFlowchart({ openPanel: true })">
@@ -126,6 +141,9 @@
         </button>
         <button type="button" class="flowchartValidationAction" @click="highlightAllValidationNodes">
           {{ $t('flowchart.validateSelectAllIssues') }}
+        </button>
+        <button type="button" class="flowchartValidationAction" @click="highlightValidationErrors">
+          {{ $t('flowchart.validateSelectErrors') }}
         </button>
         <button type="button" class="flowchartValidationAction isPrimary" @click="autofixCurrentFlowchart">
           {{ $t('flowchart.autofixStructure') }}
@@ -550,6 +568,7 @@ export default {
       flowchartValidationVisible: false,
       flowchartValidationResult: null,
       selectedValidationIssueKey: '',
+      validationIssueFilter: 'all',
       validationHighlightNodeIds: [],
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
@@ -904,6 +923,16 @@ export default {
       }
       return this.$t('toolbar.statusNoFile')
     },
+    filteredValidationIssues() {
+      const issues = this.flowchartValidationResult?.issues || []
+      if (this.validationIssueFilter === 'error') {
+        return issues.filter(issue => issue.severity === 'error')
+      }
+      if (this.validationIssueFilter === 'warn') {
+        return issues.filter(issue => issue.severity === 'warn')
+      }
+      return issues
+    },
     flowchartShortcutGroups() {
       return flowchartShortcutKeyList[this.$i18n.locale] || flowchartShortcutKeyList.zh || []
     },
@@ -1129,6 +1158,20 @@ export default {
           y: Number(node.y || 0) + Number(node.height || 0) / 2
         })
       }
+    },
+    highlightValidationErrors() {
+      const issues = (this.flowchartValidationResult?.issues || []).filter(
+        issue => issue.severity === 'error'
+      )
+      if (!issues.length) {
+        this.$message.info(this.$t('flowchart.validateNoErrors'))
+        return
+      }
+      // temporarily swap issues list for reuse
+      const original = this.flowchartValidationResult
+      this.flowchartValidationResult = { ...original, issues }
+      this.highlightAllValidationNodes()
+      this.flowchartValidationResult = original
     },
     highlightAllValidationNodes() {
       const issues = this.flowchartValidationResult?.issues || []

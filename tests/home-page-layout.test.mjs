@@ -201,3 +201,17 @@ test('首页导图模板中心覆盖竞品分析与复盘会场景', () => {
   assert.match(langSource, /"starterMindMapCompetitor"/)
   assert.match(langSource, /"starterMindMapRetro"/)
 })
+
+
+test('首页模板中心支持搜索，并覆盖产品路线图与内容日历', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /starterKeyword/)
+  assert.match(source, /isStarterVisible/)
+  assert.match(source, /starterSearch/)
+  assert.match(source, /createMindMapScenario\('roadmap'\)/)
+  assert.match(source, /createMindMapScenario\('content'\)/)
+  assert.match(langSource, /"starterSearchPlaceholder"/)
+  assert.match(langSource, /"starterMindMapRoadmap"/)
+  assert.match(langSource, /"starterMindMapContent"/)
+})
