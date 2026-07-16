@@ -415,6 +415,11 @@ export const shortcutKeyList = [
         value: ctrl + ' + Alt + 1~8'
       },
       {
+        icon: 'iconrainbow',
+        name: '切换彩虹线条',
+        value: 'Alt + R'
+      },
+      {
         icon: 'icongongshi',
         name: '插入公式',
         value: ctrl + ' + Shift + F'

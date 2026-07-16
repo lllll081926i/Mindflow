@@ -1045,9 +1045,13 @@ export default {
     }
   },
   created() {
+    this.$bus.$on('toggleRainbowLines', this.toggleRainbowLinesShortcut)
+    
     this.$bus.$on('setData', this.onSetData)
   },
   beforeUnmount() {
+    this.$bus.$off('toggleRainbowLines', this.toggleRainbowLinesShortcut)
+    
     this.$bus.$off('setData', this.onSetData)
     clearTimeout(this.storeDataTimer)
     clearTimeout(this.outerFramePaddingTimer)
@@ -1151,6 +1155,19 @@ export default {
     },
 
     // 更新彩虹线条配置
+    toggleRainbowLinesShortcut() {
+      // toggle between off and first palette option
+      const options = this.rainbowLinesOptions || []
+      const off = options.find(item => !item.list)
+      const firstOn = options.find(item => item.list && item.list.length)
+      const isOpen = !!this.curRainbowLineColorList
+      this.updateRainbowLinesConfig(isOpen ? off || { list: null } : firstOn || options[0] || { list: null })
+      this.$message?.success?.(
+        isOpen
+          ? this.$t('baseStyle.notUseRainbowLines')
+          : this.$t('baseStyle.rainbowLines')
+      )
+    },
     updateRainbowLinesConfig(item) {
       this.rainbowLinesPopoverVisible = false
       this.curRainbowLineColorList = item.list || null

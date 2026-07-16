@@ -1172,6 +1172,19 @@ export default {
         this.$bus.$emit('mindmapRenameActiveSheet')
         return
       }
+      // toggle rainbow lines Alt+R
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'r'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('toggleRainbowLines')
+        return
+      }
       // priority/progress markers
       if (
         !isTypingTarget &&

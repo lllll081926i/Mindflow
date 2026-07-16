@@ -527,3 +527,11 @@ test('思维导图支持优先级与进度标记快捷键', () => {
   assert.ok(toolbarSource.includes('progress'))
   assert.ok(toolbarSource.includes('Alt'))
 })
+
+
+test('思维导图支持 Alt+R 切换彩虹线条', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const styleSource = fs.readFileSync(path.resolve('src/pages/Edit/components/BaseStyle.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('toggleRainbowLines'))
+  assert.ok(styleSource.includes('toggleRainbowLinesShortcut'))
+})
