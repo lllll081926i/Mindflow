@@ -245,8 +245,8 @@ export const flowchartDocumentMethods = {
 
   applyTemplate(templateId = 'blank') {
     this.resetTransientFlowchartInteractionState()
-    this.flowchartData = createDefaultFlowchartData(
-      this.flowchartData.title || this.$t('flowchart.fileNameFallback'),
+    this.flowchartData = ensureFlowchartWorkbook(createDefaultFlowchartData(
+      this.flowchartData.title || this.$t('flowchart.fileNameFallback')),
       templateId
     )
     this.selectedNodeIds = []
@@ -473,7 +473,7 @@ export const flowchartDocumentMethods = {
   applyGeneratedFlowchart(result) {
     const normalized = normalizeFlowchartAiResult(result)
     this.resetTransientFlowchartInteractionState()
-    this.flowchartData = cloneJson(normalized.flowchartData)
+    this.flowchartData = ensureFlowchartWorkbook(cloneJson(normalized.flowchartData))
     const nextFlowchartConfig = {
       snapToGrid: false,
       gridSize: 24,
