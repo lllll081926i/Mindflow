@@ -191,6 +191,18 @@
           class="toolbarBtn fileActionBtn"
           role="button"
           tabindex="0"
+          :aria-label="$t('toolbar.convertToFlowchart')"
+          @click="convertCurrentToFlowchart"
+          @keydown.enter.prevent="convertCurrentToFlowchart"
+          @keydown.space.prevent="convertCurrentToFlowchart"
+        >
+          <span class="icon iconfont icontianjiazijiedian"></span>
+          <span class="text">{{ $t('toolbar.convertToFlowchart') }}</span>
+        </div>
+        <div
+          class="toolbarBtn fileActionBtn"
+          role="button"
+          tabindex="0"
           :aria-label="$t('toolbar.returnHome')"
           @click="goHome"
           @keydown.enter.prevent="goHome"

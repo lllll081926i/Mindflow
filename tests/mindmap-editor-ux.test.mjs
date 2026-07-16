@@ -334,3 +334,10 @@ test('导图粘贴大纲无选中时回落到根节点', () => {
   assert.ok(editSource.includes('renderer?.root'))
   assert.ok(editSource.includes('activeNodeList = [rootNode]'))
 })
+
+
+test('思维导图工具栏提供转换为流程图入口', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('@click="convertCurrentToFlowchart"'))
+  assert.ok(toolbarSource.includes("('toolbar.convertToFlowchart')"))
+})

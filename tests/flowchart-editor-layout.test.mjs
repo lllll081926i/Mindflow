@@ -2483,3 +2483,12 @@ test('流程图支持 Ctrl+Enter 新建同级处理节点', () => {
   assert.ok(selectionSource.includes("isMetaKey && event.key === 'Enter'"))
   assert.ok(configSource.includes('新建同级处理节点'))
 })
+
+
+test('L 连接后会选中新建连线以便继续标注', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.ok(selectionSource.includes('selectedEdgeId = edge.id'))
+})

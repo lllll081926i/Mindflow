@@ -419,7 +419,13 @@ export const flowchartSelectionMethods = {
       event.preventDefault()
       const [sourceId, targetId] = this.selectedNodeIds
       if (typeof this.ensureFlowchartEdge === 'function') {
-        this.ensureFlowchartEdge(sourceId, targetId)
+        const edge = this.ensureFlowchartEdge(sourceId, targetId)
+        if (edge?.id) {
+          this.selectedNodeIds = []
+          this.selectedEdgeId = edge.id
+          this.inspectorPanelSection = 'inspector'
+          this.isInspectorOpen = true
+        }
         void this.persistFlowchartState?.()
         this.$message?.success?.(
           this.$t('flowchart.linkSelectedSuccess') || '已连接所选节点'
