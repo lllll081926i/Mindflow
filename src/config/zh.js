@@ -340,6 +340,11 @@ export const shortcutKeyList = [
         value: macFn + 'F2'
       },
       {
+        icon: 'iconnote',
+        name: '编辑备注',
+        value: 'Space'
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`

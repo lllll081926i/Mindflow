@@ -1142,6 +1142,24 @@ export default {
       if (event.key === 'Escape' && this.commandPaletteVisible) {
         event.preventDefault()
         this.closeCommandPalette()
+        return
+      }
+      // Space opens note for active mindmap node (core annotation loop).
+      if (
+        event.key === ' ' &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        !isTypingTarget &&
+        !this.commandPaletteVisible
+      ) {
+        const activeNodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        if (activeNodes.length > 0) {
+          event.preventDefault()
+          void this.openNodeNoteDialog(activeNodes)
+        }
       }
     },
 

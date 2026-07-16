@@ -357,3 +357,13 @@ test('默认开启拖拽导入以便核心打开链路更顺手', () => {
   )
   assert.ok(schemaSource.includes('enableDragImport: true'))
 })
+
+
+test('思维导图 Space 打开备注编辑', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes("event.key === ' '"))
+  assert.ok(toolbarSource.includes('openNodeNoteDialog'))
+  assert.ok(configSource.includes('编辑备注'))
+  assert.ok(configSource.includes("'Space'"))
+})
