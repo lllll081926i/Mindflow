@@ -2279,3 +2279,14 @@ test('流程图无选中时 Enter/F2 会新建节点并进入编辑', () => {
   assert.ok(selectionSource.includes('startInlineEdit: true'))
   assert.ok(selectionSource.includes("isEmptyCanvas ? 'start' : 'process'"))
 })
+
+
+test('流程图支持 Ctrl+方向键沿连线切换节点', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes('navigateConnectedNode'))
+  assert.ok(configSource.includes('沿连线切换选中'))
+})

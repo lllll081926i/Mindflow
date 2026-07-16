@@ -283,9 +283,71 @@ export const flowchartSelectionMethods = {
       return
     }
     if (event.key.startsWith('Arrow') && this.selectedNodeIds.length) {
+      // Ctrl/Cmd + Arrow: jump selection along graph structure (XMind-like topic nav)
+      if (isMetaKey && this.selectedNodeIds.length === 1) {
+        event.preventDefault()
+        this.navigateConnectedNode(event.key)
+        return
+      }
       event.preventDefault()
       this.nudgeSelectedNodes(event.key, event)
     }
+  },
+
+  navigateConnectedNode(direction) {
+    const currentId = this.selectedNodeIds[0]
+    if (!currentId) return false
+    const nodes = Array.isArray(this.flowchartData?.nodes)
+      ? this.flowchartData.nodes
+      : []
+    const edges = Array.isArray(this.flowchartData?.edges)
+      ? this.flowchartData.edges
+      : []
+    const current = nodes.find(node => node.id === currentId)
+    if (!current) return false
+    const center = {
+      x: Number(current.x || 0) + Number(current.width || 0) / 2,
+      y: Number(current.y || 0) + Number(current.height || 0) / 2
+    }
+    const neighborIds = new Set()
+    edges.forEach(edge => {
+      if (edge.source === currentId) neighborIds.add(edge.target)
+      if (edge.target === currentId) neighborIds.add(edge.source)
+    })
+    const candidates = nodes.filter(
+      node => neighborIds.has(node.id) && node.id !== currentId
+    )
+    if (!candidates.length) return false
+    const score = node => {
+      const nx = Number(node.x || 0) + Number(node.width || 0) / 2
+      const ny = Number(node.y || 0) + Number(node.height || 0) / 2
+      const dx = nx - center.x
+      const dy = ny - center.y
+      if (direction === 'ArrowRight') return dx > 8 ? dx + Math.abs(dy) * 0.35 : Infinity
+      if (direction === 'ArrowLeft') return dx < -8 ? -dx + Math.abs(dy) * 0.35 : Infinity
+      if (direction === 'ArrowDown') return dy > 8 ? dy + Math.abs(dx) * 0.35 : Infinity
+      if (direction === 'ArrowUp') return dy < -8 ? -dy + Math.abs(dx) * 0.35 : Infinity
+      return Infinity
+    }
+    let best = null
+    let bestScore = Infinity
+    candidates.forEach(node => {
+      const value = score(node)
+      if (value < bestScore) {
+        bestScore = value
+        best = node
+      }
+    })
+    if (!best || !Number.isFinite(bestScore)) return false
+    this.selectedNodeIds = [best.id]
+    this.selectedEdgeId = ''
+    if (typeof this.centerViewportAt === 'function') {
+      this.centerViewportAt({
+        x: Number(best.x || 0) + Number(best.width || 0) / 2,
+        y: Number(best.y || 0) + Number(best.height || 0) / 2
+      })
+    }
+    return true
   },
 
   getSelectedNodes() {
