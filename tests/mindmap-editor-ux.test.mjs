@@ -316,3 +316,14 @@ test('思维导图命令面板支持转换为流程图', () => {
   assert.ok(toolbarSource.includes("key: 'convertToFlowchart'"))
   assert.match(langSource, /"convertToFlowchart"/)
 })
+
+
+test('思维导图导入支持 FreeMind .mm', () => {
+  const importSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Import.vue'), 'utf8')
+  const desktopSource = fs.readFileSync(path.resolve('src/platform/desktop/index.js'), 'utf8')
+  const parseSource = fs.readFileSync(path.resolve('src/services/freemindParse.js'), 'utf8')
+  assert.ok(importSource.includes('handleFreemind'))
+  assert.ok(importSource.includes('.mm'))
+  assert.ok(desktopSource.includes("'mm'") || desktopSource.includes('"mm"') || desktopSource.includes('.mm'))
+  assert.ok(parseSource.includes('parseFreemindXml'))
+})

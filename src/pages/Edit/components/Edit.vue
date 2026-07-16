@@ -1508,7 +1508,7 @@ export default {
     hasFileURL() {
       const fileURL = this.$route.query.fileURL
       if (!fileURL) return false
-      return /\.(smm|json|xmind|md)$/.test(fileURL)
+      return /\.(smm|json|xmind|md|mm)$/.test(fileURL)
     },
 
     // 动态设置思维导图数据

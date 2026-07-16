@@ -68,6 +68,7 @@
 
 <script>
 import xmind from 'simple-mind-map/src/parse/xmind.js'
+import { parseFreemindFile } from '@/services/freemindParse'
 import markdown from 'simple-mind-map/src/parse/markdown.js'
 import { mapState } from 'pinia'
 import { parseExternalJsonSafely } from '@/utils/json'
@@ -97,7 +98,7 @@ export default {
       isDark: 'isDark'
     }),
     supportFileStr() {
-      return '.smm,.json,.xmind,.md'
+      return '.smm,.json,.xmind,.md,.mm'
     }
   },
   watch: {
@@ -128,7 +129,7 @@ export default {
     },
 
     getRegexp() {
-      return /\.(smm|json|xmind|md)$/
+      return /\.(smm|json|xmind|md|mm)$/
     },
 
     getImportPayload(file) {
@@ -227,6 +228,8 @@ export default {
           this.handleXmind(data)
         } else if (type === 'md') {
           this.handleMd(data)
+        } else if (type === 'mm') {
+          this.handleFreemind(data)
         }
       } catch (error) {
         console.error('handleFileURL failed', error)
@@ -338,6 +341,22 @@ export default {
       this.xmindCanvasSelectDialogVisible = false
       this.canvasList = []
       this.selectCanvas = 0
+    },
+
+    // 处理 FreeMind / Freeplane .mm
+    async handleFreemind(file) {
+      try {
+        const data = await parseFreemindFile(file.raw || file)
+        this.$bus.$emit('setData', data)
+        this.$message.success(this.$t('import.importSuccess'))
+      } catch (error) {
+        console.error('handleFreemind failed', error)
+        this.$message.error(
+          error?.i18nKey
+            ? this.$t(error.i18nKey)
+            : error?.message || this.$t('import.fileParsingFailed')
+        )
+      }
     },
 
     // 处理markdown文件

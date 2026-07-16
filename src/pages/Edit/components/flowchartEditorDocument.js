@@ -28,6 +28,7 @@ import {
 } from '@/services/flowchartDocument'
 import xmind from 'simple-mind-map/src/parse/xmind.js'
 import markdown from 'simple-mind-map/src/parse/markdown.js'
+import { parseFreemindFile, isFreemindXml } from '@/services/freemindParse'
 import {
   FLOWCHART_AUTO_SAVE_INTERVAL,
   cloneJson,
@@ -385,6 +386,20 @@ export const flowchartDocumentMethods = {
       return
     }
 
+    if (/.mm$/.test(name)) {
+      const mindMapData = await parseFreemindFile(file)
+      if (!hasConvertibleMindMapData(mindMapData)) {
+        this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))
+        return
+      }
+      const nextDocument = convertMindMapToFlowchart(mindMapData, {
+        title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
+      })
+      this.applyGeneratedFlowchart(nextDocument)
+      this.$message.success(this.$t('flowchart.importMindMapFileDone'))
+      return
+    }
+
     const content = await new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onerror = () =>
@@ -408,11 +423,19 @@ export const flowchartDocumentMethods = {
       }
       mindMapData = parsedDocument.mindMapData
     } catch (_error) {
-      const parsed =
+      const raw =
         typeof resolved.content === 'string'
-          ? JSON.parse(resolved.content)
-          : resolved.content
-      mindMapData = parsed?.root ? parsed : parsed?.mindMapData || parsed
+          ? resolved.content
+          : ''
+      if (raw && isFreemindXml(raw)) {
+        mindMapData = await parseFreemindFile(raw)
+      } else {
+        const parsed =
+          typeof resolved.content === 'string'
+            ? JSON.parse(resolved.content)
+            : resolved.content
+        mindMapData = parsed?.root ? parsed : parsed?.mindMapData || parsed
+      }
     }
     if (!hasConvertibleMindMapData(mindMapData)) {
       this.$message.warning(this.$t('flowchart.importMindMapFileInvalid'))

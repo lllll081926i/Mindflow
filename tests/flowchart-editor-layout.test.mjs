@@ -2241,3 +2241,12 @@ test('流程图支持粘贴大纲生成节点树', () => {
   assert.ok(toolbarSource.includes('paste-outline'))
   assert.match(langSource, /"pasteOutline"/)
 })
+
+
+test('流程图拖入/导入支持 FreeMind .mm 并转换为流程', () => {
+  const documentSource = fs.readFileSync(path.resolve('src/pages/Edit/components/flowchartEditorDocument.js'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(documentSource.includes('parseFreemindFile'))
+  assert.ok(documentSource.includes('.mm'))
+  assert.ok(langSource.includes('.mm'))
+})
