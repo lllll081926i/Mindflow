@@ -776,6 +776,7 @@ export const flowchartShortcutKeyList = [
       { name: '编辑中确认并新建下级', value: 'Tab（编辑文字时）' },
       { name: '空白处新建节点', value: 'Enter | F2（无选中时）' },
       { name: '打开/关闭属性面板', value: 'Space（有选中时）' },
+      { name: '新建同级处理节点', value: ctrl + ' + Enter' },
       { name: '新增下级处理节点', value: 'Tab | Insert' },
       { name: '新增下级判断节点', value: 'Shift + Tab' },
       { name: '快捷添加节点类型', value: '1开始 2处理 3判断 4输入 5结束' },

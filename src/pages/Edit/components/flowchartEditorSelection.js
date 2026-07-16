@@ -241,6 +241,11 @@ export const flowchartSelectionMethods = {
       this.cloneAndConnectSelectedNode(event.key)
       return
     }
+    if (isMetaKey && event.key === 'Enter') {
+      event.preventDefault()
+      this.createSiblingProcessNode()
+      return
+    }
     if (event.key === 'Enter' || event.key === 'F2') {
       if (this.selectedNodeIds.length === 1) {
         event.preventDefault()
@@ -505,6 +510,45 @@ export const flowchartSelectionMethods = {
       })
     }
     return true
+  },
+
+  createSiblingProcessNode() {
+    if (this.selectedNodeIds.length !== 1) {
+      void this.addNodeByType({
+        type: !(this.flowchartData?.nodes || []).length ? 'start' : 'process',
+        autoConnect: false,
+        startInlineEdit: true
+      })
+      return
+    }
+    const currentId = this.selectedNodeIds[0]
+    const current = (this.flowchartData.nodes || []).find(node => node.id === currentId)
+    if (!current) return
+    const edges = Array.isArray(this.flowchartData?.edges) ? this.flowchartData.edges : []
+    const parentEdge = edges.find(edge => edge.target === currentId)
+    const size = this.getDefaultNodeSizeByType
+      ? this.getDefaultNodeSizeByType('process')
+      : { width: 168, height: 72 }
+    const worldPoint = {
+      x: Number(current.x || 0) + Number(current.width || 0) / 2,
+      y:
+        Number(current.y || 0) +
+        Number(current.height || 0) +
+        size.height / 2 +
+        96
+    }
+    void this.addNodeByType({
+      type: 'process',
+      worldPoint,
+      autoConnect: false,
+      startInlineEdit: true
+    }).then(() => {
+      const nextId = this.selectedNodeIds[0]
+      if (parentEdge?.source && nextId && typeof this.ensureFlowchartEdge === 'function') {
+        this.ensureFlowchartEdge(parentEdge.source, nextId)
+        void this.persistFlowchartState?.()
+      }
+    })
   },
 
   navigateSiblingNode(step = 1) {
