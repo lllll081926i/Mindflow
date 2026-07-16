@@ -112,3 +112,11 @@ test('工作区创建流程图支持指定模板 ID', () => {
   assert.match(source, /templateId = 'blank'/)
   assert.match(source, /createDefaultFlowchartData\(title, templateId\)/)
 })
+
+
+test('工作台打开文件支持 FreeMind 与 Markdown 内容归一化', () => {
+  const source = fs.readFileSync(path.resolve('src/services/workspaceActions.js'), 'utf8')
+  assert.match(source, /normalizeOpenableDocumentContent/)
+  assert.match(source, /parseFreemindXml/)
+  assert.match(source, /transformMarkdownTo/)
+})

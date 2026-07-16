@@ -28,6 +28,11 @@ import { createDefaultMindMapData } from '@/platform/shared/configSchema'
 import { setIsHandleLocalFile, syncRuntimeFromWorkspaceMeta } from '@/stores/runtime'
 import { resolveFileContentWithRecovery } from '@/services/recoveryStorage'
 import { parseExternalJsonSafely } from '@/utils/json'
+import markdown from 'simple-mind-map/src/parse/markdown.js'
+import {
+  isFreemindXml,
+  parseFreemindXml
+} from '@/services/freemindParse'
 import {
   createDefaultFlowchartData,
   parseStoredDocumentContent as parseStoredDocumentPayload,
@@ -81,6 +86,49 @@ export const parseStoredDocumentContent = content => {
   return parseStoredDocumentPayload(parsed)
 }
 
+export const normalizeOpenableDocumentContent = (content, fileRef = {}) => {
+  const name = String(fileRef?.name || fileRef?.path || '').toLowerCase()
+  const raw = typeof content === 'string' ? content : ''
+
+  if (name.endsWith('.mm') || isFreemindXml(raw)) {
+    const mindMapData = parseFreemindXml(raw)
+    return {
+      documentMode: 'mindmap',
+      data: mindMapData,
+      mindMapData,
+      mindMapConfig: null,
+      isFullDataFile: true
+    }
+  }
+
+  if (name.endsWith('.md')) {
+    const mindMapData = markdown.transformMarkdownTo(raw)
+    return {
+      documentMode: 'mindmap',
+      data: mindMapData,
+      mindMapData,
+      mindMapConfig: null,
+      isFullDataFile: true
+    }
+  }
+
+  try {
+    return parseStoredDocumentContent(content)
+  } catch (error) {
+    if (raw && isFreemindXml(raw)) {
+      const mindMapData = parseFreemindXml(raw)
+      return {
+        documentMode: 'mindmap',
+        data: mindMapData,
+        mindMapData,
+        mindMapConfig: null,
+        isFullDataFile: true
+      }
+    }
+    throw error
+  }
+}
+
 const applyParsedDocumentState = async parsedDocument => {
   if (parsedDocument.documentMode === 'flowchart') {
     await saveBootstrapStatePatch({
@@ -119,7 +167,7 @@ export const resumeWorkspaceSession = async router => {
 
 const hydrateWorkspaceFileSession = async (fileRef, content, router) => {
   const resolvedContent = await resolveFileContentWithRecovery(fileRef, content)
-  const parsedDocument = parseStoredDocumentContent(resolvedContent.content)
+  const parsedDocument = normalizeOpenableDocumentContent(resolvedContent.content, fileRef)
   const recentProjectRef = {
     ...createRecentProjectRef(fileRef),
     isFullDataFile: parsedDocument.isFullDataFile,
