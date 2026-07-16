@@ -357,6 +357,26 @@
               <strong>{{ $t('home.starterFlowReviewFlow') }}</strong>
               <span>{{ $t('home.starterFlowReviewFlowDesc') }}</span>
             </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowIncident'), $t('home.starterFlowIncidentDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('incident')"
+            >
+              <strong>{{ $t('home.starterFlowIncident') }}</strong>
+              <span>{{ $t('home.starterFlowIncidentDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowJourney'), $t('home.starterFlowJourneyDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('customerJourney')"
+            >
+              <strong>{{ $t('home.starterFlowJourney') }}</strong>
+              <span>{{ $t('home.starterFlowJourneyDesc') }}</span>
+            </button>
           </div>
             <div v-if="!hasVisibleStarters" class="starterEmpty">
               {{ $t('home.starterEmpty') }}
@@ -498,9 +518,9 @@ export default {
     },
     starterCategoryCounts() {
       return {
-        all: 23,
+        all: 25,
         mindmap: 17,
-        flowchart: 6
+        flowchart: 8
       }
     },
     hasVisibleStarters() {
@@ -527,7 +547,9 @@ export default {
         ['flowchart', 'home.starterFlowEnterprise', 'home.starterFlowEnterpriseDesc'],
         ['flowchart', 'home.starterFlowSupport', 'home.starterFlowSupportDesc'],
         ['flowchart', 'home.starterFlowSales', 'home.starterFlowSalesDesc'],
-        ['flowchart', 'home.starterFlowReviewFlow', 'home.starterFlowReviewFlowDesc']
+        ['flowchart', 'home.starterFlowReviewFlow', 'home.starterFlowReviewFlowDesc'],
+        ['flowchart', 'home.starterFlowIncident', 'home.starterFlowIncidentDesc'],
+        ['flowchart', 'home.starterFlowJourney', 'home.starterFlowJourneyDesc']
       ]
       return labels.some(([category, titleKey, descKey]) =>
         this.isStarterVisible(category, this.$t(titleKey), this.$t(descKey))

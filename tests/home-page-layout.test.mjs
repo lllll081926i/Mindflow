@@ -264,3 +264,13 @@ test('首页模板中心展示当前分类标题', () => {
   const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
   assert.match(source, /starterSectionTitle/)
 })
+
+
+test('首页流程图模板覆盖事故响应与客户旅程', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /createFlowchartFromTemplate\('incident'\)/)
+  assert.match(source, /createFlowchartFromTemplate\('customerJourney'\)/)
+  assert.match(langSource, /"starterFlowIncident"/)
+  assert.match(langSource, /"starterFlowJourney"/)
+})

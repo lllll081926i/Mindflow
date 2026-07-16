@@ -2129,3 +2129,14 @@ test('流程图自动修复预览包含节点连线健康度变更摘要', () =>
   assert.match(editorSource, /autofixDiffSummary/)
   assert.match(langSource, /"autofixDiffSummary"/)
 })
+
+
+test('XMind 画布选择对话框具备可访问性标签', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.match(editorSource, /xmindCanvasDialogOverlay/)
+  assert.match(editorSource, /aria-selected/)
+  assert.match(editorSource, /xmindCanvasSelectTitle/)
+})

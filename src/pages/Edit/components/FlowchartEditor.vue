@@ -92,7 +92,7 @@
       v-if="flowchartValidationVisible"
       class="flowchartValidationPanel"
       role="dialog"
-      aria-label="validation"
+      :aria-label="$t('flowchart.validateStructure')"
     >
       <div class="flowchartValidationHeader">
         <strong>{{ $t('flowchart.validateStructure') }}</strong>
@@ -456,9 +456,16 @@ v-if="flowchartShortcutVisible"
     <div
       v-if="xmindCanvasDialogVisible"
       class="xmindCanvasDialogOverlay"
+      @keydown.enter.prevent="confirmXmindCanvasSelect"
+      @keydown.esc.prevent="cancelXmindCanvasSelect"
       @mousedown.self="cancelXmindCanvasSelect"
     >
-      <section class="xmindCanvasDialog" role="dialog" aria-modal="true">
+      <section
+        class="xmindCanvasDialog"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="$t('flowchart.xmindCanvasSelectTitle')"
+      >
         <div class="xmindCanvasDialogHeader">
           <strong>{{ $t('flowchart.xmindCanvasSelectTitle') }}</strong>
           <button type="button" class="xmindCanvasDialogClose" @click="cancelXmindCanvasSelect">x</button>
@@ -470,6 +477,7 @@ v-if="flowchartShortcutVisible"
             type="button"
             class="xmindCanvasOption"
             :class="{ isActive: xmindCanvasSelectedIndex === index }"
+            :aria-selected="xmindCanvasSelectedIndex === index ? 'true' : 'false'"
             @click="xmindCanvasSelectedIndex = index"
             @dblclick="confirmXmindCanvasSelect"
           >
