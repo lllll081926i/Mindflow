@@ -777,5 +777,14 @@ export const flowchartShortcutKeyList = [
       { name: '复制一份', value: ctrl + ' + D' },
       { name: '微调节点', value: '方向键' }
     ]
+  },
+  {
+    type: '诊断修复',
+    list: [
+      { name: '检查流程结构', value: ctrl + ' + Shift + L' },
+      { name: '一键修复', value: ctrl + ' + Shift + R' },
+      { name: '撤销修复', value: ctrl + ' + Shift + Z' },
+      { name: '快捷键帮助', value: ctrl + ' + /' }
+    ]
   }
 ]

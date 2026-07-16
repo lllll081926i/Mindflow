@@ -297,3 +297,13 @@ test('大纲侧边栏支持节点搜索过滤', () => {
   assert.match(outlineSource, /filter-node-method/)
   assert.match(langSource, /搜索大纲节点/)
 })
+
+
+test('导图导入失败会优先展示具体错误信息', () => {
+  const importSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/Import.vue'),
+    'utf8'
+  )
+  assert.match(importSource, /error\?\.message \|\| this\.\$t\('import\.fileParsingFailed'\)/)
+  assert.match(importSource, /error\?\.i18nKey/)
+})

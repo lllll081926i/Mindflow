@@ -2018,3 +2018,18 @@ test('流程图一键修复支持明细反馈与撤销', () => {
   assert.match(langSource, /"autofixUndo"/)
   assert.match(langSource, /"autofixDoneDetail"/)
 })
+
+
+test('流程图快捷键帮助包含诊断修复操作', () => {
+  const shortcutSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.match(shortcutSource, /诊断修复/)
+  assert.match(shortcutSource, /检查流程结构/)
+  assert.match(selectionSource, /event\.key\.toLowerCase\(\) === 'l'/)
+  assert.match(selectionSource, /validateCurrentFlowchart/)
+  assert.match(selectionSource, /autofixCurrentFlowchart/)
+  assert.match(selectionSource, /undoLastFlowchartAutofix/)
+})

@@ -295,7 +295,11 @@ export default {
           this.$message.success(this.$t('import.importSuccess'))
         } catch (error) {
           console.error('handleSmm failed', error)
-          this.$message.error(this.$t('import.fileParsingFailed'))
+          this.$message.error(
+            error?.i18nKey
+              ? this.$t(error.i18nKey)
+              : error?.message || this.$t('import.fileParsingFailed')
+          )
         }
       }
     },
@@ -313,7 +317,11 @@ export default {
         this.$message.success(this.$t('import.importSuccess'))
       } catch (error) {
         console.error('handleXmind failed', error)
-        this.$message.error(this.$t('import.fileParsingFailed'))
+        this.$message.error(
+          error?.i18nKey
+            ? this.$t(error.i18nKey)
+            : error?.message || this.$t('import.fileParsingFailed')
+        )
       }
     },
 
@@ -346,7 +354,11 @@ export default {
           this.$message.success(this.$t('import.importSuccess'))
         } catch (error) {
           console.error('handleMd failed', error)
-          this.$message.error(this.$t('import.fileParsingFailed'))
+          this.$message.error(
+            error?.i18nKey
+              ? this.$t(error.i18nKey)
+              : error?.message || this.$t('import.fileParsingFailed')
+          )
         }
       }
     },

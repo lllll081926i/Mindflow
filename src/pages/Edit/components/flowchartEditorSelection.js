@@ -142,6 +142,21 @@ export const flowchartSelectionMethods = {
       else this.openFlowchartShortcuts()
       return
     }
+    if (isMetaKey && event.shiftKey && event.key.toLowerCase() === 'l') {
+      event.preventDefault()
+      this.validateCurrentFlowchart({ openPanel: true })
+      return
+    }
+    if (isMetaKey && event.shiftKey && event.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      this.autofixCurrentFlowchart()
+      return
+    }
+    if (isMetaKey && event.shiftKey && event.key.toLowerCase() === 'z') {
+      event.preventDefault()
+      this.undoLastFlowchartAutofix()
+      return
+    }
     if (isMetaKey && event.key.toLowerCase() === 's') {
       event.preventDefault()
       // Shift keeps a quiet write path for rapid save loops.
