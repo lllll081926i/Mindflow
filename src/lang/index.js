@@ -689,6 +689,8 @@ const zh = {
     "copySelection": "复制",
     "pasteSelection": "粘贴",
     "sheetSwitched": "已切换页面",
+    "addSheet": "新建页面",
+    "sheetDuplicate": "复制当前页面",
     "sheetAdded": "已新建页面",
     "sheetDeleted": "已删除页面",
     "sheetDeleteLast": "至少保留一个页面",

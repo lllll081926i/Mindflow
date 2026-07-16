@@ -605,7 +605,9 @@ export const flowchartDocumentMethods = {
   serializeCurrentDocument() {
     return serializeStoredDocumentContent({
       documentMode: 'flowchart',
-      data: this.flowchartData,
+      data: ensureFlowchartWorkbook(
+        snapshotActiveFlowchartSheet(this.flowchartData, this.flowchartData)
+      ),
       config: this.flowchartConfig
     })
   },

@@ -1271,6 +1271,8 @@ export default {
         { key: 'sendBack', label: this.$t('flowchart.arrangeBack'), disabled: this.selectedNodeIds.length < 1, action: () => this.sendSelectedNodesToBack() },
         { key: 'importMindMap', label: this.$t('flowchart.importMindMapFileShort'), action: () => this.importMindMapFile() },
         { key: 'export', label: this.$t('toolbar.exportCenter'), action: () => this.openExportCenter() },
+        { key: 'addFlowSheet', label: this.$t('flowchart.addSheet') || '新建页面', shortcut: 'Ctrl T', action: () => this.addFlowchartSheet(false) },
+        { key: 'dupFlowSheet', label: this.$t('flowchart.sheetDuplicate') || '复制当前页面', action: () => this.addFlowchartSheet(true) },
         { key: 'convertMindMap', label: this.$t('flowchart.convertMindMapShort'), action: () => this.convertCurrentMindMap() },
         { key: 'convertToMindMap', label: this.$t('flowchart.convertToMindMapShort'), action: () => this.convertCurrentFlowchartToMindMap() },
         { key: 'aiGenerate', label: this.$t('flowchart.aiGenerateShort'), disabled: this.isGenerating, action: () => this.generateWithAi() },
