@@ -380,6 +380,16 @@ export const shortcutKeyList = [
         value: ctrl + ' + E'
       },
       {
+        icon: 'icondaoru',
+        name: '打开导入',
+        value: ctrl + ' + O'
+      },
+      {
+        icon: 'iconzen',
+        name: '切换专注模式',
+        value: ctrl + ' + \'
+      },
+      {
         icon: 'iconxiaolian',
         name: '节点图标',
         value: ctrl + ' + Shift + O'

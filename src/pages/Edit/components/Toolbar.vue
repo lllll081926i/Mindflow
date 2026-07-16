@@ -1289,6 +1289,28 @@ export default {
         void this.openExportDialog()
         return
       }
+      // Ctrl+O open import
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        event.key?.toLowerCase() === 'o' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        void this.openImportDialog()
+        return
+      }
+      // Ctrl+ toggle zen mode
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        (event.key === '\' || event.code === 'Backslash') &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.toggleZenMode()
+        return
+      }
       // Ctrl+Shift+O open icons (avoid conflict with outline nowhere on mindmap)
       if (
         (event.ctrlKey || event.metaKey) &&

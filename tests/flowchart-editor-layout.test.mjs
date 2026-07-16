@@ -2573,3 +2573,13 @@ test('流程图支持 Ctrl+E 打开导出中心', () => {
   assert.ok(selectionSource.includes("event.key.toLowerCase() === 'e'"))
   assert.ok(selectionSource.includes('openExportCenter'))
 })
+
+
+test('流程图支持 Ctrl+O 导入导图文件', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.ok(selectionSource.includes("event.key.toLowerCase() === 'o'"))
+  assert.ok(selectionSource.includes('importMindMapFile'))
+})

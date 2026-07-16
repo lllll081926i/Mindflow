@@ -185,6 +185,11 @@ export const flowchartSelectionMethods = {
       void this.openExportCenter?.()
       return
     }
+    if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === 'o') {
+      event.preventDefault()
+      void this.importMindMapFile?.()
+      return
+    }
     if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === '0') {
       event.preventDefault()
       this.fitCanvasToView()

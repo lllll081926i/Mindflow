@@ -422,3 +422,14 @@ test('思维导图导出/图标/公式快捷键可用', () => {
   assert.ok(configSource.includes('节点图标'))
   assert.ok(configSource.includes('插入公式'))
 })
+
+
+test('思维导图导入与专注模式快捷键可用', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(toolbarSource.includes('openImportDialog'))
+  assert.ok(toolbarSource.includes('toggleZenMode'))
+  assert.ok(toolbarSource.includes("event.key?.toLowerCase() === 'o'"))
+  assert.ok(configSource.includes('打开导入'))
+  assert.ok(configSource.includes('切换专注模式'))
+})
