@@ -535,14 +535,24 @@ export const flowchartSelectionMethods = {
     const size = this.getDefaultNodeSizeByType
       ? this.getDefaultNodeSizeByType('process')
       : { width: 168, height: 72 }
-    const worldPoint = {
-      x: Number(current.x || 0) + Number(current.width || 0) / 2,
-      y:
-        Number(current.y || 0) +
-        Number(current.height || 0) +
-        size.height / 2 +
-        96
-    }
+    // With parent: stack as peer below; without parent: place to the right as parallel node.
+    const worldPoint = parentEdge
+      ? {
+          x: Number(current.x || 0) + Number(current.width || 0) / 2,
+          y:
+            Number(current.y || 0) +
+            Number(current.height || 0) +
+            size.height / 2 +
+            96
+        }
+      : {
+          x:
+            Number(current.x || 0) +
+            Number(current.width || 0) +
+            size.width / 2 +
+            96,
+          y: Number(current.y || 0) + Number(current.height || 0) / 2
+        }
     // Capture parent before async create replaces selection.
     const parentId = parentEdge?.source || ''
     Promise.resolve(
