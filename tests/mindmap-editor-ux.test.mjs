@@ -341,3 +341,10 @@ test('思维导图工具栏提供转换为流程图入口', () => {
   assert.ok(toolbarSource.includes('@click="convertCurrentToFlowchart"'))
   assert.ok(toolbarSource.includes("('toolbar.convertToFlowchart')"))
 })
+
+
+test('导图转流程后会立即同步编辑器文档模式', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('useEditorStore'))
+  assert.ok(toolbarSource.includes("documentMode: 'flowchart'"))
+})

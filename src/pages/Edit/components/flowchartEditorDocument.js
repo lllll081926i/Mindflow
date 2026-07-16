@@ -313,6 +313,22 @@ export const flowchartDocumentMethods = {
       )
       markDocumentDirty(true)
       await flushDocumentSessionSync()
+      try {
+        const { useEditorStore } = await import('@/stores/editor')
+        const editorStore = useEditorStore()
+        const meta = (await import('@/services/workspaceState')).getWorkspaceMetaState()
+        editorStore.syncWorkspaceSession({
+          ...meta,
+          currentDocument: {
+            path: baseRef.path || '',
+            name: baseRef.name || title + '.smm',
+            source: baseRef.source || 'desktop',
+            dirty: true,
+            isFullDataFile: true,
+            documentMode: 'mindmap'
+          }
+        })
+      } catch (_error) {}
       this.$message.success(this.$t('flowchart.flowchartConverted'))
       if (this.$route.path !== '/edit') {
         await this.$router.push('/edit')

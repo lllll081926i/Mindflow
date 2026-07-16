@@ -2535,3 +2535,13 @@ test('流程图支持 Shift+L 反向连接双选节点', () => {
   assert.ok(selectionSource.includes('event.shiftKey ? secondId : firstId'))
   assert.ok(configSource.includes('反向连接两个所选节点'))
 })
+
+
+test('流程转导图后会立即同步编辑器文档模式', () => {
+  const documentSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorDocument.js'),
+    'utf8'
+  )
+  assert.ok(documentSource.includes('useEditorStore'))
+  assert.ok(documentSource.includes("documentMode: 'mindmap'"))
+})

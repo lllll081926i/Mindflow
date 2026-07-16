@@ -1013,6 +1013,24 @@ export default {
           current?.mode || current?.source || 'desktop'
         )
         markDocumentDirty(true)
+        // force mode switch immediately for in-page editor remount
+        try {
+          const { useEditorStore } = await import('@/stores/editor')
+          const editorStore = useEditorStore()
+          editorStore.syncWorkspaceSession({
+            ...getWorkspaceMetaState(),
+            currentDocument: {
+              path: current?.path || '',
+              name:
+                current?.name ||
+                String(mindMapData.root?.data?.text || '流程图') + '.smm',
+              source: current?.mode || current?.source || 'desktop',
+              dirty: true,
+              isFullDataFile: true,
+              documentMode: 'flowchart'
+            }
+          })
+        } catch (_error) {}
         this.$message.success(this.$t('toolbar.convertToFlowchartDone'))
         if (this.$route.path !== '/edit') {
           await this.$router.push('/edit')
