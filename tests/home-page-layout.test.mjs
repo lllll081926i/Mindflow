@@ -145,3 +145,15 @@ test('首页提供会议纪要与项目计划场景模板', () => {
   assert.match(langSource, /"starterMindMapMeeting"/)
   assert.match(langSource, /"starterMindMapProject"/)
 })
+
+
+test('首页导图模板中心覆盖学习复盘与 OKR 场景', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /createMindMapScenario\('learning'\)/)
+  assert.match(source, /createMindMapScenario\('review'\)/)
+  assert.match(source, /createMindMapScenario\('okr'\)/)
+  assert.match(langSource, /"starterMindMapLearning"/)
+  assert.match(langSource, /"starterMindMapReview"/)
+  assert.match(langSource, /"starterMindMapOkr"/)
+})

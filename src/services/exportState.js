@@ -13,7 +13,10 @@ const PERSISTED_EXPORT_FIELDS = [
   'paddingY',
   'extraText',
   'isFitBg',
-  'imageFormat'
+  'imageFormat',
+  'pdfPageSize',
+  'pdfFitMode',
+  'pdfMargin'
 ]
 
 const baseFormats = [
@@ -89,7 +92,10 @@ export const createDefaultExportState = (
   paddingY: String(documentMode || '').trim() === 'flowchart' ? 120 : 10,
   extraText: '',
   isFitBg: true,
-  imageFormat: 'png'
+  imageFormat: 'png',
+  pdfPageSize: 'auto',
+  pdfFitMode: 'fit',
+  pdfMargin: 24
 })
 
 export const createExportStateFromFileRef = fileRef => {

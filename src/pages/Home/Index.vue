@@ -158,6 +158,33 @@
               type="button"
               class="starterCard"
               :disabled="busy"
+              @click="createMindMapScenario('learning')"
+            >
+              <strong>{{ $t('home.starterMindMapLearning') }}</strong>
+              <span>{{ $t('home.starterMindMapLearningDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapScenario('review')"
+            >
+              <strong>{{ $t('home.starterMindMapReview') }}</strong>
+              <span>{{ $t('home.starterMindMapReviewDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapScenario('okr')"
+            >
+              <strong>{{ $t('home.starterMindMapOkr') }}</strong>
+              <span>{{ $t('home.starterMindMapOkrDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
               <strong>{{ $t('home.starterFlowApproval') }}</strong>
@@ -530,7 +557,10 @@ export default {
     },
 
     createScenarioMindMapData(scenario = 'meeting') {
-      const layout = scenario === 'project' ? 'organizationStructure' : 'mindMap'
+      const layout =
+        scenario === 'project' || scenario === 'okr'
+          ? 'organizationStructure'
+          : 'mindMap'
       const data = this.createBlankProjectContent(layout)
       if (scenario === 'project') {
         data.root.data.text = '项目计划'
@@ -555,6 +585,82 @@ export default {
             children: [
               { data: { text: '资源风险' }, children: [] },
               { data: { text: '外部依赖' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'learning') {
+        data.root.data.text = '学习计划'
+        data.root.children = [
+          {
+            data: { text: '学习目标' },
+            children: [
+              { data: { text: '核心概念' }, children: [] },
+              { data: { text: '可交付成果' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '学习路径' },
+            children: [
+              { data: { text: '基础' }, children: [] },
+              { data: { text: '进阶' }, children: [] },
+              { data: { text: '实践项目' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '复盘节奏' },
+            children: [
+              { data: { text: '每周回顾' }, children: [] },
+              { data: { text: '错题/问题本' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'review') {
+        data.root.data.text = '复盘总结'
+        data.root.children = [
+          {
+            data: { text: '目标回顾' },
+            children: [
+              { data: { text: '预期结果' }, children: [] },
+              { data: { text: '实际结果' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '过程分析' },
+            children: [
+              { data: { text: '做得好的' }, children: [] },
+              { data: { text: '可改进的' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '行动项' },
+            children: [
+              { data: { text: '立即行动' }, children: [] },
+              { data: { text: '下周期计划' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
+      if (scenario === 'okr') {
+        data.root.data.text = 'OKR'
+        data.root.children = [
+          {
+            data: { text: 'O1 核心目标' },
+            children: [
+              { data: { text: 'KR1 可量化结果' }, children: [] },
+              { data: { text: 'KR2 可量化结果' }, children: [] },
+              { data: { text: 'KR3 可量化结果' }, children: [] }
+            ]
+          },
+          {
+            data: { text: 'O2 支撑目标' },
+            children: [
+              { data: { text: 'KR1 可量化结果' }, children: [] },
+              { data: { text: 'KR2 可量化结果' }, children: [] }
             ]
           }
         ]

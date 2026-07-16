@@ -1917,3 +1917,31 @@ test('流程图节点链接徽章可直接打开', () => {
   assert.match(editorSource, /@open-node-link="openNodeLinkFromBadge"/)
   assert.match(editorSource, /openNodeLinkFromBadge/)
 })
+
+
+test('流程图支持结构校验入口', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const validationSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartValidation.js'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(editorSource, /key: 'validate'/)
+  assert.match(editorSource, /validateCurrentFlowchart/)
+  assert.match(validationSource, /validateFlowchartStructure/)
+  assert.match(validationSource, /floating-nodes/)
+  assert.match(langSource, /"validateStructure"/)
+  assert.match(langSource, /"validateFloatingNodes"/)
+})
+
+test('流程图模板关键节点带有默认备注说明', () => {
+  const templateSource = fs.readFileSync(
+    path.resolve('src/services/flowchart/parts/10-templates.js'),
+    'utf8'
+  )
+  assert.match(templateSource, /note: '流程起点：明确触发条件'/)
+  assert.match(templateSource, /note: '流程终点：确认完成标准'/)
+})

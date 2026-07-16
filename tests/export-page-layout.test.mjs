@@ -222,3 +222,24 @@ test('流程图导出支持 PDF 与 JSON', () => {
   assert.match(exportPageSource, /exportType === 'pdf'/)
   assert.match(exportPageSource, /exportType === 'json'/)
 })
+
+
+test('流程图 PDF 导出支持纸张、适配与页边距选项', () => {
+  const exportStateSource = fs.readFileSync(
+    path.resolve('src/services/exportState.js'),
+    'utf8'
+  )
+  const exportPageSource = fs.readFileSync(
+    path.resolve('src/pages/Export/Index.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(exportStateSource, /pdfPageSize/)
+  assert.match(exportStateSource, /pdfFitMode/)
+  assert.match(exportStateSource, /pdfMargin/)
+  assert.match(exportPageSource, /showFlowchartPdfOptions/)
+  assert.match(exportPageSource, /exportState.pdfPageSize/)
+  assert.match(exportPageSource, /paperSizes/)
+  assert.match(langSource, /"pdfPageSize"/)
+  assert.match(langSource, /"pdfMargin"/)
+})

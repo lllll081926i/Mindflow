@@ -398,6 +398,10 @@ import {
   summarizeFlowchartStructure
 } from './flowchartStructurePreview'
 import {
+  validateFlowchartStructure,
+  formatFlowchartValidationMessage
+} from './flowchartValidation'
+import {
   FLOWCHART_ALIGNMENT_THRESHOLD,
   FLOWCHART_STRAIGHT_EDGE_SNAP_THRESHOLD,
   cloneJson
@@ -754,6 +758,7 @@ export default {
         selectionEmpty: this.$t('flowchart.selectionEmpty'),
         fitView: this.$t('flowchart.fitView'),
         tidyLayout: this.$t('flowchart.tidyLayout'),
+        validateStructure: this.$t('flowchart.validateStructure'),
         templateApproval: this.$t('flowchart.templateApproval'),
         templateRelease: this.$t('flowchart.templateRelease'),
         templateTicket: this.$t('flowchart.templateTicket'),
@@ -878,6 +883,7 @@ export default {
         { key: 'fitCanvas', label: this.$t('toolbar.fitCanvasAction'), shortcut: 'Ctrl 0', action: () => this.fitCanvasToView() },
         { key: 'resetViewport', label: this.$t('flowchart.fitView'), shortcut: 'Ctrl 1', action: () => this.resetViewport() },
         { key: 'tidyLayout', label: this.$t('flowchart.tidyLayout'), action: () => this.tidyFlowchartLayout() },
+        { key: 'validate', label: this.$t('flowchart.validateStructure'), action: () => this.validateCurrentFlowchart() },
         { key: 'undo', label: this.$t('toolbar.undo'), shortcut: 'Ctrl Z', action: () => this.undoFlowchartChange() },
         { key: 'redo', label: this.$t('toolbar.redo'), shortcut: 'Ctrl Y', action: () => this.redoFlowchartChange() },
         { key: 'addStart', label: this.$t('flowchart.addStart'), action: () => this.addNodeByType({ type: 'start', autoConnect: true }) },
@@ -1017,6 +1023,30 @@ export default {
     this.pendingCanvasPanPoint = null
   },
   methods: {
+    validateCurrentFlowchart() {
+      const result = validateFlowchartStructure(this.flowchartData)
+      const message = formatFlowchartValidationMessage(result, this.$t.bind(this))
+      if (!result.issues.length) {
+        this.$message.success(message)
+        return result
+      }
+      const floating = result.issues.find(item => item.code === 'floating-nodes')
+      if (floating?.nodeIds?.length) {
+        const nodeId = floating.nodeIds[0]
+        this.selectedNodeIds = [nodeId]
+        this.selectedEdgeId = ''
+        const node = this.flowchartNodeLookup.get(nodeId)
+        if (node && typeof this.centerViewportAt === 'function') {
+          this.centerViewportAt({
+            x: Number(node.x || 0) + Number(node.width || 0) / 2,
+            y: Number(node.y || 0) + Number(node.height || 0) / 2
+          })
+        }
+      }
+      if (result.ok) this.$message.warning(message)
+      else this.$message.error(message)
+      return result
+    },
     openCommandPalette() {
       this.commandPaletteVisible = true
       this.flowchartSearchVisible = false

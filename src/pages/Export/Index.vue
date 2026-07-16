@@ -107,6 +107,32 @@
                   <el-switch v-model="exportState.withBackground" />
                 </div>
 
+                <div class="toggleRow stacked" v-if="showFlowchartPdfOptions">
+                  <span>{{ $t('exportPage.pdfPageSize') }}</span>
+                  <el-select v-model="exportState.pdfPageSize" style="width: 160px">
+                    <el-option :label="$t('exportPage.pdfPageAuto')" value="auto" />
+                    <el-option label="A4" value="a4" />
+                    <el-option label="Letter" value="letter" />
+                  </el-select>
+                </div>
+
+                <div class="toggleRow stacked" v-if="showFlowchartPdfOptions">
+                  <span>{{ $t('exportPage.pdfFitMode') }}</span>
+                  <el-select v-model="exportState.pdfFitMode" style="width: 160px">
+                    <el-option :label="$t('exportPage.pdfFitContain')" value="fit" />
+                    <el-option :label="$t('exportPage.pdfFitStretch')" value="stretch" />
+                  </el-select>
+                </div>
+
+                <div class="toggleRow stacked" v-if="showFlowchartPdfOptions">
+                  <span>{{ $t('exportPage.pdfMargin') }}</span>
+                  <el-input-number
+                    v-model="exportState.pdfMargin"
+                    :min="0"
+                    :max="120"
+                  />
+                </div>
+
                 <div class="toggleRow" v-if="showFitBgOption">
                   <span>{{ $t('exportPage.fitBg') }}</span>
                   <el-switch v-model="exportState.isFitBg" />
@@ -442,6 +468,9 @@ export default {
         this.documentMode === 'flowchart' &&
         ['png', 'svg'].includes(this.exportState.exportType)
       )
+    },
+    showFlowchartPdfOptions() {
+      return this.documentMode === 'flowchart' && this.exportState.exportType === 'pdf'
     },
     showFitBgOption() {
       return (
@@ -910,12 +939,39 @@ export default {
       const pngBytes = new Uint8Array(await blob.arrayBuffer())
       const pdfDoc = await PDFDocument.create()
       const pngImage = await pdfDoc.embedPng(pngBytes)
-      const page = pdfDoc.addPage([pngImage.width, pngImage.height])
+      const pageSize = String(this.exportState.pdfPageSize || 'auto')
+      const fitMode = String(this.exportState.pdfFitMode || 'fit')
+      const margin = Math.max(0, Number(this.exportState.pdfMargin || 0))
+      const paperSizes = {
+        a4: { width: 595.28, height: 841.89 },
+        letter: { width: 612, height: 792 }
+      }
+      let pageWidth = pngImage.width
+      let pageHeight = pngImage.height
+      if (paperSizes[pageSize]) {
+        pageWidth = paperSizes[pageSize].width
+        pageHeight = paperSizes[pageSize].height
+      }
+      const page = pdfDoc.addPage([pageWidth, pageHeight])
+      const contentWidth = Math.max(1, pageWidth - margin * 2)
+      const contentHeight = Math.max(1, pageHeight - margin * 2)
+      let drawWidth = contentWidth
+      let drawHeight = contentHeight
+      if (fitMode === 'fit' || pageSize === 'auto') {
+        const scale = Math.min(
+          contentWidth / Math.max(1, pngImage.width),
+          contentHeight / Math.max(1, pngImage.height)
+        )
+        drawWidth = pngImage.width * scale
+        drawHeight = pngImage.height * scale
+      }
+      const x = margin + (contentWidth - drawWidth) / 2
+      const y = margin + (contentHeight - drawHeight) / 2
       page.drawImage(pngImage, {
-        x: 0,
-        y: 0,
-        width: pngImage.width,
-        height: pngImage.height
+        x,
+        y,
+        width: drawWidth,
+        height: drawHeight
       })
       const pdfBytes = await pdfDoc.save()
       await platform.saveBinaryFileAs({
@@ -923,7 +979,7 @@ export default {
         content: pdfBytes,
         defaultPath: this.currentDocument?.path || '',
         extension: 'pdf',
-        name: this.$t('exportPage.fileTypePdf') || 'PDF',
+        name: this.$t('exportPage.fileTypePdf'),
         mimeType: 'application/pdf'
       })
     },

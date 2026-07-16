@@ -53,10 +53,7 @@ const FLOWCHART_TEMPLATES = {
   blank: title => ({
     title,
     nodes: [
-      createFlowchartNode({
-        id: 'node-start',
-        type: 'start',
-        text: '开始',
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '开始', note: '流程起点：明确触发条件',
         x: 120,
         y: 120,
         width: 140,
@@ -69,10 +66,7 @@ const FLOWCHART_TEMPLATES = {
         x: 120,
         y: 236
       }),
-      createFlowchartNode({
-        id: 'node-end',
-        type: 'end',
-        text: '结束',
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '结束', note: '流程终点：确认完成标准',
         x: 120,
         y: 352,
         width: 140,
@@ -95,17 +89,11 @@ const FLOWCHART_TEMPLATES = {
   approval: title => ({
     title,
     nodes: [
-      createFlowchartNode({
-        id: 'node-start',
-        type: 'start',
-        text: '提交申请',
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '提交申请', note: '流程起点：明确触发条件',
         x: 120,
         y: 120
       }),
-      createFlowchartNode({
-        id: 'node-review',
-        type: 'decision',
-        text: '审批通过？',
+      createFlowchartNode({ id: 'node-review', type: 'decision', text: '审批通过？', note: '决策点：记录判断依据与审批标准',
         x: 120,
         y: 240,
         width: 168,
@@ -125,10 +113,7 @@ const FLOWCHART_TEMPLATES = {
         x: 120,
         y: 392
       }),
-      createFlowchartNode({
-        id: 'node-end',
-        type: 'end',
-        text: '流程完成',
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '流程完成', note: '流程终点：确认完成标准',
         x: 360,
         y: 392
       })
@@ -161,10 +146,7 @@ const FLOWCHART_TEMPLATES = {
   troubleshooting: title => ({
     title,
     nodes: [
-      createFlowchartNode({
-        id: 'node-start',
-        type: 'start',
-        text: '发现问题',
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '发现问题', note: '流程起点：明确触发条件',
         x: 120,
         y: 120
       }),
@@ -198,10 +180,7 @@ const FLOWCHART_TEMPLATES = {
         x: 120,
         y: 516
       }),
-      createFlowchartNode({
-        id: 'node-end',
-        type: 'end',
-        text: '验证完成',
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '验证完成', note: '流程终点：确认完成标准',
         x: 360,
         y: 516
       })
@@ -245,10 +224,7 @@ const FLOWCHART_TEMPLATES = {
   release: title => ({
     title,
     nodes: [
-      createFlowchartNode({
-        id: 'node-start',
-        type: 'start',
-        text: '开发完成',
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '开发完成', note: '流程起点：明确触发条件',
         x: 120,
         y: 120
       }),
@@ -282,10 +258,7 @@ const FLOWCHART_TEMPLATES = {
         x: 120,
         y: 516
       }),
-      createFlowchartNode({
-        id: 'node-end',
-        type: 'end',
-        text: '上线完成',
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '上线完成', note: '流程终点：确认完成标准',
         x: 380,
         y: 516
       })
@@ -328,10 +301,7 @@ const FLOWCHART_TEMPLATES = {
   ticket: title => ({
     title,
     nodes: [
-      createFlowchartNode({
-        id: 'node-start',
-        type: 'start',
-        text: '收到工单',
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '收到工单', note: '流程起点：明确触发条件',
         x: 120,
         y: 120
       }),
@@ -365,10 +335,7 @@ const FLOWCHART_TEMPLATES = {
         x: 380,
         y: 500
       }),
-      createFlowchartNode({
-        id: 'node-end',
-        type: 'end',
-        text: '关闭工单',
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '关闭工单', note: '流程终点：确认完成标准',
         x: 380,
         y: 620
       })
@@ -411,10 +378,7 @@ const FLOWCHART_TEMPLATES = {
   onboarding: title => ({
     title,
     nodes: [
-      createFlowchartNode({
-        id: 'node-start',
-        type: 'start',
-        text: '发起入职',
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '发起入职', note: '流程起点：明确触发条件',
         x: 120,
         y: 120
       }),
@@ -448,10 +412,7 @@ const FLOWCHART_TEMPLATES = {
         x: 380,
         y: 360
       }),
-      createFlowchartNode({
-        id: 'node-end',
-        type: 'end',
-        text: '完成入职',
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '完成入职', note: '流程终点：确认完成标准',
         x: 380,
         y: 516
       })
@@ -494,13 +455,13 @@ const FLOWCHART_TEMPLATES = {
   customerJourney: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-start', type: 'start', text: '用户进入', x: 120, y: 120 }),
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '用户进入', note: '流程起点：明确触发条件', x: 120, y: 120 }),
       createFlowchartNode({ id: 'node-touch', type: 'input', text: '触达入口', x: 120, y: 236 }),
       createFlowchartNode({ id: 'node-need', type: 'decision', text: '需求明确？', x: 120, y: 360, width: 168, height: 92 }),
       createFlowchartNode({ id: 'node-guide', type: 'process', text: '引导选择', x: 120, y: 516 }),
       createFlowchartNode({ id: 'node-action', type: 'process', text: '完成关键动作', x: 380, y: 360 }),
       createFlowchartNode({ id: 'node-feedback', type: 'input', text: '收集反馈', x: 380, y: 500 }),
-      createFlowchartNode({ id: 'node-end', type: 'end', text: '留存跟进', x: 380, y: 620 })
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '留存跟进', note: '流程终点：确认完成标准', x: 380, y: 620 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-start-touch', source: 'node-start', target: 'node-touch' }),
@@ -515,13 +476,13 @@ const FLOWCHART_TEMPLATES = {
   incident: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-start', type: 'start', text: '告警触发', x: 120, y: 120 }),
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '告警触发', note: '流程起点：明确触发条件', x: 120, y: 120 }),
       createFlowchartNode({ id: 'node-triage', type: 'process', text: '初步分级', x: 120, y: 236 }),
       createFlowchartNode({ id: 'node-major', type: 'decision', text: '重大故障？', x: 120, y: 360, width: 168, height: 92 }),
       createFlowchartNode({ id: 'node-warroom', type: 'process', text: '建立响应群', x: 380, y: 360 }),
       createFlowchartNode({ id: 'node-fix', type: 'process', text: '止血修复', x: 380, y: 500 }),
       createFlowchartNode({ id: 'node-normal', type: 'process', text: '常规处理', x: 120, y: 516 }),
-      createFlowchartNode({ id: 'node-review', type: 'input', text: '复盘记录', x: 380, y: 640 })
+      createFlowchartNode({ id: 'node-review', type: 'input', text: '复盘记录', note: '决策点：记录判断依据与审批标准', x: 380, y: 640 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-start-triage', source: 'node-start', target: 'node-triage' }),
@@ -542,7 +503,7 @@ const FLOWCHART_TEMPLATES = {
       createFlowchartNode({ id: 'node-clean', type: 'process', text: '清洗转换', x: 380, y: 360 }),
       createFlowchartNode({ id: 'node-repair', type: 'process', text: '修复重跑', x: 120, y: 516 }),
       createFlowchartNode({ id: 'node-serve', type: 'process', text: '服务发布', x: 380, y: 500 }),
-      createFlowchartNode({ id: 'node-end', type: 'end', text: '监控告警', x: 380, y: 620 })
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '监控告警', note: '流程终点：确认完成标准', x: 380, y: 620 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-source-ingest', source: 'node-source', target: 'node-ingest' }),
@@ -557,13 +518,13 @@ const FLOWCHART_TEMPLATES = {
   projectPlan: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-start', type: 'start', text: '立项', x: 120, y: 120 }),
-      createFlowchartNode({ id: 'node-scope', type: 'input', text: '确认范围', x: 120, y: 236 }),
+      createFlowchartNode({ id: 'node-start', type: 'start', text: '立项', note: '流程起点：明确触发条件', x: 120, y: 120 }),
+      createFlowchartNode({ id: 'node-scope', type: 'input', text: '确认范围', note: '先澄清范围，再进入方案/计划', x: 120, y: 236 }),
       createFlowchartNode({ id: 'node-plan', type: 'process', text: '拆解计划', x: 120, y: 352 }),
-      createFlowchartNode({ id: 'node-risk', type: 'decision', text: '风险可控？', x: 120, y: 476, width: 168, height: 92 }),
+      createFlowchartNode({ id: 'node-risk', type: 'decision', text: '风险可控？', note: '风险决策：明确可控标准', x: 120, y: 476, width: 168, height: 92 }),
       createFlowchartNode({ id: 'node-execute', type: 'process', text: '执行交付', x: 380, y: 476 }),
       createFlowchartNode({ id: 'node-adjust', type: 'process', text: '调整方案', x: 120, y: 636 }),
-      createFlowchartNode({ id: 'node-end', type: 'end', text: '验收归档', x: 380, y: 636 })
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '验收归档', note: '流程终点：确认完成标准', x: 380, y: 636 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-start-scope', source: 'node-start', target: 'node-scope' }),
@@ -579,14 +540,14 @@ const FLOWCHART_TEMPLATES = {
   crossFunctionalApproval: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-request', type: 'start', text: '提交需求', x: 120, y: 100 }),
+      createFlowchartNode({ id: 'node-request', type: 'start', text: '提交需求', note: '跨部门需求入口，补充背景与优先级', x: 120, y: 100 }),
       createFlowchartNode({ id: 'node-product', type: 'process', text: '产品评估', x: 120, y: 250 }),
       createFlowchartNode({ id: 'node-design', type: 'process', text: '设计确认', x: 420, y: 250 }),
       createFlowchartNode({ id: 'node-tech', type: 'process', text: '技术评审', x: 720, y: 250 }),
-      createFlowchartNode({ id: 'node-approve', type: 'decision', text: '跨部门通过？', x: 420, y: 410, width: 188, height: 92 }),
+      createFlowchartNode({ id: 'node-approve', type: 'decision', text: '跨部门通过？', note: '审批节点：补充审批人与时限', x: 420, y: 410, width: 188, height: 92 }),
       createFlowchartNode({ id: 'node-rework', type: 'process', text: '补充材料', x: 120, y: 590 }),
       createFlowchartNode({ id: 'node-schedule', type: 'process', text: '排期执行', x: 720, y: 590 }),
-      createFlowchartNode({ id: 'node-end', type: 'end', text: '进入交付', x: 720, y: 740 })
+      createFlowchartNode({ id: 'node-end', type: 'end', text: '进入交付', note: '流程终点：确认完成标准', x: 720, y: 740 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-request-product', source: 'node-request', target: 'node-product' }),
@@ -604,9 +565,9 @@ const FLOWCHART_TEMPLATES = {
   supportEscalation: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-ticket', type: 'start', text: '收到故障工单', x: 120, y: 100 }),
+      createFlowchartNode({ id: 'node-ticket', type: 'start', text: '收到故障工单', note: '记录故障来源与紧急程度', x: 120, y: 100 }),
       createFlowchartNode({ id: 'node-l1', type: 'process', text: 'L1 初步排查', x: 120, y: 250 }),
-      createFlowchartNode({ id: 'node-severity', type: 'decision', text: '影响范围升级？', x: 120, y: 410, width: 188, height: 92 }),
+      createFlowchartNode({ id: 'node-severity', type: 'decision', text: '影响范围升级？', note: '升级前同步影响面与客户预期', x: 120, y: 410, width: 188, height: 92 }),
       createFlowchartNode({ id: 'node-l2', type: 'process', text: 'L2 深入诊断', x: 420, y: 410 }),
       createFlowchartNode({ id: 'node-comm', type: 'input', text: '同步客户状态', x: 740, y: 410 }),
       createFlowchartNode({ id: 'node-warroom', type: 'process', text: '启动应急响应', x: 420, y: 590 }),
@@ -699,14 +660,14 @@ const FLOWCHART_TEMPLATES = {
   salesPipeline: title => ({
     title,
     nodes: [
-      createFlowchartNode({ id: 'node-lead', type: 'start', text: '线索进入', x: 120, y: 100 }),
+      createFlowchartNode({ id: 'node-lead', type: 'start', text: '线索进入', note: '线索来源与渠道标记', x: 120, y: 100 }),
       createFlowchartNode({ id: 'node-qualify', type: 'process', text: '线索筛选', x: 120, y: 250 }),
       createFlowchartNode({ id: 'node-demo', type: 'process', text: '方案演示', x: 420, y: 250 }),
-      createFlowchartNode({ id: 'node-intent', type: 'decision', text: '客户有明确意向？', x: 740, y: 238, width: 196, height: 92 }),
+      createFlowchartNode({ id: 'node-intent', type: 'decision', text: '客户有明确意向？', note: '意向判断决定报价或继续培育', x: 740, y: 238, width: 196, height: 92 }),
       createFlowchartNode({ id: 'node-proposal', type: 'process', text: '报价提案', x: 740, y: 430 }),
       createFlowchartNode({ id: 'node-follow', type: 'process', text: '继续跟进', x: 420, y: 590 }),
       createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同签署', x: 1020, y: 430 }),
-      createFlowchartNode({ id: 'node-close', type: 'end', text: '成交回款', x: 1020, y: 590 })
+      createFlowchartNode({ id: 'node-close', type: 'end', text: '成交回款', note: '确认回款与交接完成', x: 1020, y: 590 })
     ],
     edges: [
       createFlowchartEdge({ id: 'edge-lead-qualify', source: 'node-lead', target: 'node-qualify' }),
@@ -725,10 +686,10 @@ const FLOWCHART_TEMPLATES = {
     nodes: [
       createFlowchartNode({ id: 'node-demand', type: 'start', text: '需求进入', x: 100, y: 110 }),
       createFlowchartNode({ id: 'node-triage', type: 'process', text: '需求分级', x: 360, y: 110 }),
-      createFlowchartNode({ id: 'node-scope', type: 'decision', text: '范围清晰？', x: 620, y: 98, width: 188, height: 92 }),
+      createFlowchartNode({ id: 'node-scope', type: 'decision', text: '范围清晰？', note: '先澄清范围，再进入方案/计划', x: 620, y: 98, width: 188, height: 92 }),
       createFlowchartNode({ id: 'node-solution', type: 'process', text: '方案设计', x: 900, y: 110 }),
       createFlowchartNode({ id: 'node-estimate', type: 'process', text: '成本评估', x: 1180, y: 110 }),
-      createFlowchartNode({ id: 'node-approve', type: 'decision', text: '审批通过？', x: 1460, y: 98, width: 188, height: 92 }),
+      createFlowchartNode({ id: 'node-approve', type: 'decision', text: '审批通过？', note: '审批节点：补充审批人与时限', x: 1460, y: 98, width: 188, height: 92 }),
 
       createFlowchartNode({ id: 'node-contract', type: 'process', text: '合同确认', x: 100, y: 300 }),
       createFlowchartNode({ id: 'node-resource', type: 'process', text: '资源排期', x: 360, y: 300 }),
@@ -748,7 +709,7 @@ const FLOWCHART_TEMPLATES = {
       createFlowchartNode({ id: 'node-support', type: 'process', text: '问题响应', x: 360, y: 680 }),
       createFlowchartNode({ id: 'node-stabilize', type: 'decision', text: '运行稳定？', x: 620, y: 668, width: 188, height: 92 }),
       createFlowchartNode({ id: 'node-handover', type: 'process', text: '运营交接', x: 900, y: 680 }),
-      createFlowchartNode({ id: 'node-review', type: 'process', text: '复盘沉淀', x: 1180, y: 680 }),
+      createFlowchartNode({ id: 'node-review', type: 'process', text: '复盘沉淀', note: '决策点：记录判断依据与审批标准', x: 1180, y: 680 }),
       createFlowchartNode({ id: 'node-close-delivery', type: 'end', text: '项目关闭', x: 1460, y: 680 })
     ],
     edges: [
