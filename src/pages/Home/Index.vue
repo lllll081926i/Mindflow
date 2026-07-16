@@ -122,6 +122,24 @@
               type="button"
               class="starterCard"
               :disabled="busy"
+              @click="createMindMapWithLayout('mindMap')"
+            >
+              <strong>{{ $t('home.starterMindMapOrg') }}</strong>
+              <span>{{ $t('home.starterMindMapOrgDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
+              @click="createMindMapWithLayout('organizationStructure')"
+            >
+              <strong>{{ $t('home.starterMindMapTree') }}</strong>
+              <span>{{ $t('home.starterMindMapTreeDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
             >
               <strong>{{ $t('home.starterFlowApproval') }}</strong>
@@ -447,9 +465,19 @@ export default {
       })
     },
 
-    createBlankProjectContent() {
+    createBlankProjectContent(layout) {
       const themeTemplate = getPreferredMindMapThemeValue(!!this.isDark)
-      return createDefaultMindMapData('思维导图', themeTemplate)
+      return createDefaultMindMapData('思维导图', themeTemplate, layout)
+    },
+
+    async createMindMapWithLayout(layout = 'logicalStructure') {
+      await this.runWorkspaceAction(async () => {
+        const { createWorkspaceLocalFile } = await loadWorkspaceActions()
+        return createWorkspaceLocalFile({
+          router: this.$router,
+          content: this.createBlankProjectContent(layout)
+        })
+      })
     },
 
     async toggleAppearance() {

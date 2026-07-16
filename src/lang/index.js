@@ -812,6 +812,10 @@ const zh = {
     "starterTitle": "快速开始",
     "starterMindMapBlank": "空白思维导图",
     "starterMindMapBlankDesc": "从一张干净导图开始整理思路",
+    "starterMindMapOrg": "脑图结构",
+    "starterMindMapOrgDesc": "从左右发散结构快速开始",
+    "starterMindMapTree": "组织架构图",
+    "starterMindMapTreeDesc": "从上下层级结构快速开始",
     "starterFlowApproval": "审批流程图",
     "starterFlowApprovalDesc": "适合审批、会签和流转场景",
     "starterFlowRelease": "发布流程图",
@@ -884,6 +888,7 @@ const zh = {
     "fileTypeJpg": "JPG 文件",
     "fileTypePng": "PNG 文件",
     "fileTypeSvg": "SVG 文件",
+    "fileTypeJson": "JSON 文件",
     "statusDocumentLabel": "来源文档",
     "statusTargetLabel": "导出目标",
     "fallbackFormat": {

@@ -1854,3 +1854,21 @@ test('流程图挂载多选对齐工具条并支持完整对齐操作', () => {
   assert.match(nodeSource, /alignSelectedNodesCenterY\(/)
   assert.match(nodeSource, /alignSelectedNodesTop\(/)
 })
+
+
+test('流程图命令面板覆盖对齐分布与快捷键帮助', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  assert.match(editorSource, /key: 'alignLeft'/)
+  assert.match(editorSource, /key: 'distributeH'/)
+  assert.match(editorSource, /key: 'shortcuts'/)
+  assert.match(editorSource, /openFlowchartShortcuts/)
+  assert.match(editorSource, /flowchartShortcutPanel/)
+  assert.match(selectionSource, /openFlowchartShortcuts\(\)/)
+})

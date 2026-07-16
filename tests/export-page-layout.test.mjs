@@ -189,3 +189,19 @@ test('导出保存对话框文件类型名称使用国际化文案', () => {
   assert.match(source, /\$t\('exportPage\.fileTypePng'\)/)
   assert.match(source, /\$t\('exportPage\.fileTypeSvg'\)/)
 })
+
+
+test('流程图导出支持 JSON 数据格式', () => {
+  const exportStateSource = fs.readFileSync(
+    path.resolve('src/services/exportState.js'),
+    'utf8'
+  )
+  const exportPageSource = fs.readFileSync(
+    path.resolve('src/pages/Export/Index.vue'),
+    'utf8'
+  )
+  assert.match(exportStateSource, /type: 'json'/)
+  assert.match(exportStateSource, /导出可再次打开的流程图数据/)
+  assert.match(exportPageSource, /exportType === 'json'/)
+  assert.match(exportPageSource, /serializeStoredDocumentContent/)
+})

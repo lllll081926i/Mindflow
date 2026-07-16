@@ -144,7 +144,8 @@
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import {
+  mapState } from 'pinia'
 import { getConfig, getData } from '@/api'
 import platform, { ensureBootstrapDocumentState, getBootstrapState } from '@/platform'
 import { getCurrentFileRef, getLastDirectory } from '@/services/documentSession'
@@ -152,7 +153,8 @@ import {
   DEFAULT_FLOWCHART_TITLE,
   buildFlowchartSvgMarkup,
   createDefaultFlowchartData,
-  getFlowchartExportBounds
+  getFlowchartExportBounds,
+  serializeStoredDocumentContent
 } from '@/services/flowchartDocument'
 import { buildMindMapHtmlDocument, sanitizeSvgMarkup } from '@/services/htmlExport'
 import { createWorkspaceTemplateData } from '@/services/workspaceActions'
@@ -912,6 +914,23 @@ export default {
           extension: 'svg',
           name: this.$t('exportPage.fileTypeSvg'),
           mimeType: 'image/svg+xml;charset=utf-8'
+        })
+        return
+      }
+      if (exportType === 'json') {
+        const content = serializeStoredDocumentContent({
+          documentMode: 'flowchart',
+          data: this.getFlowchartData(),
+          flowchartConfig: this.getFlowchartConfig(),
+          isFullDataFile: true
+        })
+        await platform.saveTextFileAs({
+          suggestedName: safeFileName,
+          content,
+          defaultPath: this.currentDocument?.path || '',
+          extension: 'json',
+          name: this.$t('exportPage.fileTypeJson'),
+          mimeType: 'application/json;charset=utf-8'
         })
         return
       }

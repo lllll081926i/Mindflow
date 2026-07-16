@@ -23,7 +23,8 @@ import {
   numberLevelList as numberLevelListZh,
   linearGradientDirList as linearGradientDirListZh,
   alignList as alignListZh,
-  layoutGroupList as layoutGroupListZh
+  layoutGroupList as layoutGroupListZh,
+  flowchartShortcutKeyList as flowchartShortcutKeyListZh
 } from './zh'
 
 const fontFamilyList = {
@@ -100,6 +101,10 @@ const layoutGroupList = {
   zh: layoutGroupListZh
 }
 
+const flowchartShortcutKeyList = {
+  zh: flowchartShortcutKeyListZh
+}
+
 export {
   fontSizeList,
   borderWidthList,
@@ -126,5 +131,6 @@ export {
   numberLevelList,
   linearGradientDirList,
   alignList,
-  layoutGroupList
+  layoutGroupList,
+  flowchartShortcutKeyList
 }

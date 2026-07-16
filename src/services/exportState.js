@@ -47,6 +47,11 @@ const flowchartFormats = [
     name: 'PNG',
     type: 'png',
     desc: '导出流程图图片'
+  },
+  {
+    name: 'JSON',
+    type: 'json',
+    desc: '导出可再次打开的流程图数据'
   }
 ]
 

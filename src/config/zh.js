@@ -751,3 +751,31 @@ export const layoutGroupList = [
     list: ['fishbone']
   }
 ]
+
+
+export const flowchartShortcutKeyList = [
+  {
+    type: '画布操作',
+    list: [
+      { name: '命令面板', value: ctrl + ' + K' },
+      { name: '搜索节点', value: ctrl + ' + F' },
+      { name: '保存', value: ctrl + ' + S' },
+      { name: '适应画布', value: ctrl + ' + 0' },
+      { name: '重置视口', value: ctrl + ' + 1' },
+      { name: '撤销', value: ctrl + ' + Z' },
+      { name: '重做', value: ctrl + ' + Y' }
+    ]
+  },
+  {
+    type: '节点操作',
+    list: [
+      { name: '编辑节点文字', value: 'Enter | F2' },
+      { name: '删除所选', value: 'Delete | Backspace' },
+      { name: '全选节点', value: ctrl + ' + A' },
+      { name: '复制节点', value: ctrl + ' + C' },
+      { name: '粘贴节点', value: ctrl + ' + V' },
+      { name: '复制一份', value: ctrl + ' + D' },
+      { name: '微调节点', value: '方向键' }
+    ]
+  }
+]

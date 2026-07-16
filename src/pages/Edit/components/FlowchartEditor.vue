@@ -77,6 +77,32 @@
     </div>
 
     <div
+      v-if="flowchartShortcutVisible"
+      class="flowchartShortcutOverlay"
+      @mousedown.self="closeFlowchartShortcuts"
+    >
+      <section class="flowchartShortcutPanel" role="dialog" aria-modal="true">
+        <div class="flowchartShortcutHeader">
+          <strong>{{ $t('shortcutKey.title') }}</strong>
+          <button type="button" class="flowchartShortcutClose" @click="closeFlowchartShortcuts">x</button>
+        </div>
+        <div class="flowchartShortcutBody">
+          <div v-for="group in flowchartShortcutGroups" :key="group.type" class="flowchartShortcutGroup">
+            <div class="flowchartShortcutGroupTitle">{{ group.type }}</div>
+            <div
+              v-for="item in group.list"
+              :key="item.name + item.value"
+              class="flowchartShortcutItem"
+            >
+              <span class="flowchartShortcutName">{{ item.name }}</span>
+              <code class="flowchartShortcutValue">{{ item.value }}</code>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div
       v-if="flowchartAiPreviewVisible"
       class="flowchartAiPreviewOverlay"
       @mousedown.self="discardFlowchartAiPreview"
@@ -315,6 +341,7 @@
 
 <script>
 import { mapState } from 'pinia'
+import { flowchartShortcutKeyList } from '@/config'
 import {
   getBootstrapState,
   ensureBootstrapDocumentState
@@ -450,6 +477,12 @@ export default {
       aiBuffer: '',
       isGenerating: false,
       pendingFlowchartAiResult: null,
+      flowchartAiPreviewVisible: false,
+      commandPaletteVisible: false,
+      flowchartSearchVisible: false,
+      flowchartSearchKeyword: '',
+      flowchartSearchActiveIndex: 0,
+      flowchartShortcutVisible: false,
       flowchartAiConfigDialogVisible: false,
       flowchartAiClient: null,
       flowchartAiRequestToken: 0
@@ -741,6 +774,7 @@ export default {
         aiGenerate: this.$t('flowchart.aiGenerateShort'),
         commandPalette: this.$t('toolbar.commandPaletteAction'),
         search: this.$t('toolbar.searchAction'),
+        shortcuts: this.$t('shortcutKey.title'),
         exportCenter: this.$t('toolbar.exportCenter'),
         convertMindMap: this.$t('flowchart.convertMindMapShort'),
         tidyLayout: this.$t('flowchart.tidyLayout'),
@@ -796,6 +830,9 @@ export default {
       }
       return this.$t('toolbar.statusNoFile')
     },
+    flowchartShortcutGroups() {
+      return flowchartShortcutKeyList[this.$i18n.locale] || flowchartShortcutKeyList.zh || []
+    },
     flowchartSearchResults() {
       const keyword = String(this.flowchartSearchKeyword || '')
         .trim()
@@ -830,6 +867,7 @@ export default {
         { key: 'save', label: this.$t('flowchart.save'), shortcut: 'Ctrl S', action: () => this.saveCurrentFile() },
         { key: 'saveAs', label: this.$t('flowchart.saveAsShort'), action: () => this.saveAsFile() },
         { key: 'search', label: this.$t('toolbar.searchAction'), shortcut: 'Ctrl F', action: () => this.openFlowchartSearch() },
+        { key: 'shortcuts', label: this.$t('shortcutKey.title'), action: () => this.openFlowchartShortcuts() },
         { key: 'fitCanvas', label: this.$t('toolbar.fitCanvasAction'), shortcut: 'Ctrl 0', action: () => this.fitCanvasToView() },
         { key: 'resetViewport', label: this.$t('flowchart.fitView'), shortcut: 'Ctrl 1', action: () => this.resetViewport() },
         { key: 'tidyLayout', label: this.$t('flowchart.tidyLayout'), action: () => this.tidyFlowchartLayout() },
@@ -845,6 +883,16 @@ export default {
         { key: 'copy', label: this.$t('flowchart.copySelection'), shortcut: 'Ctrl C', disabled: !hasNodeSelection, action: () => this.copySelectedNodes() },
         { key: 'paste', label: this.$t('flowchart.pasteSelection'), shortcut: 'Ctrl V', action: () => this.pasteCopiedNodes() },
         { key: 'delete', label: this.$t('flowchart.delete'), shortcut: 'Delete', disabled: !hasSelection, action: () => this.removeSelection() },
+        { key: 'alignLeft', label: this.$t('flowchart.alignLeft'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesLeft() },
+        { key: 'alignCenterX', label: this.$t('flowchart.alignCenterX'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesCenterX() },
+        { key: 'alignRight', label: this.$t('flowchart.alignRight'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesRight() },
+        { key: 'alignTop', label: this.$t('flowchart.alignTop'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesTop() },
+        { key: 'alignCenterY', label: this.$t('flowchart.alignCenterY'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesCenterY() },
+        { key: 'alignBottom', label: this.$t('flowchart.alignBottom'), disabled: this.selectedNodeIds.length < 2, action: () => this.alignSelectedNodesBottom() },
+        { key: 'distributeH', label: this.$t('flowchart.distributeHorizontal'), disabled: this.selectedNodeIds.length < 3, action: () => this.distributeSelectedNodesHorizontally() },
+        { key: 'distributeV', label: this.$t('flowchart.distributeVertical'), disabled: this.selectedNodeIds.length < 3, action: () => this.distributeSelectedNodesVertically() },
+        { key: 'bringFront', label: this.$t('flowchart.arrangeFront'), disabled: this.selectedNodeIds.length < 1, action: () => this.bringSelectedNodesToFront() },
+        { key: 'sendBack', label: this.$t('flowchart.arrangeBack'), disabled: this.selectedNodeIds.length < 1, action: () => this.sendSelectedNodesToBack() },
         { key: 'importMindMap', label: this.$t('flowchart.importMindMapFileShort'), action: () => this.importMindMapFile() },
         { key: 'export', label: this.$t('toolbar.exportCenter'), action: () => this.openExportCenter() },
         { key: 'convertMindMap', label: this.$t('flowchart.convertMindMapShort'), action: () => this.convertCurrentMindMap() },
@@ -964,6 +1012,7 @@ export default {
     openCommandPalette() {
       this.commandPaletteVisible = true
       this.flowchartSearchVisible = false
+      this.flowchartShortcutVisible = false
     },
     closeCommandPalette() {
       this.commandPaletteVisible = false

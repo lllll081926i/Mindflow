@@ -107,6 +107,10 @@ export const flowchartSelectionMethods = {
         this.closeFlowchartSearch()
         return
       }
+      if (this.flowchartShortcutVisible) {
+        this.closeFlowchartShortcuts()
+        return
+      }
       if (this.flowchartAiPreviewVisible) {
         this.discardFlowchartAiPreview()
         return
@@ -126,6 +130,12 @@ export const flowchartSelectionMethods = {
     if (isMetaKey && event.key.toLowerCase() === 'f') {
       event.preventDefault()
       this.openFlowchartSearch()
+      return
+    }
+    if (isMetaKey && event.key === '/') {
+      event.preventDefault()
+      if (this.flowchartShortcutVisible) this.closeFlowchartShortcuts()
+      else this.openFlowchartShortcuts()
       return
     }
     if (isMetaKey && event.key.toLowerCase() === 's') {

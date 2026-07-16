@@ -1940,3 +1940,93 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+
+.flowchartShortcutOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1360;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 88px 16px 16px;
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.flowchartShortcutPanel {
+  width: min(520px, 100%);
+  max-height: min(620px, calc(100vh - 110px));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--flowchart-floating-bg);
+  border: 1px solid var(--flowchart-floating-border);
+  box-shadow: var(--flowchart-floating-shadow);
+  color: var(--flowchart-text);
+}
+
+.flowchartShortcutHeader {
+  height: 46px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--flowchart-toolbar-border);
+}
+
+.flowchartShortcutClose {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--flowchart-subtle-text);
+  cursor: pointer;
+}
+
+.flowchartShortcutClose:hover {
+  background: var(--flowchart-toolbar-btn-hover);
+  color: var(--flowchart-text);
+}
+
+.flowchartShortcutBody {
+  overflow: auto;
+  padding: 12px 14px 16px;
+}
+
+.flowchartShortcutGroup + .flowchartShortcutGroup {
+  margin-top: 14px;
+}
+
+.flowchartShortcutGroupTitle {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.flowchartShortcutItem {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.flowchartShortcutName {
+  color: var(--flowchart-subtle-text);
+  font-size: 13px;
+}
+
+.flowchartShortcutValue {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--flowchart-text);
+  font-size: 12px;
+}
+
+.flowchartEditor.isDark .flowchartShortcutValue {
+  background: rgba(255, 255, 255, 0.08);
+}
