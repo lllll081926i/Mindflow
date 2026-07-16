@@ -535,3 +535,11 @@ test('思维导图支持 Alt+R 切换彩虹线条', () => {
   assert.ok(toolbarSource.includes('toggleRainbowLines'))
   assert.ok(styleSource.includes('toggleRainbowLinesShortcut'))
 })
+
+
+test('思维导图支持 Alt+W 切换水印', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const settingSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Setting.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('toggleWatermark'))
+  assert.ok(settingSource.includes('toggleWatermarkShortcut'))
+})

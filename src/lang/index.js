@@ -71,6 +71,7 @@ const zh = {
     "isUseMomentum": "是否开启拖动画布的动量效果",
     "openBlankMode": "是否开启演示模式的填空功能",
     "watermark": "水印",
+    "hideWatermark": "已关闭水印",
     "showWatermark": "是否显示水印",
     "watermarkDefaultText": "水印文字",
     "onlyExport": "是否仅在导出时显示",

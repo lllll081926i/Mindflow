@@ -420,6 +420,11 @@ export const shortcutKeyList = [
         value: 'Alt + R'
       },
       {
+        icon: 'iconwatermark',
+        name: '切换水印',
+        value: 'Alt + W'
+      },
+      {
         icon: 'icongongshi',
         name: '插入公式',
         value: ctrl + ' + Shift + F'

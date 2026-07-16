@@ -1185,6 +1185,19 @@ export default {
         this.$bus.$emit('toggleRainbowLines')
         return
       }
+      // toggle watermark Alt+W
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'w'
+      ) {
+        event.preventDefault()
+        this.$bus.$emit('toggleWatermark')
+        return
+      }
       // priority/progress markers
       if (
         !isTypingTarget &&

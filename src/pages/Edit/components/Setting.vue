@@ -525,10 +525,14 @@ export default {
     }
   },
   created() {
+    this.$bus.$on('toggleWatermark', this.toggleWatermarkShortcut)
+    
     this.initLoacalConfig()
     this.$bus.$on('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
   },
   beforeUnmount() {
+    this.$bus.$off('toggleWatermark', this.toggleWatermarkShortcut)
+    
     this.$bus.$off('toggleOpenNodeRichText', this.onToggleOpenNodeRichText)
     clearTimeout(this.storeConfigTimer)
   },
@@ -610,6 +614,15 @@ export default {
     },
 
     // 切换显示水印与否
+    toggleWatermarkShortcut() {
+      this.watermarkConfig.show = !this.watermarkConfig.show
+      this.watermarkShowChange(this.watermarkConfig.show)
+      this.$message?.success?.(
+        this.watermarkConfig.show
+          ? this.$t('setting.showWatermark') || '已开启水印'
+          : this.$t('setting.hideWatermark') || '已关闭水印'
+      )
+    },
     watermarkShowChange(value) {
       if (value) {
         let text =
