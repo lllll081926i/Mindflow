@@ -190,6 +190,22 @@ export const flowchartSelectionMethods = {
       void this.importMindMapFile?.()
       return
     }
+    // flowchart page shortcuts
+    if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === 't') {
+      event.preventDefault()
+      void this.addFlowchartSheet?.(false)
+      return
+    }
+    if (isMetaKey && event.key === 'Tab') {
+      event.preventDefault()
+      const sheets = this.flowchartSheets || []
+      if (sheets.length > 1) {
+        const idx = sheets.findIndex(item => item.active)
+        const next = sheets[(idx + (event.shiftKey ? -1 : 1) + sheets.length) % sheets.length]
+        if (next) void this.switchFlowchartSheetById?.(next.id)
+      }
+      return
+    }
     if (isMetaKey && !event.shiftKey && event.key.toLowerCase() === '0') {
       event.preventDefault()
       this.fitCanvasToView()

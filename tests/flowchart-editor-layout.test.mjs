@@ -2592,3 +2592,15 @@ test('流程图提供多页面标签栏', () => {
   assert.ok(editorSource.includes('switchFlowchartSheetById'))
   assert.ok(serviceSource.includes('ensureFlowchartWorkbook'))
 })
+
+
+test('流程图支持 Ctrl+T/Tab 管理多页面', () => {
+  const selectionSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/flowchartEditorSelection.js'),
+    'utf8'
+  )
+  const configSource = fs.readFileSync(path.resolve('src/config/zh.js'), 'utf8')
+  assert.ok(selectionSource.includes('addFlowchartSheet'))
+  assert.ok(selectionSource.includes('switchFlowchartSheetById'))
+  assert.ok(configSource.includes('新建流程图页面') || selectionSource.includes("event.key.toLowerCase() === 't'"))
+})
