@@ -1,5 +1,15 @@
 <template>
-  <div class="homePage" :class="{ isDark: isDark }">
+  <div
+    class="homePage"
+    :class="{ isDark: isDark, isDragOver: isHomeDragOver }"
+    @dragenter.prevent="onHomeDragEnter"
+    @dragover.prevent="onHomeDragOver"
+    @dragleave.prevent="onHomeDragLeave"
+    @drop.prevent="onHomeDrop"
+  >
+    <div v-if="isHomeDragOver" class="homeDragMask">
+      <div class="homeDragTip">{{ $t('home.dragOpenTip') }}</div>
+    </div>
     <div class="workspaceShell">
       <aside class="workspaceSidebar">
         <div class="sidebarMeta">{{ $t('home.eyebrow') }}</div>
@@ -1020,6 +1030,7 @@ export default {
       recentStarterKeys: [],
       favoriteStarterKeys: [],
       busy: false,
+      isHomeDragOver: false,
       homeRefreshFrame: 0,
       homeRefreshTimer: 0,
       workspaceWarmupTimer: 0
@@ -1402,6 +1413,96 @@ export default {
       })
     },
 
+    onHomeDragEnter(event) {
+      if (!event?.dataTransfer?.types?.includes?.('Files')) return
+      this.isHomeDragOver = true
+    },
+    onHomeDragOver(event) {
+      if (!event?.dataTransfer?.types?.includes?.('Files')) return
+      this.isHomeDragOver = true
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
+    },
+    onHomeDragLeave(event) {
+      if (event?.currentTarget?.contains?.(event.relatedTarget)) return
+      this.isHomeDragOver = false
+    },
+    async onHomeDrop(event) {
+      this.isHomeDragOver = false
+      const file = event?.dataTransfer?.files?.[0]
+      if (!file) return
+      const name = String(file.name || '').toLowerCase()
+      if (/.xmind$/.test(name)) {
+        this.$message.info(this.$t('home.dragOpenXmindTip'))
+        return
+      }
+      if (!/.(smm|json|md|mm)$/.test(name)) {
+        this.$message.warning(this.$t('home.dragOpenUnsupported'))
+        return
+      }
+      if (this.busy) return
+      this.busy = true
+      try {
+        const content = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onerror = () => reject(new Error(this.$t('home.actionFailed')))
+          reader.onload = () => resolve(String(reader.result || ''))
+          reader.readAsText(file)
+        })
+        const workspaceActions = await loadWorkspaceActions()
+        const parsed = workspaceActions.normalizeOpenableDocumentContent(content, {
+          name: file.name
+        })
+        const { saveBootstrapStatePatch } = await import('@/platform')
+        if (parsed.documentMode === 'flowchart') {
+          await saveBootstrapStatePatch({
+            mindMapData: null,
+            mindMapConfig: null,
+            flowchartData: parsed.flowchartData || parsed.data,
+            flowchartConfig: parsed.flowchartConfig || null
+          })
+        } else {
+          await saveBootstrapStatePatch({
+            mindMapData: parsed.mindMapData || parsed.data,
+            mindMapConfig: parsed.mindMapConfig || null,
+            flowchartData: null,
+            flowchartConfig: null
+          })
+        }
+        const {
+          setCurrentFileRef,
+          markDocumentDirty,
+          flushDocumentSessionSync
+        } = await import('@/services/documentSession')
+        setCurrentFileRef(
+          {
+            path: '',
+            name: file.name,
+            documentMode: parsed.documentMode || 'mindmap',
+            isFullDataFile: true
+          },
+          'desktop'
+        )
+        markDocumentDirty(true)
+        await flushDocumentSessionSync()
+        const { useEditorStore } = await import('@/stores/editor')
+        useEditorStore().syncWorkspaceSession({
+          currentDocument: {
+            path: '',
+            name: file.name,
+            documentMode: parsed.documentMode || 'mindmap',
+            dirty: true,
+            isFullDataFile: true,
+            source: 'desktop'
+          }
+        })
+        await this.$router.push('/edit')
+      } catch (error) {
+        console.error('onHomeDrop failed', error)
+        this.$message.error(error?.message || this.$t('home.actionFailed'))
+      } finally {
+        this.busy = false
+      }
+    },
     async toggleAppearance() {
       if (this.busy) return
       try {
@@ -1416,6 +1517,28 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.homeDragMask {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  pointer-events: none;
+}
+.homeDragTip {
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.96);
+  color: #0f172a;
+  font-size: 14px;
+  box-shadow: 0 12px 32px rgba(15,23,42,0.18);
+}
+.homePage.isDark .homeDragTip {
+  background: rgba(24,28,34,0.96);
+  color: hsla(0,0%,100%,0.9);
+}
 .homePage {
   min-height: 100vh;
   background: #fff;

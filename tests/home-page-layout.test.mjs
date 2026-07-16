@@ -378,3 +378,13 @@ test('首页与模板中心收藏按钮具备可访问状态', () => {
   assert.match(templatesSource, /aria-pressed/)
   assert.match(templatesSource, /templateFavoriteBtn/)
 })
+
+
+test('首页支持拖放打开导图文件', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(source.includes('onHomeDrop'))
+  assert.ok(source.includes('homeDragMask'))
+  assert.ok(source.includes('normalizeOpenableDocumentContent'))
+  assert.ok(langSource.includes('dragOpenTip'))
+})
