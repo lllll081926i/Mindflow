@@ -31,6 +31,7 @@
       @validate-structure="validateCurrentFlowchart({ openPanel: true })"
       @open-command-palette="openCommandPalette"
       @open-search="openFlowchartSearch"
+      @open-outline="openFlowchartOutline"
     />
 
     <FlowchartCommandPalette
@@ -39,6 +40,16 @@
       :labels="flowchartCommandPaletteLabels"
       @close="closeCommandPalette"
       @execute="executeCommandPaletteItem"
+    />
+
+    <FlowchartOutlinePanel
+      :visible="flowchartOutlineVisible"
+      :items="flowchartOutlineItems"
+      :keyword="flowchartOutlineKeyword"
+      :labels="flowchartOutlineLabels"
+      @close="closeFlowchartOutline"
+      @select="focusFlowchartOutlineItem"
+      @update:keyword="flowchartOutlineKeyword = $event"
     />
 
     <div
@@ -550,6 +561,7 @@ import FlowchartQuickAddBar from './FlowchartQuickAddBar.vue'
 import FlowchartToolbar from './FlowchartToolbar.vue'
 import FlowchartSelectionToolbar from './FlowchartSelectionToolbar.vue'
 import FlowchartCommandPalette from './FlowchartCommandPalette.vue'
+import FlowchartOutlinePanel from './FlowchartOutlinePanel.vue'
 import AiConfigDialog from './AiConfigDialog.vue'
 import './FlowchartEditor.less'
 import { flowchartHistoryMethods } from './flowchartEditorHistory'
@@ -596,6 +608,7 @@ export default {
     FlowchartToolbar,
     FlowchartSelectionToolbar,
     FlowchartCommandPalette,
+    FlowchartOutlinePanel,
     AiConfigDialog
   },
   data() {
@@ -689,6 +702,17 @@ export default {
     }
   },
   computed: {
+    flowchartOutlineLabels() {
+      return {
+        title: this.$t('flowchart.outlineTitle'),
+        close: this.$t('dialog.close'),
+        searchPlaceholder: this.$t('flowchart.outlineSearchPlaceholder'),
+        empty: this.$t('flowchart.outlineEmpty')
+      }
+    },
+    flowchartOutlineItems() {
+      return this.buildFlowchartOutlineItems()
+    },
     lastAutofixDiffLines() {
       const diff = this.lastAutofixDiff || {}
       const lines = []
@@ -991,6 +1015,7 @@ export default {
         selectionEmpty: this.$t('flowchart.selectionEmpty'),
         fitView: this.$t('flowchart.fitView'),
         tidyLayout: this.$t('flowchart.tidyLayout'),
+        outline: this.$t('flowchart.outlineTitle'),
         validateStructure: this.$t('flowchart.validateStructure'),
         templateApproval: this.$t('flowchart.templateApproval'),
         templateRelease: this.$t('flowchart.templateRelease'),
@@ -1019,6 +1044,7 @@ export default {
         aiGenerate: this.$t('flowchart.aiGenerateShort'),
         commandPalette: this.$t('toolbar.commandPaletteAction'),
         search: this.$t('toolbar.searchAction'),
+        outline: this.$t('flowchart.outlineShort'),
         shortcuts: this.$t('shortcutKey.title'),
         exportCenter: this.$t('toolbar.exportCenter'),
         convertMindMap: this.$t('flowchart.convertMindMapShort'),
@@ -1124,6 +1150,7 @@ export default {
         { key: 'save', label: this.$t('flowchart.save'), shortcut: 'Ctrl S', action: () => this.saveCurrentFile() },
         { key: 'saveAs', label: this.$t('flowchart.saveAsShort'), action: () => this.saveAsFile() },
         { key: 'search', label: this.$t('toolbar.searchAction'), shortcut: 'Ctrl F', action: () => this.openFlowchartSearch() },
+        { key: 'outline', label: this.$t('flowchart.outlineTitle'), shortcut: 'Ctrl Shift O', action: () => this.openFlowchartOutline() },
         { key: 'shortcuts', label: this.$t('shortcutKey.title'), action: () => this.openFlowchartShortcuts() },
         { key: 'fitCanvas', label: this.$t('toolbar.fitCanvasAction'), shortcut: 'Ctrl 0', action: () => this.fitCanvasToView() },
         { key: 'resetViewport', label: this.$t('flowchart.fitView'), shortcut: 'Ctrl 1', action: () => this.resetViewport() },
@@ -1617,6 +1644,92 @@ export default {
     },
 
 
+    openFlowchartOutline() {
+      this.flowchartOutlineVisible = true
+      this.commandPaletteVisible = false
+      this.flowchartSearchVisible = false
+    },
+    closeFlowchartOutline() {
+      this.flowchartOutlineVisible = false
+      this.flowchartOutlineKeyword = ''
+    },
+    buildFlowchartOutlineItems() {
+      const strip = value =>
+        String(value || '')
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+      const nodes = Array.isArray(this.flowchartData?.nodes) ? this.flowchartData.nodes : []
+      const edges = Array.isArray(this.flowchartData?.edges) ? this.flowchartData.edges : []
+      const nodeMap = new Map(nodes.map(n => [String(n.id), n]))
+      const children = new Map()
+      const indegree = new Map(nodes.map(n => [String(n.id), 0]))
+      edges.forEach(edge => {
+        const source = String(edge?.source || '')
+        const target = String(edge?.target || '')
+        if (!nodeMap.has(source) || !nodeMap.has(target) || source === target) return
+        if (!children.has(source)) children.set(source, [])
+        children.get(source).push(target)
+        indegree.set(target, (indegree.get(target) || 0) + 1)
+      })
+      children.forEach(list => {
+        list.sort((a, b) => {
+          const na = nodeMap.get(a)
+          const nb = nodeMap.get(b)
+          return (
+            Number(na?.y || 0) - Number(nb?.y || 0) ||
+            Number(na?.x || 0) - Number(nb?.x || 0)
+          )
+        })
+      })
+      const starts = nodes.filter(n => n.type === 'start').map(n => String(n.id))
+      const zeros = [...indegree.entries()].filter(([, c]) => c === 0).map(([id]) => id)
+      let roots = starts.length ? starts : zeros
+      if (!roots.length && nodes.length) roots = [String(nodes[0].id)]
+      const items = []
+      const visited = new Set()
+      const typeLabel = type => {
+        const map = {
+          start: this.$t('flowchart.addStart'),
+          process: this.$t('flowchart.addProcess'),
+          decision: this.$t('flowchart.addDecision'),
+          input: this.$t('flowchart.addInput'),
+          end: this.$t('flowchart.addEnd')
+        }
+        return map[type] || type || ''
+      }
+      const walk = (id, depth) => {
+        if (!id || visited.has(id) || !nodeMap.has(id)) return
+        visited.add(id)
+        const node = nodeMap.get(id)
+        items.push({
+          key: id + '-' + depth + '-' + items.length,
+          id,
+          depth,
+          text: strip(node.text) || typeLabel(node.type),
+          typeLabel: typeLabel(node.type)
+        })
+        ;(children.get(id) || []).forEach(childId => walk(childId, depth + 1))
+      }
+      roots.forEach(id => walk(id, 0))
+      nodes.forEach(node => {
+        const id = String(node.id)
+        if (!visited.has(id)) walk(id, 0)
+      })
+      return items
+    },
+    focusFlowchartOutlineItem(item) {
+      if (!item?.id) return
+      this.selectedNodeIds = [item.id]
+      this.selectedEdgeId = ''
+      const node = this.flowchartNodeLookup.get(item.id)
+      if (node && typeof this.centerViewportAt === 'function') {
+        this.centerViewportAt({
+          x: Number(node.x || 0) + Number(node.width || 0) / 2,
+          y: Number(node.y || 0) + Number(node.height || 0) / 2
+        })
+      }
+    },
     openCommandPalette() {
       this.commandPaletteVisible = true
       this.flowchartSearchVisible = false

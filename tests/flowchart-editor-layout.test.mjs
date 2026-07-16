@@ -2216,3 +2216,15 @@ test('流程图编辑器支持转回思维导图', () => {
   assert.match(langSource, /"convertToMindMap"/)
   assert.match(langSource, /"flowchartConverted"/)
 })
+
+
+test('流程图提供大纲面板并支持定位节点', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  const panelSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartOutlinePanel.vue'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.ok(editorSource.includes('FlowchartOutlinePanel'))
+  assert.ok(editorSource.includes('openFlowchartOutline'))
+  assert.ok(editorSource.includes('buildFlowchartOutlineItems'))
+  assert.ok(panelSource.includes('flowchartOutlinePanel'))
+  assert.match(langSource, /"outlineTitle"/)
+})

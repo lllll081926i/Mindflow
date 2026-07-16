@@ -184,6 +184,20 @@
         <EditorToolbarAction
           action-class="flowchartToolbarBtn"
           icon-class="flowchartToolbarIcon"
+          :label="labels.outline"
+          @action="$emit('open-outline')"
+        >
+          <template #icon>
+            <svg viewBox="0 0 24 24">
+              <path d="M6 7h12"></path>
+              <path d="M8 12h10"></path>
+              <path d="M10 17h8"></path>
+            </svg>
+          </template>
+        </EditorToolbarAction>
+        <EditorToolbarAction
+          action-class="flowchartToolbarBtn"
+          icon-class="flowchartToolbarIcon"
           :label="labels.commandPalette"
           @action="$emit('open-command-palette')"
         >

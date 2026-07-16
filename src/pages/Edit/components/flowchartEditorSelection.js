@@ -103,6 +103,10 @@ export const flowchartSelectionMethods = {
         this.closeCommandPalette()
         return
       }
+      if (this.flowchartOutlineVisible) {
+        this.closeFlowchartOutline()
+        return
+      }
       if (this.flowchartSearchVisible) {
         this.closeFlowchartSearch()
         return
@@ -134,6 +138,12 @@ export const flowchartSelectionMethods = {
     if (isMetaKey && event.key.toLowerCase() === 'f') {
       event.preventDefault()
       this.openFlowchartSearch()
+      return
+    }
+    if (isMetaKey && event.shiftKey && event.key.toLowerCase() === 'o') {
+      event.preventDefault()
+      if (this.flowchartOutlineVisible) this.closeFlowchartOutline()
+      else this.openFlowchartOutline()
       return
     }
     if (isMetaKey && event.key === '/') {
