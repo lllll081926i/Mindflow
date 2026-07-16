@@ -459,3 +459,13 @@ test('思维导图编辑器提供多画布工作簿标签栏', () => {
   assert.ok(serviceSource.includes('ensureMindmapWorkbook'))
   assert.ok(langSource.includes('sheetSwitched') || langSource.includes('sheetAdded'))
 })
+
+
+test('思维导图支持 Ctrl+Tab 切换画布', () => {
+  const toolbarSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Toolbar.vue'), 'utf8')
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.ok(toolbarSource.includes('mindmapNextSheet'))
+  assert.ok(toolbarSource.includes('mindmapPrevSheet'))
+  assert.ok(editSource.includes('handleMindmapNextSheet'))
+  assert.ok(editSource.includes('handleMindmapPrevSheet'))
+})

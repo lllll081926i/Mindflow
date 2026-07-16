@@ -817,6 +817,8 @@ export default {
       )
       this.$bus.$on('mindmapAddSheet', this.handleMindmapAddSheet)
       this.$bus.$on('mindmapDuplicateSheet', this.handleMindmapDuplicateSheet)
+      this.$bus.$on('mindmapNextSheet', this.handleMindmapNextSheet)
+      this.$bus.$on('mindmapPrevSheet', this.handleMindmapPrevSheet)
       this.$bus.$on(
         'createAssociativeLine',
         this.handleCreateLineFromActiveNode
@@ -844,6 +846,8 @@ export default {
       )
       this.$bus.$off('mindmapAddSheet', this.handleMindmapAddSheet)
       this.$bus.$off('mindmapDuplicateSheet', this.handleMindmapDuplicateSheet)
+      this.$bus.$off('mindmapNextSheet', this.handleMindmapNextSheet)
+      this.$bus.$off('mindmapPrevSheet', this.handleMindmapPrevSheet)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)
@@ -1520,10 +1524,17 @@ export default {
 
     getCurrentMindMapData() {
       if (!this.mindMap) {
-        return createDefaultMindMapData()
+        return ensureMindmapWorkbook(createDefaultMindMapData())
       }
       const fullData = this.mindMap.getData(true)
-      return { ...fullData }
+      const base = this.mindMapData || getData() || {}
+      return snapshotActiveMindmapSheet(
+        {
+          ...base,
+          ...fullData
+        },
+        fullData
+      )
     },
 
     async ensureExtendedIconListLoaded(force = false) {
@@ -1761,6 +1772,8 @@ export default {
     async export(...args) {
       try {
         showLoading()
+        // Keep multi-canvas workbook in persisted data for smm/json style exports.
+        this.persistActiveSheetSnapshot?.()
         await this.mindMap.export(...args)
         hideLoading()
       } catch (error) {

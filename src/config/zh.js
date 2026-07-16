@@ -420,6 +420,16 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + B'
       },
       {
+        icon: 'icontab',
+        name: '切换到下一画布',
+        value: ctrl + ' + Tab'
+      },
+      {
+        icon: 'icontab',
+        name: '切换到上一画布',
+        value: ctrl + ' + Shift + Tab'
+      },
+      {
         icon: 'iconhuanhang',
         name: '文本换行',
         value: `Shift + ${enter}`

@@ -239,6 +239,7 @@ import {
 } from '@/services/flowchartDocument'
 import { buildMindMapHtmlDocument, sanitizeSvgMarkup } from '@/services/htmlExport'
 import { serializeFreemindXml } from '@/services/freemindParse'
+import { snapshotActiveMindmapSheet, ensureMindmapWorkbook } from '@/services/mindmapWorkbook'
 import {
   validateFlowchartStructure,
   formatFlowchartValidationMessage
@@ -1328,12 +1329,46 @@ export default {
               return
             }
           } else if (['smm', 'json'].includes(this.exportState.exportType)) {
-            await this.mindMap.export(
-              resolvedType,
-              true,
-              safeFileName,
-              this.exportState.withConfig
-            )
+            // Prefer workbook-aware snapshot so multi-canvas docs round-trip.
+            try {
+              const live = typeof this.mindMap?.getData === 'function'
+                ? this.mindMap.getData(!!this.exportState.withConfig)
+                : null
+              const base = getData() || {}
+              const workbook = snapshotActiveMindmapSheet(
+                ensureMindmapWorkbook({
+                  ...base,
+                  ...(live || {})
+                }),
+                live
+              )
+              const payload = this.exportState.withConfig
+                ? workbook
+                : workbook.root
+              const content = JSON.stringify(payload)
+              this.advanceExportProgress(84, 'save')
+              const fileRef = await platform.saveTextFileAs({
+                suggestedName: safeFileName,
+                content,
+                defaultPath: getLastDirectory(),
+                extension: this.exportState.exportType === 'json' ? 'json' : 'smm',
+                name: this.exportState.exportType === 'json' ? 'JSON' : 'SMM',
+                mimeType: 'application/json;charset=utf-8'
+              })
+              if (!fileRef) {
+                this.finishExportProgress(false)
+                this.exporting = false
+                return
+              }
+            } catch (error) {
+              console.error('workbook export fallback', error)
+              await this.mindMap.export(
+                resolvedType,
+                true,
+                safeFileName,
+                this.exportState.withConfig
+              )
+            }
             this.advanceExportProgress(90, 'save')
           } else if (['png', 'jpg'].includes(resolvedType)) {
             await this.mindMap.export(

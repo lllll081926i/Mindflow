@@ -1412,6 +1412,16 @@ export default {
           event.preventDefault()
           this.$bus.$emit('selectAttachment', activeNodes)
         }
+        return
+      }
+      // Ctrl+Tab / Ctrl+Shift+Tab switch sheets
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key === 'Tab' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.$bus.$emit(event.shiftKey ? 'mindmapPrevSheet' : 'mindmapNextSheet')
       }
     },
 
