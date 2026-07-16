@@ -30,8 +30,17 @@
         }}</el-button>
       </div>
       <div class="matchStats" v-if="filterStats.token">
-        {{ $t('markerLegend.matchStats', filterStats) ||
-          ('筛选命中 ' + filterStats.matched + ' / ' + filterStats.total) }}
+        <span>{{
+          $t('markerLegend.matchStats', filterStats) ||
+          ('筛选命中 ' + filterStats.matched + ' / ' + filterStats.total)
+        }}</span>
+        <span v-if="filterStats.matched > 0" class="matchCursor">
+          {{ (matchCursor.index >= 0 ? matchCursor.index + 1 : 0) + ' / ' + filterStats.matched }}
+        </span>
+        <div class="matchNav" v-if="filterStats.matched > 0">
+          <el-button size="small" @click="jumpPrevMatch">上一个</el-button>
+          <el-button size="small" @click="jumpNextMatch">下一个</el-button>
+        </div>
       </div>
       <div class="quickFilters">
         <button type="button" class="chip" :class="{ isActive: activeFilter === 'has:comment' }" @click="toggleQuick('has:comment')">批注</button>
@@ -114,7 +123,8 @@ export default {
       activeFilter: '',
       countsByKey: {},
       activeNodes: [],
-      filterStats: { token: '', matched: 0, total: 0 }
+      filterStats: { token: '', matched: 0, total: 0 },
+      matchCursor: { index: -1, total: 0, uid: '' }
     }
   },
   computed: {
@@ -194,10 +204,12 @@ export default {
   created() {
     this.$bus.$on('applyMarkerFilter', this.syncFilterFromBus)
     this.$bus.$on('markerFilterStats', this.onFilterStats)
+    this.$bus.$on('markerFilterMatchCursor', this.onMatchCursor)
   },
   beforeUnmount() {
     this.$bus.$off('applyMarkerFilter', this.syncFilterFromBus)
     this.$bus.$off('markerFilterStats', this.onFilterStats)
+    this.$bus.$off('markerFilterMatchCursor', this.onMatchCursor)
     if (this.mindMap) {
       this.mindMap.off?.('data_change', this.refreshCounts)
       this.mindMap.off?.('node_active', this.onNodeActive)
@@ -227,6 +239,24 @@ export default {
         matched: Number(payload.matched || 0),
         total: Number(payload.total || 0)
       }
+      if (this.filterStats.matched > 0) {
+        this.matchCursor = { index: 0, total: this.filterStats.matched, uid: '' }
+      } else {
+        this.matchCursor = { index: -1, total: 0, uid: '' }
+      }
+    },
+    onMatchCursor(payload = {}) {
+      this.matchCursor = {
+        index: Number(payload.index ?? -1),
+        total: Number(payload.total || 0),
+        uid: String(payload.uid || '')
+      }
+    },
+    jumpNextMatch() {
+      this.$bus.$emit('jumpMarkerFilterMatch', 1)
+    },
+    jumpPrevMatch() {
+      this.$bus.$emit('jumpMarkerFilterMatch', -1)
     },
     openOutlineWithFilter() {
       setActiveSidebar('outline')
@@ -235,6 +265,9 @@ export default {
         if (!this.activeFilter.includes('_') && !this.activeFilter.startsWith('has:')) {
           this.$bus.$emit('outlineSetKeyword', this.activeFilter)
         }
+        this.$bus.$emit('outlineSetMarkerFilter', this.activeFilter)
+        // focus first match for dual panel review
+        this.$nextTick(() => this.$bus.$emit('jumpMarkerFilterMatch', 0))
       }
     },
     refreshCounts() {

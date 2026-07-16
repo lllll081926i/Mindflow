@@ -756,3 +756,27 @@ test('标记筛选会同步大纲并反馈命中统计', () => {
   assert.ok(legendSource.includes('openOutlineWithFilter'))
   assert.ok(legendSource.includes('matchStats'))
 })
+
+
+test('标记筛选支持命中节点互跳与大纲定位', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  const outlineSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Outline.vue'), 'utf8')
+  const legendSource = fs.readFileSync(path.resolve('src/pages/Edit/components/MarkerLegendSidebar.vue'), 'utf8')
+  assert.ok(editSource.includes('jumpMarkerFilterMatch'))
+  assert.ok(editSource.includes('focusMarkerFilterUid'))
+  assert.ok(editSource.includes('markerFilterMatchedUids'))
+  assert.ok(outlineSource.includes('outlineRevealUid'))
+  assert.ok(outlineSource.includes('nodeMatchesMarker'))
+  assert.ok(legendSource.includes('jumpNextMatch'))
+  assert.ok(legendSource.includes('jumpPrevMatch'))
+})
+
+test('范围概要拖拽在松开时提交以优化撤销', () => {
+  const summarySource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/SummaryRangeBar.vue'),
+    'utf8'
+  )
+  assert.ok(summarySource.includes('pendingRange'))
+  assert.ok(summarySource.includes('onHandleUp'))
+  assert.ok(summarySource.includes('live visual only') || summarySource.includes('pendingRange'))
+})

@@ -102,6 +102,7 @@ export default {
     clearMarkerFilter() {
       this.markerFilterToken = ''
       this.$bus.$emit('applyMarkerFilter', '')
+      this.$bus.$emit('outlineSetMarkerFilter', '')
       this.outlineKeyword = ''
     },
 

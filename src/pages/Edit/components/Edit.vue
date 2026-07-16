@@ -599,6 +599,8 @@ export default {
       sheetRenameDraft: '',
       sheetEditingId: '',
       activeMarkerFilter: '',
+      markerFilterMatchedUids: [],
+      markerFilterMatchIndex: -1,
       focusModeActive: false,
       focusModeUid: '',
       enableShowLoading: true,
@@ -852,6 +854,8 @@ export default {
       this.$bus.$on('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$on('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$on('applyMarkerFilter', this.handleApplyMarkerFilter)
+      this.$bus.$on('jumpMarkerFilterMatch', this.handleJumpMarkerFilterMatch)
+      this.$bus.$on('focusMarkerFilterMatch', this.handleFocusMarkerFilterMatch)
       this.$bus.$on('toggleFocusMode', this.toggleFocusMode)
       this.$bus.$on(
         'createAssociativeLine',
@@ -887,6 +891,8 @@ export default {
       this.$bus.$off('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$off('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$off('applyMarkerFilter', this.handleApplyMarkerFilter)
+      this.$bus.$off('jumpMarkerFilterMatch', this.handleJumpMarkerFilterMatch)
+      this.$bus.$off('focusMarkerFilterMatch', this.handleFocusMarkerFilterMatch)
       this.$bus.$off('toggleFocusMode', this.toggleFocusMode)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
@@ -1223,6 +1229,49 @@ export default {
       this.activeMarkerFilter = String(marker || '')
       this.applyActiveMarkerFilter()
     },
+    handleJumpMarkerFilterMatch(direction = 1) {
+      const list = this.markerFilterMatchedUids || []
+      if (!list.length || !this.mindMap) return
+      // direction 0 => first
+      if (direction === 0) {
+        this.markerFilterMatchIndex = 0
+      } else {
+        const step = direction < 0 ? -1 : 1
+        let next = this.markerFilterMatchIndex
+        if (next < 0) next = 0
+        else next = (next + step + list.length) % list.length
+        this.markerFilterMatchIndex = next
+      }
+      const uid = list[this.markerFilterMatchIndex]
+      this.focusMarkerFilterUid(uid)
+      this.$bus.$emit('markerFilterMatchCursor', {
+        index: this.markerFilterMatchIndex,
+        total: list.length,
+        uid
+      })
+    },
+    handleFocusMarkerFilterMatch(uid) {
+      if (!uid) return
+      const list = this.markerFilterMatchedUids || []
+      const index = list.indexOf(uid)
+      if (index >= 0) this.markerFilterMatchIndex = index
+      this.focusMarkerFilterUid(uid)
+      this.$bus.$emit('markerFilterMatchCursor', {
+        index: this.markerFilterMatchIndex,
+        total: list.length,
+        uid
+      })
+    },
+    focusMarkerFilterUid(uid) {
+      if (!uid || !this.mindMap) return
+      try {
+        this.mindMap.execCommand('GO_TARGET_NODE', uid, () => {
+          this.$bus.$emit('outlineRevealUid', uid)
+        })
+      } catch (error) {
+        console.error('focusMarkerFilterUid failed', error)
+      }
+    },
     applyActiveMarkerFilter() {
       if (!this.mindMap?.renderer) return
       if (this.focusModeActive) {
@@ -1232,6 +1281,7 @@ export default {
       const token = String(this.activeMarkerFilter || '').trim()
       let matched = 0
       let total = 0
+      const matchedUids = []
       const walk = node => {
         if (!node) return
         total += 1
@@ -1263,7 +1313,11 @@ export default {
             match = hay.includes(lower)
           }
         }
-        if (match) matched += 1
+        if (match) {
+          matched += 1
+          const uid = node.uid || node.getData?.('uid')
+          if (uid) matchedUids.push(uid)
+        }
         try {
           if (node.group && typeof node.group.opacity === 'function') {
             node.group.opacity(match ? 1 : 0.18)
@@ -1272,10 +1326,13 @@ export default {
         ;(node.children || []).forEach(child => walk(child))
       }
       walk(this.mindMap.renderer.root)
+      this.markerFilterMatchedUids = matchedUids
+      this.markerFilterMatchIndex = matchedUids.length ? 0 : -1
       this.$bus.$emit('markerFilterStats', {
         token,
         matched: token ? matched : total,
-        total
+        total,
+        uids: matchedUids
       })
       // text-like filters also sync outline search for dual-panel review
       if (token && !token.includes('_') && !token.startsWith('has:')) {
@@ -1283,6 +1340,8 @@ export default {
       } else if (!token) {
         this.$bus.$emit('outlineSetKeyword', '')
       }
+      // icon filters can still highlight outline via custom marker keyword channel
+      this.$bus.$emit('outlineSetMarkerFilter', token)
     },
     handleMindmapRenameActiveSheet() {
       const active = (this.mindmapSheets || []).find(item => item.active)

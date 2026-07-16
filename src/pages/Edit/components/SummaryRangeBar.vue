@@ -7,6 +7,7 @@
     <div
       v-if="startHandle"
       class="rangeHandle start"
+      :class="{ isDragging: draggingEndpoint === 'start' }"
       :style="{ left: startHandle.left + 'px', top: startHandle.top + 'px' }"
       @mousedown.stop.prevent="onHandleDown('start', $event)"
       title="拖拽调整起点"
@@ -14,6 +15,7 @@
     <div
       v-if="endHandle"
       class="rangeHandle end"
+      :class="{ isDragging: draggingEndpoint === 'end' }"
       :style="{ left: endHandle.left + 'px', top: endHandle.top + 'px' }"
       @mousedown.stop.prevent="onHandleDown('end', $event)"
       title="拖拽调整终点"
@@ -89,7 +91,8 @@ export default {
       startHandle: null,
       endHandle: null,
       draggingEndpoint: '',
-      dragRaf: 0
+      dragRaf: 0,
+      pendingRange: null
     }
   },
   computed: {
@@ -158,6 +161,7 @@ export default {
       this.startHandle = null
       this.endHandle = null
       this.draggingEndpoint = ''
+      this.pendingRange = null
     },
     toggleCanvasEditMode() {
       if (!this.parentNode || !Array.isArray(this.range)) return
@@ -304,6 +308,7 @@ export default {
     onHandleDown(endpoint) {
       if (!this.canvasEditMode || !Array.isArray(this.range)) return
       this.draggingEndpoint = endpoint
+      this.pendingRange = Array.isArray(this.range) ? [...this.range] : null
       this.suppressCloseOnce = true
     },
     onHandleMove(event) {
@@ -316,8 +321,24 @@ export default {
     },
     onHandleUp() {
       if (!this.draggingEndpoint) return
+      const endpoint = this.draggingEndpoint
       this.draggingEndpoint = ''
       this.suppressCloseOnce = true
+      if (Array.isArray(this.pendingRange)) {
+        const [start, end] = this.pendingRange
+        this.pendingRange = null
+        if (this.generalizationNode) {
+          this.updateRange([start, end])
+        } else {
+          this.range = [start, end]
+          this.applyRangeHighlight()
+          this.updateHandlePositions()
+        }
+      } else {
+        this.updateHandlePositions()
+      }
+      // endpoint currently unused but kept for future analytics
+      void endpoint
     },
     dragRangeToPoint(clientX, clientY) {
       const children = this.parentNode?.children || []
@@ -336,7 +357,7 @@ export default {
         }
       })
       if (bestIndex < 0) return
-      let [start, end] = this.range
+      let [start, end] = this.pendingRange || this.range
       if (this.draggingEndpoint === 'start') {
         start = bestIndex
         if (start > end) end = start
@@ -344,16 +365,16 @@ export default {
         end = bestIndex
         if (end < start) start = end
       }
-      if (start === this.range[0] && end === this.range[1]) {
+      const current = this.pendingRange || this.range
+      if (start === current[0] && end === current[1]) {
         this.updateHandlePositions()
         return
       }
-      if (this.generalizationNode) {
-        this.updateRange([start, end])
-      } else {
-        this.range = [start, end]
-        this.applyRangeHighlight()
-      }
+      this.pendingRange = [start, end]
+      this.range = [start, end]
+      // live visual only; persist on mouseup for one undo step
+      this.applyRangeHighlight()
+      this.updateHandlePositions()
     },
     onNodeActive(node, nodeList = []) {
       const list = Array.isArray(nodeList) ? nodeList : []
@@ -532,8 +553,11 @@ export default {
   user-select: none;
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
-.rangeHandle:active {
+.rangeHandle:active,
+.rangeHandle.isDragging {
   cursor: grabbing;
+  transform: scale(1.12);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.45);
 }
 .rangeHandle.start {
   background: #2563eb;

@@ -77,7 +77,8 @@ export default {
       isInTreArea: false,
       isAfterCreateNewNode: false,
       refreshTimer: 0,
-      outlineVersion: 0
+      outlineVersion: 0,
+      markerFilterToken: ''
     }
   },
   computed: {
@@ -93,6 +94,8 @@ export default {
     this.$bus.$on('data_change', this.handleDataChange)
     this.$bus.$on('node_tree_render_end', this.handleNodeTreeRenderEnd)
     this.$bus.$on('hide_text_edit', this.handleHideTextEdit)
+    this.$bus.$on('outlineRevealUid', this.revealUid)
+    this.$bus.$on('outlineSetMarkerFilter', this.setMarkerFilter)
   },
   mounted() {
     this.scheduleRefresh()
@@ -102,6 +105,8 @@ export default {
     this.$bus.$off('data_change', this.handleDataChange)
     this.$bus.$off('node_tree_render_end', this.handleNodeTreeRenderEnd)
     this.$bus.$off('hide_text_edit', this.handleHideTextEdit)
+    this.$bus.$off('outlineRevealUid', this.revealUid)
+    this.$bus.$off('outlineSetMarkerFilter', this.setMarkerFilter)
     clearTimeout(this.refreshTimer)
   },
   watch: {
@@ -112,10 +117,55 @@ export default {
   methods: {
     filterOutlineNode(value, data) {
       const keyword = String(value || this.keyword || '').trim().toLowerCase()
+      const marker = String(this.markerFilterToken || '').trim()
+      // marker-only filter (icons / has:* tokens)
+      if (marker && (marker.includes('_') || marker.startsWith('has:'))) {
+        return this.nodeMatchesMarker(data, marker)
+      }
       if (!keyword) return true
       const text = String(data?.label || data?.data?.text || data?.text || '')
         .toLowerCase()
       return text.includes(keyword)
+    },
+    setMarkerFilter(token = '') {
+      this.markerFilterToken = String(token || '')
+      // for marker tokens, force tree filter refresh
+      this.$nextTick(() => {
+        this.$refs.tree?.filter?.(this.keyword || this.markerFilterToken || '')
+      })
+    },
+    nodeMatchesMarker(data, token) {
+      const nodeData = data?.data || data || {}
+      const icons = Array.isArray(nodeData.icon) ? nodeData.icon : []
+      const tags = Array.isArray(nodeData.tag) ? nodeData.tag : []
+      const tagText = tags
+        .map(item => (typeof item === 'object' ? item.text : item))
+        .join(' ')
+      const note = String(nodeData.note || '')
+      const comments = Array.isArray(nodeData.comments) ? nodeData.comments : []
+      const commentText = comments.map(item => item?.text || item).join(' ')
+      const lower = String(token || '').toLowerCase()
+      if (lower === 'has:comment' || lower === 'has:comments') return comments.length > 0
+      if (lower === 'has:note') return !!note.trim()
+      if (lower === 'has:link') return !!(nodeData.hyperlink || nodeData.link)
+      if (icons.includes(token)) return true
+      if (token.startsWith('priority_') || token.startsWith('progress_')) {
+        return icons.includes(token)
+      }
+      const hay = (tagText + ' ' + note + ' ' + commentText).toLowerCase()
+      return hay.includes(lower)
+    },
+    revealUid(uid) {
+      if (!uid || !this.$refs.tree) return
+      try {
+        this.$refs.tree.setCurrentKey(uid)
+        const node = this.$refs.tree.getNode(uid)
+        if (node?.data) this.onCurrentChange(node.data)
+        const el = document.querySelector(`.customNode[data-id="${uid}"]`)
+        if (el) this.$emit('scrollTo', el.offsetTop)
+      } catch (error) {
+        console.error('revealUid failed', error)
+      }
     },
     scheduleRefresh() {
       clearTimeout(this.refreshTimer)
@@ -302,6 +352,7 @@ export default {
 
     // 激活当前节点且移动当前节点到画布中间
     onClick(data) {
+      if (data?.uid) this.$bus.$emit('focusMarkerFilterMatch', data.uid)
       this.notHandleDataChange = true
       const targetNode = this.mindMap.renderer.findNodeByUid(data.uid)
       if (targetNode && targetNode.nodeData.data.isActive) return
