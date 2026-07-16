@@ -606,7 +606,14 @@ export const flowchartSelectionMethods = {
   },
 
   selectAllNodes() {
-    this.selectedNodeIds = this.flowchartData.nodes.map(node => node.id)
+    this.selectedNodeIds = [...(this.flowchartData.nodes || [])]
+      .sort((a, b) => {
+        const ay = Number(a.y || 0)
+        const by = Number(b.y || 0)
+        if (ay !== by) return ay - by
+        return Number(a.x || 0) - Number(b.x || 0)
+      })
+      .map(node => node.id)
     this.selectedEdgeId = ''
     this.edgeToolbarState = null
   },
