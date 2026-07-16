@@ -115,6 +115,7 @@
       :mindMap="mindMap"
     ></MarkerLegendSidebar>
     <SummaryRangeBar v-if="mindMap && !isZenMode" :mindMap="mindMap" />
+    <DocumentConvertPreviewDialog />
     <NodeIconToolbar
       v-if="mindMap && secondaryUiReady"
       :mindMap="mindMap"
@@ -216,6 +217,9 @@ const MarkerLegendSidebar = defineAsyncComponent(() =>
 )
 const SummaryRangeBar = defineAsyncComponent(() =>
   import('./SummaryRangeBar.vue')
+)
+const DocumentConvertPreviewDialog = defineAsyncComponent(() =>
+  import('./DocumentConvertPreviewDialog.vue')
 )
 const NodeIconToolbar = defineAsyncComponent(() =>
   import('./NodeIconToolbar.vue')
@@ -576,6 +580,7 @@ export default {
     NodeIconSidebar,
     MarkerLegendSidebar,
     SummaryRangeBar,
+    DocumentConvertPreviewDialog,
     NodeIconToolbar,
     OutlineEdit,
     SourceCodeEdit,

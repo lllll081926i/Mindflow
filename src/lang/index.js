@@ -517,11 +517,21 @@ const zh = {
     "nextResult": "下一条",
     "idleHint": "输入关键词后按回车开始搜索"
   },
+  "documentConvert": {
+    "previewHint": "默认转换全部页面。可取消部分页面后仅转换勾选项。",
+    "selectAll": "全选",
+    "noPages": "没有可转换的页面",
+    "mindToFlowTitle": "选择要转换的导图画布",
+    "flowToMindTitle": "选择要转换的流程页面",
+    "confirmConvert": "转换 {count} 项"
+  },
   "summaryRange": {
     "title": "范围概要",
     "single": "单节点概要",
     "hint": "选中多个同级主题后按 Ctrl+G 可创建范围概要；选中概要节点可在此调整覆盖范围。",
-    "creatingRange": "正在为所选同级主题创建范围概要"
+    "creatingRange": "正在为所选同级主题创建范围概要",
+    "create": "创建范围概要",
+    "created": "已创建范围概要"
   },
   "markerLegend": {
     "title": "标记图例",

@@ -33,7 +33,13 @@ export const convertMindmapWorkbookToFlowchartWorkbook = (
   const workbook = ensureMindmapWorkbook(mindMapData, {
     title: options.title
   })
-  const pages = workbook.sheets.map((sheet, index) => {
+  const selectedSet = Array.isArray(options.selectedSheetIds)
+    ? new Set(options.selectedSheetIds.map(String))
+    : null
+  const sourceSheets = selectedSet
+    ? workbook.sheets.filter(sheet => selectedSet.has(String(sheet.id)))
+    : workbook.sheets
+  const pages = (sourceSheets.length ? sourceSheets : workbook.sheets).map((sheet, index) => {
     const sheetMind = {
       root: sheet.root,
       theme: sheet.theme,
@@ -79,7 +85,13 @@ export const convertFlowchartWorkbookToMindmapWorkbook = (
   const workbook = ensureFlowchartWorkbook(flowchartData, {
     title: options.title
   })
-  const maps = workbook.sheets.map((sheet, index) => {
+  const selectedSet = Array.isArray(options.selectedSheetIds)
+    ? new Set(options.selectedSheetIds.map(String))
+    : null
+  const sourceSheets = selectedSet
+    ? workbook.sheets.filter(sheet => selectedSet.has(String(sheet.id)))
+    : workbook.sheets
+  const maps = (sourceSheets.length ? sourceSheets : workbook.sheets).map((sheet, index) => {
     const pageData = {
       title: sheet.title || sheet.name,
       templateId: sheet.templateId,

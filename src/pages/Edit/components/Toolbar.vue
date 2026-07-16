@@ -432,6 +432,7 @@
     <NodeNote v-if="mountedPanels.nodeNote" ref="NodeNoteRef"></NodeNote>
     <NodeTag v-if="mountedPanels.nodeTag" ref="NodeTagRef"></NodeTag>
     <NodeCommentsDialog />
+    <DocumentConvertPreviewDialog />
     <Import v-if="mountedPanels.import" ref="ImportRef"></Import>
   </div>
 </template>
@@ -513,6 +514,9 @@ const NodeTag = defineAsyncComponent(() => import('./NodeTag.vue'))
 const NodeCommentsDialog = defineAsyncComponent(() =>
   import('./NodeCommentsDialog.vue')
 )
+const DocumentConvertPreviewDialog = defineAsyncComponent(() =>
+  import('./DocumentConvertPreviewDialog.vue')
+)
 const Import = defineAsyncComponent(() => import('./Import.vue'))
 // 工具栏
 const defaultBtnList = [
@@ -542,6 +546,7 @@ export default {
     NodeNote,
     NodeTag,
     NodeCommentsDialog,
+    DocumentConvertPreviewDialog,
     Import,
     EditorToolbarAction,
     ToolbarNodeBtnList
@@ -1011,6 +1016,15 @@ export default {
       emitShowImport()
     },
 
+    openDocumentConvertPreview(payload = {}) {
+      return new Promise((resolve, reject) => {
+        this.$bus.$emit('openDocumentConvertPreview', {
+          ...payload,
+          resolve,
+          reject
+        })
+      })
+    },
     async convertCurrentToFlowchart() {
       try {
         const mindMapData = getData()
@@ -1018,28 +1032,31 @@ export default {
           this.$message.warning(this.$t('toolbar.noMindMapToConvert'))
           return
         }
-        const sheetCount = Array.isArray(mindMapData.sheets)
-          ? mindMapData.sheets.length
-          : 1
-        // convert multi confirm
-        if (sheetCount > 1) {
+        let selectedSheetIds = null
+        const sheets = Array.isArray(mindMapData.sheets) ? mindMapData.sheets : []
+        // convert multi preview
+        if (sheets.length > 1) {
           try {
-            await this.$confirm(
-              this.$t('toolbar.convertMultiSheetConfirm', { count: sheetCount }) ||
-                `将把 ${sheetCount} 个画布分别转换为流程页面，是否继续？`,
-              this.$t('toolbar.convertToFlowchart') || '转换为流程图',
-              {
-                type: 'info',
-                confirmButtonText: this.$t('dialog.confirm') || '确定',
-                cancelButtonText: this.$t('dialog.cancel') || '取消'
-              }
-            )
+            const result = await this.openDocumentConvertPreview({
+              mode: 'mindmap-to-flowchart',
+              items: sheets.map((sheet, index) => ({
+                id: sheet.id || 'sheet_' + (index + 1),
+                name: sheet.name || sheet.root?.data?.text || '画布 ' + (index + 1),
+                meta:
+                  (Array.isArray(sheet.root?.children)
+                    ? sheet.root.children.length
+                    : 0) + ' 个子主题'
+              }))
+            })
+            selectedSheetIds = (result.selected || []).map(item => item.id)
+            if (!selectedSheetIds.length) return
           } catch (_error) {
             return
           }
         }
         const flowWorkbook = convertMindmapWorkbookToFlowchartWorkbook(mindMapData, {
-          title: String(mindMapData.root?.data?.text || '流程图')
+          title: String(mindMapData.root?.data?.text || '流程图'),
+          selectedSheetIds
         })
         const nextDocument = {
           documentMode: 'flowchart',

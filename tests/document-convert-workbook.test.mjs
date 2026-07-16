@@ -21,6 +21,18 @@ test('多页转换服务已接入导图/流程图转换入口', () => {
   assert.ok(toolbarSource.includes('convertMindmapWorkbookToFlowchartWorkbook'))
   assert.ok(documentSource.includes('convertMindmapWorkbookToFlowchartWorkbook'))
   assert.ok(documentSource.includes('convertFlowchartWorkbookToMindmapWorkbook'))
-  assert.ok(toolbarSource.includes('convert multi confirm') || toolbarSource.includes('convertMultiSheetConfirm') || toolbarSource.includes('sheetCount'))
-  assert.ok(documentSource.includes('pageCount') || documentSource.includes('convert multi page confirm'))
+  assert.ok(
+    toolbarSource.includes('selectedSheetIds') ||
+      toolbarSource.includes('openDocumentConvertPreview')
+  )
+  assert.ok(
+    documentSource.includes('selectedSheetIds') ||
+      documentSource.includes('openDocumentConvertPreview')
+  )
+  assert.ok(convertSource.includes('selectedSheetIds'))
+  const dialogSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/DocumentConvertPreviewDialog.vue'),
+    'utf8'
+  )
+  assert.ok(dialogSource.includes('openDocumentConvertPreview'))
 })

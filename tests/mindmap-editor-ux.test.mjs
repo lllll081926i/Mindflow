@@ -677,3 +677,11 @@ test('思维导图支持范围概要调整条与标记图例', () => {
   assert.ok(contextSource.includes('summaryActionLabel'))
   assert.ok(contextSource.includes('insertRangeSummary') || contextSource.includes('范围概要'))
 })
+
+
+test('范围概要支持画布高亮与直接创建', () => {
+  const summarySource = fs.readFileSync(path.resolve('src/pages/Edit/components/SummaryRangeBar.vue'), 'utf8')
+  assert.ok(summarySource.includes('applyRangeHighlight'))
+  assert.ok(summarySource.includes('createRangeSummary'))
+  assert.ok(summarySource.includes('clearRangeHighlight'))
+})

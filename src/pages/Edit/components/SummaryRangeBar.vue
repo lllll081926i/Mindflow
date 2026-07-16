@@ -10,11 +10,17 @@
       <span class="range">{{ rangeLabel }}</span>
     </div>
     <div class="actions">
-      <el-button size="small" :disabled="!canShrinkStart" @click="shrinkStart">收起起点</el-button>
-      <el-button size="small" :disabled="!canExpandStart" @click="expandStart">扩展起点</el-button>
-      <el-button size="small" :disabled="!canShrinkEnd" @click="shrinkEnd">收起终点</el-button>
-      <el-button size="small" :disabled="!canExpandEnd" @click="expandEnd">扩展终点</el-button>
-      <el-button size="small" type="danger" @click="removeSummary">删除概要</el-button>
+      <el-button
+        v-if="!generalizationNode && range"
+        size="small"
+        type="primary"
+        @click="createRangeSummary"
+      >{{ $t('summaryRange.create') || '创建范围概要' }}</el-button>
+      <el-button size="small" :disabled="!canShrinkStart || !generalizationNode" @click="shrinkStart">收起起点</el-button>
+      <el-button size="small" :disabled="!canExpandStart || !generalizationNode" @click="expandStart">扩展起点</el-button>
+      <el-button size="small" :disabled="!canShrinkEnd || !generalizationNode" @click="shrinkEnd">收起终点</el-button>
+      <el-button size="small" :disabled="!canExpandEnd || !generalizationNode" @click="expandEnd">扩展终点</el-button>
+      <el-button size="small" type="danger" :disabled="!generalizationNode" @click="removeSummary">删除概要</el-button>
       <el-button size="small" @click="close">关闭</el-button>
     </div>
     <div class="hint">
@@ -74,18 +80,58 @@ export default {
   created() {
     this.$bus.$on('node_active', this.onNodeActive)
     this.$bus.$on('draw_click', this.close)
+    this.$bus.$on('node_tree_render_end', this.onRenderEnd)
   },
   beforeUnmount() {
     this.$bus.$off('node_active', this.onNodeActive)
     this.$bus.$off('draw_click', this.close)
+    this.$bus.$off('node_tree_render_end', this.onRenderEnd)
   },
   methods: {
+    onRenderEnd() {
+      if (this.visible) this.applyRangeHighlight()
+    },
     close() {
+      this.clearRangeHighlight()
       this.visible = false
       this.generalizationNode = null
       this.parentNode = null
       this.range = null
       this.brotherCount = 0
+    },
+    clearRangeHighlight() {
+      try {
+        const root = this.mindMap?.renderer?.root
+        if (!root) return
+        const walk = node => {
+          if (!node) return
+          if (node._summaryRangeHighlight && node.group?.opacity) {
+            node.group.opacity(1)
+            node._summaryRangeHighlight = false
+          }
+          ;(node.children || []).forEach(walk)
+        }
+        walk(root)
+      } catch (_error) {}
+    },
+    applyRangeHighlight() {
+      this.clearRangeHighlight()
+      if (!this.parentNode || !Array.isArray(this.range)) return
+      try {
+        const children = this.parentNode.children || []
+        const [start, end] = this.range
+        children.forEach((child, index) => {
+          if (!child?.group?.opacity) return
+          const inRange = index >= start && index <= end
+          child.group.opacity(inRange ? 1 : 0.22)
+          child._summaryRangeHighlight = true
+        })
+        // keep parent visible
+        if (this.parentNode.group?.opacity) {
+          this.parentNode.group.opacity(1)
+          this.parentNode._summaryRangeHighlight = true
+        }
+      } catch (_error) {}
     },
     onNodeActive(node, nodeList = []) {
       const list = Array.isArray(nodeList) ? nodeList : []
@@ -105,6 +151,7 @@ export default {
             : null
           this.brotherCount = parent.children?.length || 0
           this.visible = true
+          this.$nextTick(() => this.applyRangeHighlight())
           return
         }
       }
@@ -118,10 +165,15 @@ export default {
       this.parentNode = target.generalizationBelongNode || target.parent || null
       const data = target.getData?.() || {}
       this.range = Array.isArray(data.range) ? [...data.range] : null
+      // if no explicit range, treat as single node index when possible
+      if (!this.range && this.parentNode && target.generalizationBelongNode) {
+        // leave null for single-node summary
+      }
       this.brotherCount = this.parentNode?.children?.length || 0
       this.visible = true
+      this.$nextTick(() => this.applyRangeHighlight())
     },
-        updateRange(nextRange) {
+    updateRange(nextRange) {
       if (!this.generalizationNode || !this.parentNode) return
       if (!Array.isArray(nextRange) || nextRange.length !== 2) return
       const [start, end] = nextRange
@@ -167,7 +219,9 @@ export default {
       }
       this.range = [start, end]
       this.mindMap?.render?.()
-    },expandStart() {
+      this.$nextTick(() => this.applyRangeHighlight())
+    },
+    expandStart() {
       if (!this.canExpandStart) return
       this.updateRange([this.range[0] - 1, this.range[1]])
     },
@@ -182,6 +236,24 @@ export default {
     shrinkEnd() {
       if (!this.canShrinkEnd) return
       this.updateRange([this.range[0], this.range[1] - 1])
+    },
+    createRangeSummary() {
+      if (!this.parentNode || !Array.isArray(this.range)) return
+      // ensure siblings in range are selected, then use library command
+      try {
+        const children = this.parentNode.children || []
+        const [start, end] = this.range
+        const targets = children.slice(start, end + 1)
+        if (!targets.length) return
+        this.mindMap?.renderer?.clearActiveNodeList?.()
+        targets.forEach(node => node.active?.())
+        this.mindMap?.execCommand?.('ADD_GENERALIZATION')
+        this.$message?.success?.(
+          this.$t('summaryRange.created') || '已创建范围概要'
+        )
+      } catch (error) {
+        console.error('createRangeSummary failed', error)
+      }
     },
     removeSummary() {
       if (this.generalizationNode) {
@@ -203,7 +275,8 @@ export default {
   bottom: 88px;
   transform: translateX(-50%);
   z-index: 1400;
-  min-width: 520px;
+  min-width: 560px;
+  border-left: 4px solid #2563eb;
   max-width: min(860px, calc(100vw - 32px));
   padding: 12px 14px;
   border-radius: 14px;

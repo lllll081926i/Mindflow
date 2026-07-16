@@ -276,28 +276,41 @@ export const flowchartDocumentMethods = {
     await this.$router.push('/export')
   },
 
+  openDocumentConvertPreview(payload = {}) {
+    return new Promise((resolve, reject) => {
+      this.$bus.$emit('openDocumentConvertPreview', {
+        ...payload,
+        resolve,
+        reject
+      })
+    })
+  },
+
   async convertCurrentMindMap() {
     const bootstrapState = getBootstrapState()
     if (!hasConvertibleMindMapData(bootstrapState.mindMapData)) {
       this.$message.warning(this.$t('flowchart.noMindMapToConvert'))
       return
     }
-    const sheetCount = Array.isArray(bootstrapState.mindMapData?.sheets)
-      ? bootstrapState.mindMapData.sheets.length
-      : 1
-    // mind multi convert confirm
-    if (sheetCount > 1) {
+    let selectedSheetIds = null
+    const sheets = Array.isArray(bootstrapState.mindMapData?.sheets)
+      ? bootstrapState.mindMapData.sheets
+      : []
+    // mind multi convert preview
+    if (sheets.length > 1) {
       try {
-        await this.$confirm(
-          this.$t('toolbar.convertMultiSheetConfirm', { count: sheetCount }) ||
-            '将把多个画布分别转换为流程页面，是否继续？',
-          this.$t('flowchart.convertMindMapShort') || '转换当前导图',
-          {
-            type: 'info',
-            confirmButtonText: this.$t('dialog.confirm') || '确定',
-            cancelButtonText: this.$t('dialog.cancel') || '取消'
-          }
-        )
+        const result = await this.openDocumentConvertPreview({
+          mode: 'mindmap-to-flowchart',
+          items: sheets.map((sheet, index) => ({
+            id: sheet.id || 'sheet_' + (index + 1),
+            name: sheet.name || sheet.root?.data?.text || '画布 ' + (index + 1),
+            meta:
+              (Array.isArray(sheet.root?.children) ? sheet.root.children.length : 0) +
+              ' 个子主题'
+          }))
+        })
+        selectedSheetIds = (result.selected || []).map(item => item.id)
+        if (!selectedSheetIds.length) return
       } catch (_error) {
         return
       }
@@ -306,7 +319,8 @@ export const flowchartDocumentMethods = {
     const flowWorkbook = convertMindmapWorkbookToFlowchartWorkbook(
       bootstrapState.mindMapData,
       {
-        title: this.flowchartData.title || this.$t('flowchart.fileNameFallback')
+        title: this.flowchartData.title || this.$t('flowchart.fileNameFallback'),
+        selectedSheetIds
       }
     )
     this.applyGeneratedFlowchart({
@@ -327,22 +341,24 @@ export const flowchartDocumentMethods = {
       return
     }
     try {
-      const pageCount = Array.isArray(this.flowchartData?.sheets)
-        ? this.flowchartData.sheets.length
-        : 1
-      // convert multi page confirm
-      if (pageCount > 1) {
+      let selectedSheetIds = null
+      const pages = Array.isArray(this.flowchartData?.sheets)
+        ? this.flowchartData.sheets
+        : []
+      // convert multi page preview
+      if (pages.length > 1) {
         try {
-          await this.$confirm(
-            this.$t('flowchart.convertMultiPageConfirm', { count: pageCount }) ||
-              `将把 ${pageCount} 个流程页面分别转换为导图画布，是否继续？`,
-            this.$t('flowchart.convertToMindMapShort') || '转换为思维导图',
-            {
-              type: 'info',
-              confirmButtonText: this.$t('dialog.confirm') || '确定',
-              cancelButtonText: this.$t('dialog.cancel') || '取消'
-            }
-          )
+          const result = await this.openDocumentConvertPreview({
+            mode: 'flowchart-to-mindmap',
+            items: pages.map((sheet, index) => ({
+              id: sheet.id || 'page_' + (index + 1),
+              name: sheet.name || sheet.title || '页面 ' + (index + 1),
+              meta:
+                (Array.isArray(sheet.nodes) ? sheet.nodes.length : 0) + ' 个节点'
+            }))
+          })
+          selectedSheetIds = (result.selected || []).map(item => item.id)
+          if (!selectedSheetIds.length) return
         } catch (_error) {
           return
         }
@@ -353,7 +369,7 @@ export const flowchartDocumentMethods = {
         this.$t('flowchart.fileNameFallback')
       const mindMapData = convertFlowchartWorkbookToMindmapWorkbook(
         this.flowchartData,
-        { title }
+        { title, selectedSheetIds }
       )
       await saveBootstrapStatePatch({
         mindMapData: cloneJson(mindMapData),
