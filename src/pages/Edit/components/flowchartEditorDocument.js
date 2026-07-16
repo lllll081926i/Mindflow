@@ -276,11 +276,31 @@ export const flowchartDocumentMethods = {
     await this.$router.push('/export')
   },
 
-  convertCurrentMindMap() {
+  async convertCurrentMindMap() {
     const bootstrapState = getBootstrapState()
     if (!hasConvertibleMindMapData(bootstrapState.mindMapData)) {
       this.$message.warning(this.$t('flowchart.noMindMapToConvert'))
       return
+    }
+    const sheetCount = Array.isArray(bootstrapState.mindMapData?.sheets)
+      ? bootstrapState.mindMapData.sheets.length
+      : 1
+    // mind multi convert confirm
+    if (sheetCount > 1) {
+      try {
+        await this.$confirm(
+          this.$t('toolbar.convertMultiSheetConfirm', { count: sheetCount }) ||
+            '将把多个画布分别转换为流程页面，是否继续？',
+          this.$t('flowchart.convertMindMapShort') || '转换当前导图',
+          {
+            type: 'info',
+            confirmButtonText: this.$t('dialog.confirm') || '确定',
+            cancelButtonText: this.$t('dialog.cancel') || '取消'
+          }
+        )
+      } catch (_error) {
+        return
+      }
     }
     // multi-page: convert each mindmap sheet into a flowchart page
     const flowWorkbook = convertMindmapWorkbookToFlowchartWorkbook(
@@ -307,6 +327,26 @@ export const flowchartDocumentMethods = {
       return
     }
     try {
+      const pageCount = Array.isArray(this.flowchartData?.sheets)
+        ? this.flowchartData.sheets.length
+        : 1
+      // convert multi page confirm
+      if (pageCount > 1) {
+        try {
+          await this.$confirm(
+            this.$t('flowchart.convertMultiPageConfirm', { count: pageCount }) ||
+              `将把 ${pageCount} 个流程页面分别转换为导图画布，是否继续？`,
+            this.$t('flowchart.convertToMindMapShort') || '转换为思维导图',
+            {
+              type: 'info',
+              confirmButtonText: this.$t('dialog.confirm') || '确定',
+              cancelButtonText: this.$t('dialog.cancel') || '取消'
+            }
+          )
+        } catch (_error) {
+          return
+        }
+      }
       await this.flushInteractiveFlowchartPersist()
       const title =
         String(this.flowchartData?.title || '').trim() ||
@@ -354,7 +394,11 @@ export const flowchartDocumentMethods = {
           }
         })
       } catch (_error) {}
-      this.$message.success(this.$t('flowchart.flowchartConverted'))
+      this.$message.success(
+        this.$t('flowchart.flowchartConvertedMulti', {
+          count: Array.isArray(mindMapData?.sheets) ? mindMapData.sheets.length : 1
+        }) || this.$t('flowchart.flowchartConverted')
+      )
       if (this.$route.path !== '/edit') {
         await this.$router.push('/edit')
       }

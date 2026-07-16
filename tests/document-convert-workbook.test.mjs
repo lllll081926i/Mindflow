@@ -21,4 +21,6 @@ test('多页转换服务已接入导图/流程图转换入口', () => {
   assert.ok(toolbarSource.includes('convertMindmapWorkbookToFlowchartWorkbook'))
   assert.ok(documentSource.includes('convertMindmapWorkbookToFlowchartWorkbook'))
   assert.ok(documentSource.includes('convertFlowchartWorkbookToMindmapWorkbook'))
+  assert.ok(toolbarSource.includes('convert multi confirm') || toolbarSource.includes('convertMultiSheetConfirm') || toolbarSource.includes('sheetCount'))
+  assert.ok(documentSource.includes('pageCount') || documentSource.includes('convert multi page confirm'))
 })

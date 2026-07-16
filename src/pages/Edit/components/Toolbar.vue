@@ -1018,6 +1018,26 @@ export default {
           this.$message.warning(this.$t('toolbar.noMindMapToConvert'))
           return
         }
+        const sheetCount = Array.isArray(mindMapData.sheets)
+          ? mindMapData.sheets.length
+          : 1
+        // convert multi confirm
+        if (sheetCount > 1) {
+          try {
+            await this.$confirm(
+              this.$t('toolbar.convertMultiSheetConfirm', { count: sheetCount }) ||
+                `将把 ${sheetCount} 个画布分别转换为流程页面，是否继续？`,
+              this.$t('toolbar.convertToFlowchart') || '转换为流程图',
+              {
+                type: 'info',
+                confirmButtonText: this.$t('dialog.confirm') || '确定',
+                cancelButtonText: this.$t('dialog.cancel') || '取消'
+              }
+            )
+          } catch (_error) {
+            return
+          }
+        }
         const flowWorkbook = convertMindmapWorkbookToFlowchartWorkbook(mindMapData, {
           title: String(mindMapData.root?.data?.text || '流程图')
         })
