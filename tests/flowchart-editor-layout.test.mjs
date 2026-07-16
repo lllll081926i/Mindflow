@@ -2611,3 +2611,10 @@ test('流程图页面标签支持拖拽排序', () => {
   assert.ok(editorSource.includes('onFlowSheetDragStart'))
   assert.ok(editorSource.includes('onFlowSheetDrop'))
 })
+
+
+test('流程图搜索可命中其他页面节点', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  assert.ok(editorSource.includes('isCrossPage'))
+  assert.ok(editorSource.includes('crossPageHits'))
+})

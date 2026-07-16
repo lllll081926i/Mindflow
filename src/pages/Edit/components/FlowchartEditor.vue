@@ -1225,7 +1225,53 @@ export default {
         })
         .filter(Boolean)
         .filter(item => item.haystack.includes(keyword))
-      return [...nodeHits, ...edgeHits]
+      // include inactive pages
+      let crossPageHits = []
+      try {
+        const workbook = ensureFlowchartWorkbook(this.flowchartData)
+        const activeId = workbook.activeSheetId
+        workbook.sheets.forEach(sheet => {
+          if (sheet.id === activeId) return
+          ;(sheet.nodes || []).forEach(node => {
+            const text = String(node.text || '').trim()
+            const note = String(node.note || '').trim()
+            const link = String(node.link || '').trim()
+            const typeDef = this.flowchartNodeTypes.find(item => item.type === node.type)
+            const haystack = (text + ' ' + note + ' ' + link + ' ' + (typeDef?.label || '') + ' ' + node.type).toLowerCase()
+            if (haystack.includes(keyword)) {
+              crossPageHits.push({
+                id: node.id + '@' + sheet.id,
+                kind: 'node',
+                sheetId: sheet.id,
+                sheetName: sheet.name,
+                text: '[' + sheet.name + '] ' + (text || typeDef?.label || node.type),
+                type: node.type,
+                typeLabel: sheet.name,
+                isCrossPage: true,
+                haystack
+              })
+            }
+          })
+          ;(sheet.edges || []).forEach(edge => {
+            const label = String(edge.label || '').trim()
+            if (!label) return
+            if (label.toLowerCase().includes(keyword)) {
+              crossPageHits.push({
+                id: edge.id + '@' + sheet.id,
+                kind: 'edge',
+                sheetId: sheet.id,
+                sheetName: sheet.name,
+                text: '[' + sheet.name + '] ' + label,
+                type: 'edge',
+                typeLabel: sheet.name,
+                isCrossPage: true,
+                haystack: label.toLowerCase()
+              })
+            }
+          })
+        })
+      } catch (_error) {}
+      return [...nodeHits, ...edgeHits, ...crossPageHits]
     },
     flowchartCommandPaletteLabels() {
       return {
@@ -1777,6 +1823,36 @@ export default {
       this.flowchartSearchActiveIndex = nextIndex
       const item = list[nextIndex]
       if (!item?.id) return
+      if (item.isCrossPage && item.sheetId) {
+        const targetId = String(item.id || '').split('@')[0]
+        const kind = item.kind
+        Promise.resolve(this.switchFlowchartSheetById(item.sheetId)).then(() => {
+          this.$nextTick(() => {
+            if (kind === 'edge') {
+              this.selectedEdgeId = targetId
+              this.selectedNodeIds = []
+              const edge = (this.edgesWithLayout || []).find(e => e.id === targetId)
+              if (edge && typeof this.centerViewportAt === 'function') {
+                this.centerViewportAt({
+                  x: Number(edge.labelX || edge.sourcePoint?.x || 0),
+                  y: Number(edge.labelY || edge.sourcePoint?.y || 0)
+                })
+              }
+              return
+            }
+            this.selectedNodeIds = [targetId]
+            this.selectedEdgeId = ''
+            const node = this.flowchartNodeLookup.get(targetId)
+            if (node && typeof this.centerViewportAt === 'function') {
+              this.centerViewportAt({
+                x: Number(node.x || 0) + Number(node.width || 0) / 2,
+                y: Number(node.y || 0) + Number(node.height || 0) / 2
+              })
+            }
+          })
+        })
+        return
+      }
       if (item.kind === 'edge') {
         this.selectedEdgeId = item.id
         this.selectedNodeIds = []
