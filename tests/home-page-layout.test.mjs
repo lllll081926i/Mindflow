@@ -317,3 +317,18 @@ test('模板中心与首页共享完整导图场景工厂', () => {
   assert.match(templatesSource, /scenarioMindMapFactory/)
   assert.match(templatesSource, /rememberStarter/)
 })
+
+
+test('首页与模板中心覆盖商业路演与采购流程模板', () => {
+  const source = fs.readFileSync(path.resolve('src/pages/Home/Index.vue'), 'utf8')
+  const catalog = fs.readFileSync(path.resolve('src/services/templateCatalog.js'), 'utf8')
+  const factory = fs.readFileSync(path.resolve('src/services/scenarioMindMapFactory.js'), 'utf8')
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(source, /createMindMapScenario\('pitch'\)/)
+  assert.match(source, /createFlowchartFromTemplate\('procurement'\)/)
+  assert.match(catalog, /key: 'pitch'/)
+  assert.match(catalog, /key: 'procurement'/)
+  assert.match(factory, /scenario === 'pitch'/)
+  assert.match(langSource, /"starterMindMapPitch"/)
+  assert.match(langSource, /"starterFlowProcurement"/)
+})

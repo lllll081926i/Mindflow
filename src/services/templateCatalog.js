@@ -12,7 +12,8 @@ export const MIND_MAP_SCENARIO_STARTERS = [
   { key: 'competitor', titleKey: 'home.starterMindMapCompetitor', descKey: 'home.starterMindMapCompetitorDesc' },
   { key: 'retro', titleKey: 'home.starterMindMapRetro', descKey: 'home.starterMindMapRetroDesc' },
   { key: 'roadmap', titleKey: 'home.starterMindMapRoadmap', descKey: 'home.starterMindMapRoadmapDesc' },
-  { key: 'content', titleKey: 'home.starterMindMapContent', descKey: 'home.starterMindMapContentDesc' }
+  { key: 'content', titleKey: 'home.starterMindMapContent', descKey: 'home.starterMindMapContentDesc' },
+  { key: 'pitch', titleKey: 'home.starterMindMapPitch', descKey: 'home.starterMindMapPitchDesc' }
 ]
 
 export const FLOWCHART_TEMPLATE_STARTERS = [
@@ -23,5 +24,6 @@ export const FLOWCHART_TEMPLATE_STARTERS = [
   { key: 'salesPipeline', titleKey: 'home.starterFlowSales', descKey: 'home.starterFlowSalesDesc' },
   { key: 'contentReview', titleKey: 'home.starterFlowReviewFlow', descKey: 'home.starterFlowReviewFlowDesc' },
   { key: 'incident', titleKey: 'home.starterFlowIncident', descKey: 'home.starterFlowIncidentDesc' },
-  { key: 'customerJourney', titleKey: 'home.starterFlowJourney', descKey: 'home.starterFlowJourneyDesc' }
+  { key: 'customerJourney', titleKey: 'home.starterFlowJourney', descKey: 'home.starterFlowJourneyDesc' },
+  { key: 'procurement', titleKey: 'home.starterFlowProcurement', descKey: 'home.starterFlowProcurementDesc' }
 ]

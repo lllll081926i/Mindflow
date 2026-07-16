@@ -2151,3 +2151,13 @@ test('流程图最近修复动作可点击定位相关节点', () => {
   assert.ok(editorSource.includes('focusAutofixAction'))
   assert.ok(editorSource.includes('@click="focusAutofixAction(action)"'))
 })
+
+
+test('XMind 画布对话框打开后聚焦确认按钮', () => {
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.ok(editorSource.includes('xmindConfirmBtn'))
+  assert.ok(editorSource.includes('xmindConfirmBtn?.focus'))
+})

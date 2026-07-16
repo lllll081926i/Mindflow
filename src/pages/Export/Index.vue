@@ -1136,10 +1136,12 @@ export default {
         clearInterval(this.exportProgressTimer)
         this.exportProgressTimer = 0
       }
-      this.exportProgress = 100
+      if (this.exportProgress > 0 && this.exportProgress < 100) {
+        this.exportProgress = 100
+      }
       window.setTimeout(() => {
         this.exportProgress = 0
-      }, 400)
+      }, 300)
     },
     async handleExport() {
       if (!this.canExportCurrentDocument || this.isDisabledFormat || this.exporting) {

@@ -317,6 +317,16 @@
             <button
               type="button"
               class="starterCard"
+              v-show="isStarterVisible('mindmap', $t('home.starterMindMapPitch'), $t('home.starterMindMapPitchDesc'))"
+              :disabled="busy"
+              @click="createMindMapScenario('pitch')"
+            >
+              <strong>{{ $t('home.starterMindMapPitch') }}</strong>
+              <span>{{ $t('home.starterMindMapPitchDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
               v-show="isStarterVisible('flowchart', $t('home.starterFlowApproval'), $t('home.starterFlowApprovalDesc'))"
               :disabled="busy"
               @click="createFlowchartFromTemplate('approval')"
@@ -393,6 +403,16 @@
             >
               <strong>{{ $t('home.starterFlowJourney') }}</strong>
               <span>{{ $t('home.starterFlowJourneyDesc') }}</span>
+            </button>
+            <button
+              type="button"
+              class="starterCard"
+              v-show="isStarterVisible('flowchart', $t('home.starterFlowProcurement'), $t('home.starterFlowProcurementDesc'))"
+              :disabled="busy"
+              @click="createFlowchartFromTemplate('procurement')"
+            >
+              <strong>{{ $t('home.starterFlowProcurement') }}</strong>
+              <span>{{ $t('home.starterFlowProcurementDesc') }}</span>
             </button>
           </div>
             <div v-if="!hasVisibleStarters" class="starterEmpty">
@@ -537,9 +557,9 @@ export default {
     },
     starterCategoryCounts() {
       return {
-        all: 25,
-        mindmap: 17,
-        flowchart: 8
+        all: 27,
+        mindmap: 18,
+        flowchart: 9
       }
     },
     hasVisibleStarters() {
@@ -561,6 +581,7 @@ export default {
         ['mindmap', 'home.starterMindMapRetro', 'home.starterMindMapRetroDesc'],
         ['mindmap', 'home.starterMindMapRoadmap', 'home.starterMindMapRoadmapDesc'],
         ['mindmap', 'home.starterMindMapContent', 'home.starterMindMapContentDesc'],
+        ['mindmap', 'home.starterMindMapPitch', 'home.starterMindMapPitchDesc'],
         ['flowchart', 'home.starterFlowApproval', 'home.starterFlowApprovalDesc'],
         ['flowchart', 'home.starterFlowRelease', 'home.starterFlowReleaseDesc'],
         ['flowchart', 'home.starterFlowEnterprise', 'home.starterFlowEnterpriseDesc'],
@@ -568,7 +589,8 @@ export default {
         ['flowchart', 'home.starterFlowSales', 'home.starterFlowSalesDesc'],
         ['flowchart', 'home.starterFlowReviewFlow', 'home.starterFlowReviewFlowDesc'],
         ['flowchart', 'home.starterFlowIncident', 'home.starterFlowIncidentDesc'],
-        ['flowchart', 'home.starterFlowJourney', 'home.starterFlowJourneyDesc']
+        ['flowchart', 'home.starterFlowJourney', 'home.starterFlowJourneyDesc'],
+        ['flowchart', 'home.starterFlowProcurement', 'home.starterFlowProcurementDesc']
       ]
       return labels.some(([category, titleKey, descKey]) =>
         this.isStarterVisible(category, this.$t(titleKey), this.$t(descKey))

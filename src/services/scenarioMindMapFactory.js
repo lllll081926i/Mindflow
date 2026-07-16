@@ -367,6 +367,40 @@ export function createScenarioMindMapData(scenario = 'meeting', isDark = false) 
         ]
         return data
       }
+      if (scenario === 'pitch') {
+        data.root.data.text = '商业路演'
+        data.root.children = [
+          {
+            data: { text: '问题与机会' },
+            children: [
+              { data: { text: '用户痛点' }, children: [] },
+              { data: { text: '市场机会' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '解决方案' },
+            children: [
+              { data: { text: '产品能力' }, children: [] },
+              { data: { text: '差异化' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '商业模式' },
+            children: [
+              { data: { text: '定价' }, children: [] },
+              { data: { text: '增长' }, children: [] }
+            ]
+          },
+          {
+            data: { text: '下一步' },
+            children: [
+              { data: { text: '里程碑' }, children: [] },
+              { data: { text: '需要支持' }, children: [] }
+            ]
+          }
+        ]
+        return data
+      }
       data.root.data.text = '会议纪要'
       data.root.children = [
         {

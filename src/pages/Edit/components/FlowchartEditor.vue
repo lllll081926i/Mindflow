@@ -149,6 +149,7 @@
           :key="issue.code + '-' + index"
           type="button"
           class="flowchartValidationItem"
+          tabindex="0"
           :class="[
             'is-' + issue.severity,
             { isActive: selectedValidationIssueKey === issue.code + '-' + index }
@@ -491,7 +492,9 @@ v-if="flowchartShortcutVisible"
           <button type="button" class="xmindCanvasDialogBtn" @click="cancelXmindCanvasSelect">
             {{ $t('flowchart.autofixCancel') }}
           </button>
-          <button type="button" class="xmindCanvasDialogBtn isPrimary" @click="confirmXmindCanvasSelect">
+          <button type="button" ref="xmindConfirmBtn"
+            class="xmindCanvasDialogBtn isPrimary"
+            @click="confirmXmindCanvasSelect">
             {{ $t('flowchart.xmindCanvasConfirm') }}
           </button>
         </div>
@@ -1240,6 +1243,9 @@ export default {
       this.xmindCanvasOptions = options
       this.xmindCanvasSelectedIndex = 0
       this.xmindCanvasDialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.xmindConfirmBtn?.focus?.()
+      })
       return new Promise(resolve => {
         this.xmindCanvasResolve = resolve
       })
