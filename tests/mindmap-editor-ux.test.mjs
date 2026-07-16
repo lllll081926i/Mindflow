@@ -485,3 +485,11 @@ test('storeData 在局部 root 更新时保留多画布 sheets', () => {
   assert.ok(apiSource.includes('workbook-aware merge'))
   assert.ok(apiSource.includes('activeSheetId'))
 })
+
+
+test('思维导图画布标签支持拖拽排序', () => {
+  const editSource = fs.readFileSync(path.resolve('src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.ok(editSource.includes('onSheetDragStart'))
+  assert.ok(editSource.includes('onSheetDrop'))
+  assert.ok(editSource.includes('draggable="true"'))
+})

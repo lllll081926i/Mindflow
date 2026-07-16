@@ -42,10 +42,14 @@
           type="button"
           class="flowchartSheetTab"
           role="tab"
+          draggable="true"
           :aria-selected="sheet.active ? 'true' : 'false'"
           :class="{ isActive: sheet.active }"
           @click="switchFlowchartSheetById(sheet.id)"
           @dblclick.stop="startRenameFlowchartSheet(sheet)"
+          @dragstart.stop="onFlowSheetDragStart(sheet, $event)"
+          @dragover.prevent
+          @drop.stop.prevent="onFlowSheetDrop(sheet, $event)"
         >
           <input
             v-if="flowSheetEditingId === sheet.id"
@@ -1975,6 +1979,25 @@ export default {
     },
     persistActiveFlowchartSheet() {
       this.flowchartData = snapshotActiveFlowchartSheet(this.flowchartData, this.flowchartData)
+      void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: false })
+    },
+    onFlowSheetDragStart(sheet, event) {
+      if (!sheet?.id || !event?.dataTransfer) return
+      event.dataTransfer.setData('text/flow-sheet-id', sheet.id)
+      event.dataTransfer.effectAllowed = 'move'
+    },
+    onFlowSheetDrop(targetSheet, event) {
+      const sourceId = event?.dataTransfer?.getData('text/flow-sheet-id')
+      if (!sourceId || !targetSheet?.id || sourceId === targetSheet.id) return
+      const sheets = this.flowchartSheets || []
+      const targetIndex = sheets.findIndex(item => item.id === targetSheet.id)
+      if (targetIndex < 0) return
+      this.flowchartData = moveFlowchartSheet(
+        this.flowchartData,
+        sourceId,
+        targetIndex,
+        this.flowchartData
+      )
       void this.persistFlowchartState?.({ dirty: true, autoSave: true, recordHistory: false })
     },
     moveActiveFlowchartSheet(delta = 1) {

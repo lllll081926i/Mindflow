@@ -22,10 +22,13 @@
           v-for="sheet in mindmapSheets"
           :key="sheet.id"
           type="button"
-          class="mindmapSheetTab" role="tab" :aria-selected="sheet.active ? 'true' : 'false'"
+          class="mindmapSheetTab" role="tab" draggable="true" :aria-selected="sheet.active ? 'true' : 'false'"
           :class="{ isActive: sheet.active }"
           @click="switchMindmapSheetById(sheet.id)"
           @dblclick.stop="startRenameMindmapSheet(sheet)"
+          @dragstart.stop="onSheetDragStart(sheet, $event)"
+          @dragover.prevent
+          @drop.stop.prevent="onSheetDrop(sheet, $event)"
         >
           <input
             v-if="sheetEditingId === sheet.id"
@@ -1126,6 +1129,43 @@ export default {
       storeData(this.mindMapData)
     },
 
+    onSheetDragStart(sheet, event) {
+      if (!sheet?.id || !event?.dataTransfer) return
+      event.dataTransfer.setData('text/sheet-id', sheet.id)
+      event.dataTransfer.effectAllowed = 'move'
+    },
+    onSheetDrop(targetSheet, event) {
+      const sourceId = event?.dataTransfer?.getData('text/sheet-id')
+      if (!sourceId || !targetSheet?.id || sourceId === targetSheet.id) return
+      const sheets = this.mindmapSheets || []
+      const targetIndex = sheets.findIndex(item => item.id === targetSheet.id)
+      if (targetIndex < 0) return
+      this.persistActiveSheetSnapshot()
+      const next = moveMindmapSheet(
+        this.mindMapData || getData(),
+        sourceId,
+        targetIndex,
+        this.mindMap?.getData?.(true)
+      )
+      this.mindMapData = next
+      storeData(next)
+    },
+    moveActiveMindmapSheet(delta = 1) {
+      const sheets = this.mindmapSheets || []
+      const idx = sheets.findIndex(item => item.active)
+      if (idx < 0) return
+      const target = idx + delta
+      if (target < 0 || target >= sheets.length) return
+      this.persistActiveSheetSnapshot()
+      const next = moveMindmapSheet(
+        this.mindMapData || getData(),
+        sheets[idx].id,
+        target,
+        this.mindMap?.getData?.(true)
+      )
+      this.mindMapData = next
+      storeData(next)
+    },
     async switchMindmapSheetById(sheetId) {
       if (!sheetId || sheetId === this.activeMindmapSheetId) return
       this.persistActiveSheetSnapshot()
@@ -2002,7 +2042,7 @@ export default {
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255,255,255,0.92);
 }
-.editContainer.editContainer.isDark .mindmapSheetBar {
+.editContainer.isDark .mindmapSheetBar {
   background: rgba(24, 28, 34, 0.96);
   border-bottom-color: rgba(255,255,255,0.08);
 }
@@ -2033,7 +2073,7 @@ export default {
 .mindmapSheetTab.isActive {
   background: #fff;
 }
-.editContainer.editContainer.isDark .mindmapSheetTab.isActive {
+.editContainer.isDark .mindmapSheetTab.isActive {
   background: #1c2128;
 }
 .mindmapSheetTab span {

@@ -2604,3 +2604,10 @@ test('流程图支持 Ctrl+T/Tab 管理多页面', () => {
   assert.ok(selectionSource.includes('switchFlowchartSheetById'))
   assert.ok(configSource.includes('新建流程图页面') || selectionSource.includes("event.key.toLowerCase() === 't'"))
 })
+
+
+test('流程图页面标签支持拖拽排序', () => {
+  const editorSource = fs.readFileSync(path.resolve('src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  assert.ok(editorSource.includes('onFlowSheetDragStart'))
+  assert.ok(editorSource.includes('onFlowSheetDrop'))
+})
