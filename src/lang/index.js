@@ -681,6 +681,8 @@ const zh = {
     "arrangeBack": "置于底层",
     "emptyAddStart": "添加开始节点",
     "emptyUseTemplate": "使用审批模版",
+    "emptyUseReleaseTemplate": "使用发布模版",
+    "emptyUseEnterpriseTemplate": "使用交付模版",
     "inspectorTitle": "属性",
     "nodeType": "节点类型",
     "nodeText": "节点文本",

@@ -141,6 +141,19 @@
         <EditorToolbarAction
           action-class="flowchartToolbarBtn"
           icon-class="flowchartToolbarIcon"
+          :label="labels.search"
+          @action="$emit('open-search')"
+        >
+          <template #icon>
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="6"></circle>
+              <path d="m16 16 4 4"></path>
+            </svg>
+          </template>
+        </EditorToolbarAction>
+        <EditorToolbarAction
+          action-class="flowchartToolbarBtn"
+          icon-class="flowchartToolbarIcon"
           :label="labels.commandPalette"
           @action="$emit('open-command-palette')"
         >

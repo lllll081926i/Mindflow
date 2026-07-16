@@ -1796,3 +1796,38 @@ test('企业交付模板保持无重叠并提供更舒展的行距', () => {
   assert.match(templateSource, /y:\s*680/)
   assert.match(templateSource, /node-close-delivery/)
 })
+
+
+test('空画布提供多模板快速开始入口', () => {
+  const canvasSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartCanvas.vue'),
+    'utf8'
+  )
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  const langSource = fs.readFileSync(path.resolve('src/lang/index.js'), 'utf8')
+  assert.match(canvasSource, /apply-template', 'approval'/)
+  assert.match(canvasSource, /apply-template', 'release'/)
+  assert.match(canvasSource, /apply-template', 'enterpriseDelivery'/)
+  assert.match(editorSource, /emptyUseReleaseTemplate/)
+  assert.match(editorSource, /emptyUseEnterpriseTemplate/)
+  assert.match(langSource, /"emptyUseReleaseTemplate"/)
+  assert.match(langSource, /"emptyUseEnterpriseTemplate"/)
+})
+
+test('流程图工具栏提供搜索入口', () => {
+  const toolbarSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartToolbar.vue'),
+    'utf8'
+  )
+  const editorSource = fs.readFileSync(
+    path.resolve('src/pages/Edit/components/FlowchartEditor.vue'),
+    'utf8'
+  )
+  assert.match(toolbarSource, /open-search/)
+  assert.match(toolbarSource, /labels\.search/)
+  assert.match(editorSource, /@open-search="openFlowchartSearch"/)
+  assert.match(editorSource, /search: this\.\$t\('toolbar\.searchAction'\)/)
+})

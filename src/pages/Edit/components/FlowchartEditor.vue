@@ -17,6 +17,7 @@
       @generate-ai="generateWithAi"
       @tidy-layout="tidyFlowchartLayout"
       @open-command-palette="openCommandPalette"
+      @open-search="openFlowchartSearch"
     />
 
     <FlowchartCommandPalette
@@ -657,6 +658,8 @@ export default {
         arrangeBack: this.$t('flowchart.arrangeBack'),
         emptyAddStart: this.$t('flowchart.emptyAddStart'),
         emptyUseTemplate: this.$t('flowchart.emptyUseTemplate'),
+        emptyUseReleaseTemplate: this.$t('flowchart.emptyUseReleaseTemplate'),
+        emptyUseEnterpriseTemplate: this.$t('flowchart.emptyUseEnterpriseTemplate'),
         inspectorTitle: this.$t('flowchart.inspectorTitle'),
         nodeType: this.$t('flowchart.nodeType'),
         nodeText: this.$t('flowchart.nodeText'),
@@ -713,6 +716,7 @@ export default {
         importMindMapFile: this.$t('flowchart.importMindMapFileShort'),
         aiGenerate: this.$t('flowchart.aiGenerateShort'),
         commandPalette: this.$t('toolbar.commandPaletteAction'),
+        search: this.$t('toolbar.searchAction'),
         exportCenter: this.$t('toolbar.exportCenter'),
         convertMindMap: this.$t('flowchart.convertMindMapShort'),
         tidyLayout: this.$t('flowchart.tidyLayout'),

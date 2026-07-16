@@ -22,6 +22,12 @@
             <button type="button" class="flowchartPanelBtn" @click="$emit('apply-template', 'approval')">
               {{ labels.emptyUseTemplate }}
             </button>
+            <button type="button" class="flowchartPanelBtn" @click="$emit('apply-template', 'release')">
+              {{ labels.emptyUseReleaseTemplate }}
+            </button>
+            <button type="button" class="flowchartPanelBtn" @click="$emit('apply-template', 'enterpriseDelivery')">
+              {{ labels.emptyUseEnterpriseTemplate }}
+            </button>
             <button type="button" class="flowchartPanelBtn" @click="$emit('generate-ai')">
               {{ labels.aiGenerate }}
             </button>
