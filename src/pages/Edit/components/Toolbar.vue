@@ -857,6 +857,7 @@ export default {
         {
           key: 'bookmarkPanel',
           label: this.$t('bookmark.openPanel') || '打开书签',
+          shortcut: 'Alt+Shift+M',
           action: () => setActiveSidebar('bookmark')
         },
         {
@@ -2049,6 +2050,20 @@ export default {
       ) {
         event.preventDefault()
         this.collapseOtherBranches()
+        return
+      }
+      // Alt+Shift+M open bookmark sidebar
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'm'
+      ) {
+        event.preventDefault()
+        setActiveSidebar('bookmark')
         return
       }
       // Ctrl+Shift+B back to root center
