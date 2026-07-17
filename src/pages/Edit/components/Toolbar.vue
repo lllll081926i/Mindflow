@@ -879,6 +879,18 @@ export default {
           action: () => this.toggleSelectedBookmark()
         },
         {
+          key: 'prevBookmark',
+          label: this.$t('bookmark.prev') || '上一个书签',
+          shortcut: 'Alt+Shift+[',
+          action: () => this.$bus.$emit('mindmapJumpBookmark', -1)
+        },
+        {
+          key: 'nextBookmark',
+          label: this.$t('bookmark.next') || '下一个书签',
+          shortcut: 'Alt+Shift+]',
+          action: () => this.$bus.$emit('mindmapJumpBookmark', 1)
+        },
+        {
           key: 'clearAllBookmarks',
           label: this.$t('bookmark.clearAll') || '清空书签',
           action: () => this.$bus.$emit('bookmarkClearAll')
