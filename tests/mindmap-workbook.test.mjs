@@ -65,3 +65,28 @@ test('画布可重排序', () => {
   data = moveMindmapSheet(data, firstId, 2)
   assert.equal(data.sheets[2].id, firstId)
 })
+
+test('可使用自定义 root 新建画布', async () => {
+  const {
+    ensureMindmapWorkbook,
+    addMindmapSheet,
+    createMindmapSheet
+  } = await import('../src/services/mindmapWorkbook.js')
+  let data = ensureMindmapWorkbook(
+    createMindmapSheet({
+      name: '主画布',
+      root: { data: { text: 'root' }, children: [] }
+    })
+  )
+  data = addMindmapSheet(data, {
+    name: '分支画布',
+    root: {
+      data: { text: '专题', uid: 't1' },
+      children: [{ data: { text: '子节点', uid: 't2' }, children: [] }]
+    }
+  })
+  assert.equal(data.sheets.length, 2)
+  assert.equal(data.sheets[1].root.data.text, '专题')
+  assert.equal(data.sheets[1].root.children[0].data.text, '子节点')
+  assert.equal(data.activeSheetId, data.sheets[1].id)
+})
