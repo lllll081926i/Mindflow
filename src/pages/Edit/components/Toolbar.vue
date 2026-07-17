@@ -927,6 +927,12 @@ export default {
           action: () => this.emitEditorCommand('FIT_SELECTION')
         },
         {
+          key: 'centerSelection',
+          label: this.$t('toolbar.centerSelectionAction') || '居中选中',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('CENTER_SELECTION')
+        },
+        {
           key: 'painter',
           label: this.$t('toolbar.painter') || '格式刷',
           shortcut: 'Ctrl+Shift+P',

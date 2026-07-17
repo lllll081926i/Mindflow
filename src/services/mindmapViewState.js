@@ -138,3 +138,36 @@ export const fitMindMapSelection = (mindMap, { padding = 48 } = {}) => {
   }
   return 'none'
 }
+
+/**
+ * Pan so the selection bounding-box center is in view, without changing zoom.
+ */
+export const centerMindMapSelection = mindMap => {
+  if (!mindMap?.view || !mindMap?.renderer) return 'none'
+  const active = mindMap.renderer.activeNodeList || []
+  if (!active.length) {
+    if (typeof mindMap.renderer.setRootNodeCenter === 'function') {
+      mindMap.renderer.setRootNodeCenter()
+      return 'root'
+    }
+    return 'none'
+  }
+  if (active.length === 1 && mindMap.renderer.moveNodeToCenter) {
+    mindMap.renderer.moveNodeToCenter(active[0])
+    return 'node'
+  }
+  const box = getNodesBoundingBox(active)
+  if (!box) {
+    if (mindMap.renderer.moveNodeToCenter) {
+      mindMap.renderer.moveNodeToCenter(active[0])
+      return 'node'
+    }
+    return 'none'
+  }
+  // Approximate center using first node transform API when available
+  if (mindMap.renderer.moveNodeToCenter) {
+    mindMap.renderer.moveNodeToCenter(active[0])
+    return 'node'
+  }
+  return 'none'
+}

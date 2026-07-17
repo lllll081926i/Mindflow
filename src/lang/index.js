@@ -454,6 +454,7 @@ const zh = {
     "outlineAction": "大纲",
     "fitCanvasAction": "适应画布",
     "fitSelectionAction": "缩放到选中",
+    "centerSelectionAction": "居中选中",
     "expandToLevelLast": "折叠到上次层级",
     "expandToLevel1": "折叠到第 1 级",
     "expandToLevel2": "折叠到第 2 级",

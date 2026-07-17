@@ -246,6 +246,7 @@ import {
 } from '@/services/mindmapWorkbook'
 import {
   applyMindMapViewAfterLoad,
+  centerMindMapSelection,
   ensureExplicitExpandFlags,
   fitMindMapSelection,
   hasMindMapViewState,
@@ -2366,6 +2367,9 @@ export default {
           break
         case 'FIT_SELECTION':
           fitMindMapSelection(this.mindMap)
+          break
+        case 'CENTER_SELECTION':
+          centerMindMapSelection(this.mindMap)
           break
         case 'RETURN_CENTER':
           this.mindMap.renderer.setRootNodeCenter()
