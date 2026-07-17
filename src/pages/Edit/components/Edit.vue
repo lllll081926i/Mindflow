@@ -40,7 +40,15 @@
             @keydown.esc.prevent="sheetEditingId = ''"
             @blur="commitRenameMindmapSheet"
           />
-          <span v-else>{{ sheet.name }}</span>
+          <span v-else class="mindmapSheetName">
+            {{ sheet.name }}
+            <small
+              v-if="sheet.nodeCount > 0"
+              class="mindmapSheetCount"
+              :title="$t('edit.sheetNodeCount', { count: sheet.nodeCount }) || `${sheet.nodeCount} 个主题`"
+              >{{ sheet.nodeCount }}</small
+            >
+          </span>
           <em
             v-if="mindmapSheets.length > 1"
             class="mindmapSheetClose"
@@ -2330,10 +2338,31 @@ export default {
 .editContainer.isDark .mindmapSheetTab.isActive {
   background: #1c2128;
 }
-.mindmapSheetTab span {
+.mindmapSheetTab span,
+.mindmapSheetName {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.mindmapSheetCount {
+  flex-shrink: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: rgba(15, 23, 42, 0.62);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+.editContainer.isDark .mindmapSheetCount {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.72);
 }
 .mindmapSheetClose {
   font-style: normal;

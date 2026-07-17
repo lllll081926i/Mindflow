@@ -105,12 +105,24 @@ export const ensureMindmapWorkbook = (data = {}, options = {}) => {
   }
 }
 
+const countMindmapNodes = root => {
+  let count = 0
+  const walk = node => {
+    if (!node) return
+    count += 1
+    ;(node.children || []).forEach(walk)
+  }
+  walk(root)
+  return count
+}
+
 export const listMindmapSheets = data => {
   const workbook = ensureMindmapWorkbook(data)
   return workbook.sheets.map(sheet => ({
     id: sheet.id,
     name: sheet.name,
-    active: sheet.id === workbook.activeSheetId
+    active: sheet.id === workbook.activeSheetId,
+    nodeCount: countMindmapNodes(sheet.root)
   }))
 }
 
