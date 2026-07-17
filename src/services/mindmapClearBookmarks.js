@@ -8,8 +8,8 @@ export const clearAllMindMapBookmarks = mindMap => {
     const icons = typeof node.getData === 'function' ? node.getData('icon') || [] : []
     if (Array.isArray(icons) && icons.some(isBookmarkIcon)) {
       const next = icons.filter(icon => !isBookmarkIcon(icon))
-      if (mindMap.renderer.setNodeIcon) {
-        mindMap.renderer.setNodeIcon(node, next)
+      if (node.nodeData?.data) {
+        node.nodeData.data.icon = next
       } else if (typeof node.setData === 'function') {
         node.setData({ icon: next })
       }
@@ -18,5 +18,17 @@ export const clearAllMindMapBookmarks = mindMap => {
     ;(node.children || []).forEach(walk)
   }
   walk(mindMap.renderer.root)
+  if (cleared > 0) {
+    if (typeof mindMap.render === 'function') {
+      mindMap.render()
+    }
+    try {
+      const data = typeof mindMap.getData === 'function' ? mindMap.getData() : null
+      if (data) mindMap.emit?.('data_change', data)
+    } catch (_error) {}
+    if (mindMap.command?.addHistory) {
+      mindMap.command.addHistory()
+    }
+  }
   return cleared
 }
