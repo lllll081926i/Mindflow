@@ -606,7 +606,9 @@ const zh = {
     "toggle": "切换收藏",
     "clearAll": "清空书签",
     "clearAllConfirm": "确定清除当前画布全部书签标记吗？",
-    "clearAllDone": "已清除 {count} 个书签"
+    "clearAllDone": "已清除 {count} 个书签",
+    "prev": "上一个",
+    "next": "下一个"
   },
   "nodeIconSidebar": {
     "title": "图标/贴纸",

@@ -19,6 +19,20 @@
         <el-button
           size="small"
           :disabled="bookmarks.length <= 0"
+          @click="jumpAdjacent(-1)"
+        >
+          {{ $t('bookmark.prev') || '上一个' }}
+        </el-button>
+        <el-button
+          size="small"
+          :disabled="bookmarks.length <= 0"
+          @click="jumpAdjacent(1)"
+        >
+          {{ $t('bookmark.next') || '下一个' }}
+        </el-button>
+        <el-button
+          size="small"
+          :disabled="bookmarks.length <= 0"
           @click="clearAllBookmarks"
         >
           {{ $t('bookmark.clearAll') || '清空书签' }}
@@ -75,6 +89,7 @@ import {
   toggleNodesBookmark
 } from '@/services/nodeBookmarks'
 import { clearAllMindMapBookmarks } from '@/services/mindmapClearBookmarks'
+import { jumpToAdjacentBookmark } from '@/services/mindmapBookmarkNav'
 
 export default {
   name: 'BookmarkSidebar',
@@ -198,6 +213,15 @@ export default {
         this.$t('bookmark.clearAllDone', { count }) ||
           `已清除 ${count} 个书签`
       )
+    },
+
+    jumpAdjacent(direction = 1) {
+      if (!this.mindMap) return
+      const current = this.activeNodes[0] || null
+      const target = jumpToAdjacentBookmark(this.mindMap, current, direction)
+      if (!target) {
+        this.$message.info(this.$t('bookmark.empty') || '还没有收藏的主题')
+      }
     },
 
     jumpTo(item) {
