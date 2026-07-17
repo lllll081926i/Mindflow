@@ -923,6 +923,13 @@ export default {
           action: () => this.$bus.$emit('startPainter')
         },
         {
+          key: 'removeCustomStyles',
+          label:
+            this.$t('contextmenu.removeCustomStyles') || '清除自定义样式',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('REMOVE_CUSTOM_STYLES')
+        },
+        {
           key: 'selectAll',
           label: this.$t('toolbar.selectAll') || '全选主题',
           shortcut: 'Ctrl+A',
