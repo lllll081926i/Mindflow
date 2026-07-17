@@ -936,6 +936,13 @@ export default {
           action: () => this.emitEditorCommand('SELECT_ALL')
         },
         {
+          key: 'selectParent',
+          label: this.$t('toolbar.selectParent') || '选中父主题',
+          shortcut: 'Alt+↑',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.selectRelativeTopic('parent')
+        },
+        {
           key: 'selectBranch',
           label: this.$t('contextmenu.selectBranch') || '选中整支分支',
           shortcut: 'Ctrl+Alt+B',
@@ -3091,6 +3098,46 @@ export default {
             `已选中 ${count} 个主题`
         )
       }
+    },
+
+    selectRelativeTopic(relation = 'parent') {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      const current = nodes[0]
+      if (!current) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      let target = null
+      if (relation === 'parent') {
+        target = current.parent
+      } else if (relation === 'firstChild') {
+        target = current.children && current.children[0]
+      } else if (relation === 'prevSibling' && current.parent?.children) {
+        const siblings = current.parent.children
+        const index = siblings.indexOf(current)
+        target = index > 0 ? siblings[index - 1] : null
+      } else if (relation === 'nextSibling' && current.parent?.children) {
+        const siblings = current.parent.children
+        const index = siblings.indexOf(current)
+        target =
+          index >= 0 && index < siblings.length - 1
+            ? siblings[index + 1]
+            : null
+      }
+      if (!target) return
+      const mindMap = target.mindMap || current.mindMap
+      if (mindMap?.renderer?.clearActiveNodeList) {
+        mindMap.renderer.clearActiveNodeList()
+      }
+      if (mindMap?.renderer?.addNodeToActiveList) {
+        mindMap.renderer.addNodeToActiveList(target)
+        mindMap.renderer.emitNodeActiveEvent?.(target, [target])
+      }
+      mindMap?.renderer?.moveNodeToCenter?.(target)
     },
 
     copyActiveNodePath() {
