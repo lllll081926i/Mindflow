@@ -84,3 +84,23 @@ test('storeData 在仅 view 变更时也会写入当前 sheet.view', () => {
     /sheet\.id !== originData\.activeSheetId[\s\S]*view: data\.view/
   )
 })
+
+test('缩放到选中 helper 覆盖选区/整图回退', async () => {
+  const mod = await import(pathToFileURL(path.join(root, 'src/services/mindmapViewState.js')).href)
+  assert.match(fs.readFileSync(path.join(root, 'src/services/mindmapViewState.js'), 'utf8'), /fitMindMapSelection/)
+  const box = mod.getNodesBoundingBox([
+    { getRect: () => ({ x: 0, y: 0, width: 100, height: 40 }) },
+    { getRect: () => ({ x: 50, y: 20, width: 80, height: 30 }) }
+  ])
+  assert.equal(box.x, 0)
+  assert.equal(box.y, 0)
+  assert.equal(box.width, 130)
+  assert.equal(box.height, 50)
+  let mode = null
+  const mindMap = {
+    renderer: { activeNodeList: [{ getRect: () => ({ x: 10, y: 10, width: 20, height: 20 }) }] },
+    view: { fit: () => { mode = 'fit' } }
+  }
+  assert.equal(mod.fitMindMapSelection(mindMap), 'selection')
+  assert.equal(mode, 'fit')
+})

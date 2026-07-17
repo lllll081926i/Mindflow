@@ -866,6 +866,13 @@ export default {
           action: () => this.emitEditorCommand('FIT_CANVAS')
         },
         {
+          key: 'fitSelection',
+          label: this.$t('toolbar.fitSelectionAction') || '缩放到选中',
+          shortcut: 'Alt+Shift+F',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('FIT_SELECTION')
+        },
+        {
           key: 'returnCenter',
           label: this.$t('contextmenu.backToRoot'),
           action: () => this.emitEditorCommand('RETURN_CENTER')
@@ -1855,7 +1862,7 @@ export default {
         this.emitEditorCommand('UNEXPAND_ALL', true, '')
         return
       }
-      // Ctrl+Shift+H fit canvas / return center alternates with Fit then center if needed
+      // Ctrl+Shift+H fit canvas
       if (
         (event.ctrlKey || event.metaKey) &&
         event.shiftKey &&
@@ -1864,6 +1871,20 @@ export default {
       ) {
         event.preventDefault()
         this.emitEditorCommand('FIT_CANVAS')
+        return
+      }
+      // Alt+Shift+F fit selection
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'f'
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('FIT_SELECTION')
         return
       }
       // Ctrl+Shift+B back to root center

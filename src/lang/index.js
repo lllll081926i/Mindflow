@@ -432,6 +432,7 @@ const zh = {
     "focusModeAction": "专注",
     "outlineAction": "大纲",
     "fitCanvasAction": "适应画布",
+    "fitSelectionAction": "缩放到选中",
     "expandAllAction": "展开全部",
     "collapseAllAction": "收起全部",
     "pasteOutlineAction": "粘贴大纲",

@@ -178,6 +178,7 @@ import {
 import {
   applyMindMapViewAfterLoad,
   ensureExplicitExpandFlags,
+  fitMindMapSelection,
   hasMindMapViewState,
   restoreMindMapViewState
 } from '@/services/mindmapViewState'
@@ -2075,6 +2076,9 @@ export default {
       switch (command) {
         case 'FIT_CANVAS':
           this.mindMap.view.fit()
+          break
+        case 'FIT_SELECTION':
+          fitMindMapSelection(this.mindMap)
           break
         case 'RETURN_CENTER':
           this.mindMap.renderer.setRootNodeCenter()

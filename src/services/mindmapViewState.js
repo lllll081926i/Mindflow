@@ -73,3 +73,68 @@ export const ensureExplicitExpandFlags = root => {
   ;(root.children || []).forEach(child => ensureExplicitExpandFlags(child))
   return root
 }
+
+/**
+ * Compute a bounding box for selected nodes (SVG rbox style).
+ * Returns null when no measurable nodes.
+ */
+export const getNodesBoundingBox = (nodes = []) => {
+  const list = Array.isArray(nodes) ? nodes.filter(Boolean) : []
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  let count = 0
+  list.forEach(node => {
+    try {
+      const box =
+        typeof node.getRect === 'function'
+          ? node.getRect()
+          : node.group?.rbox?.()
+      if (!box) return
+      const x = Number(box.x)
+      const y = Number(box.y)
+      const width = Number(box.width)
+      const height = Number(box.height)
+      if (![x, y, width, height].every(Number.isFinite)) return
+      minX = Math.min(minX, x)
+      minY = Math.min(minY, y)
+      maxX = Math.max(maxX, x + width)
+      maxY = Math.max(maxY, y + height)
+      count += 1
+    } catch (_error) {}
+  })
+  if (!count) return null
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY
+  }
+}
+
+/**
+ * Fit view to active selection; falls back to whole canvas fit.
+ */
+export const fitMindMapSelection = (mindMap, { padding = 48 } = {}) => {
+  if (!mindMap?.view) return 'none'
+  const active = mindMap.renderer?.activeNodeList || []
+  if (active.length > 0 && typeof mindMap.view.fit === 'function') {
+    const box = getNodesBoundingBox(active)
+    if (box && box.width > 0 && box.height > 0) {
+      mindMap.view.fit(() => box, true, padding)
+      return 'selection'
+    }
+    // single node fallback
+    const node = active[0]
+    if (node && mindMap.renderer?.moveNodeToCenter) {
+      mindMap.renderer.moveNodeToCenter(node)
+      return 'center'
+    }
+  }
+  if (typeof mindMap.view.fit === 'function') {
+    mindMap.view.fit()
+    return 'canvas'
+  }
+  return 'none'
+}
