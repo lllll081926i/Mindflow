@@ -78,7 +78,7 @@
         <span class="name">{{
           $t('contextmenu.selectBranch') || '选中整支分支'
         }}</span>
-        <span class="desc">Ctrl+Shift+A</span>
+        <span class="desc">Ctrl+Alt+B</span>
       </div>
       <div
         class="item"

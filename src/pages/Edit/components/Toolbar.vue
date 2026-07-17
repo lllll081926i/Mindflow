@@ -930,7 +930,7 @@ export default {
         {
           key: 'selectBranch',
           label: this.$t('contextmenu.selectBranch') || '选中整支分支',
-          shortcut: 'Ctrl+Shift+A',
+          shortcut: 'Ctrl+Alt+B',
           disabled: this.activeNodes.length <= 0,
           action: () => this.selectActiveBranch()
         },
@@ -2044,11 +2044,12 @@ export default {
         this.emitEditorCommand('FIT_SELECTION')
         return
       }
-      // Ctrl+Shift+A select whole branch
+      // Ctrl+Alt+B select whole branch (avoid Ctrl+Shift+A associative-line conflict)
       if (
         (event.ctrlKey || event.metaKey) &&
-        event.shiftKey &&
-        event.key?.toLowerCase() === 'a' &&
+        event.altKey &&
+        !event.shiftKey &&
+        event.key?.toLowerCase() === 'b' &&
         !isTypingTarget
       ) {
         event.preventDefault()

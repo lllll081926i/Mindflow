@@ -515,6 +515,36 @@ export const shortcutKeyList = [
         value: ctrl + ' + Shift + H'
       },
       {
+        icon: 'iconfull',
+        name: '缩放到选中',
+        value: 'Alt + Shift + F'
+      },
+      {
+        icon: 'iconstar',
+        name: '切换收藏书签',
+        value: 'Alt + Shift + B'
+      },
+      {
+        icon: 'iconstar',
+        name: '打开书签面板',
+        value: 'Alt + Shift + M'
+      },
+      {
+        icon: 'iconzhankai',
+        name: '选中整支分支',
+        value: ctrl + ' + Alt + B'
+      },
+      {
+        icon: 'iconshouqi',
+        name: '折叠其他分支',
+        value: 'Alt + Shift + C'
+      },
+      {
+        icon: 'iconzhankai',
+        name: '折叠到指定层级',
+        value: ctrl + ' + Shift + 1~4'
+      },
+      {
         icon: 'iconlayout',
         name: '整理布局',
         value: ctrl + ' + L'
