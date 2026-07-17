@@ -80,6 +80,15 @@
         }}</span>
         <span class="desc">Ctrl+Shift+A</span>
       </div>
+      <div
+        class="item"
+        @click="copyNodePath"
+        :class="{ disabled: isGeneralization }"
+      >
+        <span class="name">{{
+          $t('contextmenu.copyNodePath') || '复制主题路径'
+        }}</span>
+      </div>
       <div class="item" @click="fitSelection">
         <span class="name">{{
           $t('toolbar.fitSelectionAction') || '缩放到选中'
@@ -268,6 +277,7 @@ import {
   toggleNodesBookmark
 } from '@/services/nodeBookmarks'
 import { selectMindMapBranch } from '@/services/mindmapSelection'
+import { buildMindMapNodePath } from '@/services/mindmapPath'
 
 // 右键菜单
 export default {
@@ -461,6 +471,23 @@ export default {
             `已选中 ${count} 个主题`
         )
       }
+      this.hide()
+    },
+
+    copyNodePath() {
+      if (!this.node) {
+        this.hide()
+        return
+      }
+      const pathText = buildMindMapNodePath(this.node)
+      if (!pathText) {
+        this.hide()
+        return
+      }
+      copy(pathText)
+      this.$message.success(
+        this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+      )
       this.hide()
     },
 

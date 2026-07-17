@@ -518,6 +518,8 @@ import {
   toggleNodesBookmark
 } from '@/services/nodeBookmarks'
 import { selectMindMapBranch } from '@/services/mindmapSelection'
+import { buildMindMapNodePath } from '@/services/mindmapPath'
+import { copy } from '@/utils'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
 const NodeHyperlink = defineAsyncComponent(() => import('./NodeHyperlink.vue'))
@@ -898,6 +900,12 @@ export default {
           shortcut: 'Ctrl+Shift+A',
           disabled: this.activeNodes.length <= 0,
           action: () => this.selectActiveBranch()
+        },
+        {
+          key: 'copyNodePath',
+          label: this.$t('contextmenu.copyNodePath') || '复制主题路径',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.copyActiveNodePath()
         },
         {
           key: 'expandToLevelLast',
@@ -2839,6 +2847,25 @@ export default {
             `已选中 ${count} 个主题`
         )
       }
+    },
+
+    copyActiveNodePath() {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      const node = nodes[0]
+      if (!node) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const pathText = buildMindMapNodePath(node)
+      if (!pathText) return
+      copy(pathText)
+      this.$message.success(
+        this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+      )
     },
 
     async onSelectAttachment(activeNodes = []) {

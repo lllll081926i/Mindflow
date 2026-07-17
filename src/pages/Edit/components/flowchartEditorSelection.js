@@ -133,6 +133,20 @@ export const flowchartSelectionMethods = {
       this.clearSelection()
       return
     }
+    // Alt+Shift+F fit selection (parity with mindmap)
+    if (
+      event.altKey &&
+      event.shiftKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      event.key.toLowerCase() === 'f'
+    ) {
+      event.preventDefault()
+      if (typeof this.fitSelectionToView === 'function') {
+        this.fitSelectionToView()
+      }
+      return
+    }
     const isMetaKey = event.ctrlKey || event.metaKey
     if (isMetaKey && event.key.toLowerCase() === 'k') {
       event.preventDefault()

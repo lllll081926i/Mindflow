@@ -163,18 +163,16 @@ export const flowchartViewportMethods = {
     this.setViewportZoom(viewport.zoom - this.getViewportZoomStep(viewport.zoom))
   },
 
-  fitCanvasToView({ persist = true } = {}) {
+  fitContentItemsToView(contentItems = [], { persist = true, padding = 96, maxZoom = 1 } = {}) {
     const canvasRect = this.getCanvasElement()?.getBoundingClientRect?.()
-    const nodes = Array.isArray(this.flowchartData?.nodes) ? this.flowchartData.nodes : []
-    const lanes = Array.isArray(this.flowchartData?.lanes) ? this.flowchartData.lanes : []
-    const contentItems = [...lanes, ...nodes]
-    if (!canvasRect || !contentItems.length) {
+    const items = Array.isArray(contentItems) ? contentItems.filter(Boolean) : []
+    if (!canvasRect || !items.length) {
       this.resetViewport({
         persist
       })
-      return
+      return 'reset'
     }
-    const bounds = contentItems.reduce(
+    const bounds = items.reduce(
       (result, item) => ({
         minX: Math.min(result.minX, Number(item.x || 0)),
         minY: Math.min(result.minY, Number(item.y || 0)),
@@ -188,14 +186,13 @@ export const flowchartViewportMethods = {
         maxY: -Infinity
       }
     )
-    const padding = 96
     const contentWidth = Math.max(1, bounds.maxX - bounds.minX)
     const contentHeight = Math.max(1, bounds.maxY - bounds.minY)
     const zoom = clampNumber(
       Math.min(
         (canvasRect.width - padding) / contentWidth,
         (canvasRect.height - padding) / contentHeight,
-        1
+        maxZoom
       ),
       MIN_VIEWPORT_ZOOM,
       MAX_VIEWPORT_ZOOM
@@ -210,6 +207,31 @@ export const flowchartViewportMethods = {
         persist
       }
     )
+    return 'fit'
+  },
+
+  fitCanvasToView({ persist = true } = {}) {
+    const nodes = Array.isArray(this.flowchartData?.nodes) ? this.flowchartData.nodes : []
+    const lanes = Array.isArray(this.flowchartData?.lanes) ? this.flowchartData.lanes : []
+    return this.fitContentItemsToView([...lanes, ...nodes], {
+      persist,
+      padding: 96,
+      maxZoom: 1
+    })
+  },
+
+  fitSelectionToView({ persist = true } = {}) {
+    const nodes = Array.isArray(this.flowchartData?.nodes) ? this.flowchartData.nodes : []
+    const selectedIds = Array.isArray(this.selectedNodeIds) ? this.selectedNodeIds : []
+    const selectedNodes = nodes.filter(node => selectedIds.includes(node.id))
+    if (!selectedNodes.length) {
+      return this.fitCanvasToView({ persist })
+    }
+    return this.fitContentItemsToView(selectedNodes, {
+      persist,
+      padding: 72,
+      maxZoom: 1.6
+    })
   },
 
   handleCanvasWheel(event) {

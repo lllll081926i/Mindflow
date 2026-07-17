@@ -178,6 +178,8 @@ const zh = {
     "unExpandNodeChild": "收起所有下级节点",
     "selectBranch": "选中整支分支",
     "selectBranchDone": "已选中 {count} 个主题",
+    "copyNodePath": "复制主题路径",
+    "copyNodePathDone": "已复制主题路径",
     "aiCreate": "AI续写",
     "modifyNodeLink": "修改节点链接",
     "linkToNode": "链接到指定节点",

@@ -1291,6 +1291,12 @@ export default {
         { key: 'outline', label: this.$t('flowchart.outlineTitle'), shortcut: 'Ctrl Shift O', action: () => this.openFlowchartOutline() },
         { key: 'shortcuts', label: this.$t('shortcutKey.title'), action: () => this.openFlowchartShortcuts() },
         { key: 'fitCanvas', label: this.$t('toolbar.fitCanvasAction'), shortcut: 'Ctrl 0', action: () => this.fitCanvasToView() },
+        {
+          key: 'fitSelection',
+          label: this.$t('toolbar.fitSelectionAction') || '缩放到选中',
+          shortcut: 'Alt+Shift+F',
+          action: () => this.fitSelectionToView?.()
+        },
         { key: 'resetViewport', label: this.$t('flowchart.fitView'), shortcut: 'Ctrl 1', action: () => this.resetViewport() },
         { key: 'tidyLayout', label: this.$t('flowchart.tidyLayout'), action: () => this.tidyFlowchartLayout() },
         { key: 'validate', label: this.$t('flowchart.validateStructure'), action: () => this.validateCurrentFlowchart({ openPanel: true }) },

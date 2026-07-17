@@ -28,3 +28,18 @@ test('演示模式展示演讲者备注', () => {
   assert.match(demo, /speakerNote/)
   assert.match(lang, /"speakerNotes"/)
 })
+
+test('流程图支持缩放到选中', () => {
+  const viewport = fs.readFileSync(path.join(root, 'src/pages/Edit/components/flowchartEditorViewport.js'), 'utf8')
+  const editor = fs.readFileSync(path.join(root, 'src/pages/Edit/components/FlowchartEditor.vue'), 'utf8')
+  assert.match(viewport, /fitSelectionToView/)
+  assert.match(editor, /fitSelectionToView/)
+})
+
+test('支持复制主题路径', () => {
+  const pathService = fs.readFileSync(path.join(root, 'src/services/mindmapPath.js'), 'utf8')
+  const menu = fs.readFileSync(path.join(root, 'src/pages/Edit/components/Contextmenu.vue'), 'utf8')
+  assert.match(pathService, /buildMindMapNodePath/)
+  assert.match(menu, /copyNodePath/)
+  assert.match(lang, /"copyNodePath"/)
+})
