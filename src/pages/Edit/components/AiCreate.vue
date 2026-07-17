@@ -382,6 +382,40 @@ export default {
       this.aiInput = ''
     },
 
+    // 生成前缓存当前导图，失败/停止时可回滚
+    captureMindMapSnapshot() {
+      try {
+        if (!this.mindMap || typeof this.mindMap.getData !== 'function') {
+          this.mindMapDataCache = ''
+          return false
+        }
+        this.mindMapDataCache = JSON.stringify(this.mindMap.getData())
+        return true
+      } catch (error) {
+        console.error('captureMindMapSnapshot failed', error)
+        this.mindMapDataCache = ''
+        return false
+      }
+    },
+
+    restoreMindMapSnapshot({ notify = false } = {}) {
+      const raw = String(this.mindMapDataCache || '').trim()
+      if (!raw || !this.mindMap || typeof this.mindMap.setData !== 'function') {
+        return false
+      }
+      try {
+        const snapshot = JSON.parse(raw)
+        this.mindMap.setData(snapshot)
+        if (notify) {
+          this.$message.info(this.$t('ai.restoredPreviousMindMap'))
+        }
+        return true
+      } catch (error) {
+        console.error('restoreMindMapSnapshot failed', error)
+        return false
+      }
+    },
+
     // 确认生成
     async doAiCreate() {
       const aiInputText = this.aiInput.trim()
@@ -410,6 +444,7 @@ export default {
       // 发起请求
       const requestId = this.beginAiRequest('create-all')
       this.createAiInstance()
+      this.captureMindMapSnapshot()
       this.mindMap.renderer.setRootNodeCenter()
       this.mindMap.setData(null)
       this.aiInstance.request(
@@ -431,6 +466,8 @@ export default {
             return
           }
           this.aiCreatingContent = content
+          // 成功完成：丢弃回滚缓存
+          this.mindMapDataCache = ''
           this.resetOnAiCreatingStop({
             invalidateRequest: false
           })
@@ -440,6 +477,7 @@ export default {
             return
           }
           this.resetOnAiCreatingStop()
+          this.restoreMindMapSnapshot({ notify: true })
           this.resetOnRenderEnd()
           this.$message.error(error?.message || this.$t('ai.generationFailed'))
         }
@@ -465,13 +503,25 @@ export default {
       this.beingAiCreateNodeUid = ''
     },
 
-    // 停止生成
+    // 停止生成：整图/续写均回滚到生成前快照
     stopCreate() {
+      const shouldRestore =
+        this.activeAiRequestKind === 'create-all' ||
+        this.activeAiRequestKind === 'create-part'
       this.aiCreatingContent = ''
-      this.resetOnRenderEnd()
       this.resetAiRequestState({ abort: true })
       this.aiCreatingMaskVisible = false
       this.resetAiCreatePartDialog()
+      this.detachRenderEndListener()
+      this.isLoopRendering = false
+      this.uidMap = {}
+      this.latestUid = ''
+      this.beingAiCreateNodeUid = ''
+      if (shouldRestore) {
+        this.restoreMindMapSnapshot({ notify: true })
+      }
+      this.mindMapDataCache = ''
+      this.aiCreatingContent = ''
       this.$message.success(this.$t('ai.stoppedGenerating'))
     },
 
@@ -662,6 +712,7 @@ export default {
             }
             this.resetOnAiCreatingStop()
             this.resetAiCreatePartDialog()
+            this.restoreMindMapSnapshot({ notify: true })
             this.resetOnRenderEnd()
             this.$message.error(
               error?.message || this.$t('ai.generationFailed')

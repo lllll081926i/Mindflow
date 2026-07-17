@@ -667,6 +667,7 @@ const zh = {
     "generationFailed": "生成失败",
     "aiGenerationSuccess": "AI生成完成",
     "stoppedGenerating": "已停止生成",
+    "restoredPreviousMindMap": "已恢复生成前的导图内容",
     "AIConfiguration": "AI配置",
     "VolcanoArkLargeModelConfiguration": "火山方舟大模型配置：",
     "configTip": "目前仅支持火山方舟大模型，需要自行去获取key，详细操作步骤见：",
