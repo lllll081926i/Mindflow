@@ -1953,6 +1953,18 @@ export default {
         this.selectActiveBranch()
         return
       }
+      // Ctrl+Shift+1..4 expand/collapse to level
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        !event.altKey &&
+        /^[1-4]$/.test(event.key) &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.expandToPreferredLevel(Number(event.key))
+        return
+      }
       // Ctrl+Shift+B back to root center
       if (
         (event.ctrlKey || event.metaKey) &&
