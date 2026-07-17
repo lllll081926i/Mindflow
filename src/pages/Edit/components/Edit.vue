@@ -53,6 +53,7 @@
               v-if="sheet.bookmarkCount > 0"
               class="mindmapSheetBookmark"
               :title="$t('edit.sheetBookmarkCount', { count: sheet.bookmarkCount }) || `${sheet.bookmarkCount} 个书签`"
+              @click.stop="openSheetBookmarks(sheet)"
               >★{{ sheet.bookmarkCount }}</small
             >
           </span>
@@ -268,7 +269,8 @@ import { useSettingsStore } from '@/stores/settings'
 import { useThemeStore } from '@/stores/theme'
 import {
   applyMindMapThemeMode,
-  getMindMapThemeMetaByValue
+  getMindMapThemeMetaByValue,
+  setActiveSidebar
 } from '@/stores/runtime'
 
 const loadOutlineSidebar = () => import('./OutlineSidebar.vue')
@@ -1541,6 +1543,14 @@ export default {
       }
     },
 
+    async openSheetBookmarks(sheet) {
+      if (!sheet?.id) return
+      if (sheet.id !== this.activeMindmapSheetId) {
+        await this.switchMindmapSheetById(sheet.id)
+      }
+      setActiveSidebar('bookmark')
+    },
+
     async createSheetFromActiveBranch(node = null) {
       const target =
         node ||
@@ -2633,6 +2643,10 @@ export default {
 .mindmapSheetBookmark {
   background: rgba(245, 158, 11, 0.16);
   color: #d97706;
+  cursor: pointer;
+}
+.mindmapSheetBookmark:hover {
+  filter: brightness(1.08);
 }
 .editContainer.isDark .mindmapSheetCount {
   background: rgba(255, 255, 255, 0.1);
