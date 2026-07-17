@@ -2188,38 +2188,23 @@ export default {
         const nodes = this.getActiveNodesSnapshot
           ? this.getActiveNodesSnapshot()
           : this.activeNodes || []
-        const current = nodes[0]
-        if (current) {
-          let target = null
-          if (event.key === 'ArrowUp') {
-            target = current.parent
-          } else if (event.key === 'ArrowDown') {
-            target = current.children && current.children[0]
-          } else if (current.parent && Array.isArray(current.parent.children)) {
-            const siblings = current.parent.children
-            const index = siblings.indexOf(current)
-            if (index >= 0) {
-              target =
-                event.key === 'ArrowLeft'
-                  ? siblings[index - 1]
-                  : siblings[index + 1]
-            }
-          }
-          if (target) {
+        if (nodes[0]) {
+          const relation =
+            event.key === 'ArrowUp'
+              ? 'parent'
+              : event.key === 'ArrowDown'
+                ? 'firstChild'
+                : event.key === 'ArrowLeft'
+                  ? 'prevSibling'
+                  : 'nextSibling'
+          const moved = this.selectRelativeTopic(relation, { quiet: true })
+          if (moved) {
             event.preventDefault()
-            const mindMap = target.mindMap || current.mindMap
-            if (mindMap?.renderer?.clearActiveNodeList) {
-              mindMap.renderer.clearActiveNodeList()
-            }
-            if (mindMap?.renderer?.addNodeToActiveList) {
-              mindMap.renderer.addNodeToActiveList(target)
-              mindMap.renderer.emitNodeActiveEvent?.(target, [target])
-            }
-            mindMap?.renderer?.moveNodeToCenter?.(target)
             return
           }
-          // no sibling/parent target: for Left/Right fall through to sheet reorder
+          // no sibling target: Left/Right fall through to sheet reorder
           if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            event.preventDefault()
             return
           }
         }
@@ -3100,16 +3085,18 @@ export default {
       }
     },
 
-    selectRelativeTopic(relation = 'parent') {
+    selectRelativeTopic(relation = 'parent', { quiet = false } = {}) {
       const nodes = this.getActiveNodesSnapshot
         ? this.getActiveNodesSnapshot()
         : this.activeNodes || []
       const current = nodes[0]
       if (!current) {
-        this.$message.warning(
-          this.$t('bookmark.needSelection') || '请先选择主题'
-        )
-        return
+        if (!quiet) {
+          this.$message.warning(
+            this.$t('bookmark.needSelection') || '请先选择主题'
+          )
+        }
+        return false
       }
       let target = null
       if (relation === 'parent') {
@@ -3128,7 +3115,7 @@ export default {
             ? siblings[index + 1]
             : null
       }
-      if (!target) return
+      if (!target) return false
       const mindMap = target.mindMap || current.mindMap
       if (mindMap?.renderer?.clearActiveNodeList) {
         mindMap.renderer.clearActiveNodeList()
@@ -3138,6 +3125,7 @@ export default {
         mindMap.renderer.emitNodeActiveEvent?.(target, [target])
       }
       mindMap?.renderer?.moveNodeToCenter?.(target)
+      return true
     },
 
     copyActiveNodePath() {
