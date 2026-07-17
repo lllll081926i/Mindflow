@@ -26,17 +26,28 @@ export const jumpToAdjacentBookmark = (mindMap, currentNode, direction = 1) => {
     node => node === currentNode || node.uid === currentNode?.uid
   )
   if (index < 0) {
-    // No current bookmark selection: start from ends
     index = direction > 0 ? -1 : 0
   }
   const nextIndex = (index + direction + list.length) % list.length
   const target = list[nextIndex]
   if (!target) return null
-  if (mindMap.renderer.clearActiveNodeList) mindMap.renderer.clearActiveNodeList()
-  if (mindMap.renderer.addNodeToActiveList) {
-    mindMap.renderer.addNodeToActiveList(target)
-    mindMap.renderer.emitNodeActiveEvent?.(target, [target])
+  const uid = target.uid || target.getData?.('uid')
+  const activate = node => {
+    if (!node) return
+    if (mindMap.renderer.clearActiveNodeList) mindMap.renderer.clearActiveNodeList()
+    if (mindMap.renderer.addNodeToActiveList) {
+      mindMap.renderer.addNodeToActiveList(node)
+      mindMap.renderer.emitNodeActiveEvent?.(node, [node])
+    }
+    mindMap.renderer.moveNodeToCenter?.(node)
   }
-  mindMap.renderer.moveNodeToCenter?.(target)
+  if (uid && typeof mindMap.renderer.expandToNodeUid === 'function') {
+    mindMap.renderer.expandToNodeUid(uid, () => {
+      const live = mindMap.renderer.findNodeByUid?.(uid) || target
+      activate(live)
+    })
+  } else {
+    activate(target)
+  }
   return target
 }
