@@ -191,18 +191,31 @@ export const switchMindmapSheet = (data, sheetId, liveFullData = null) => {
   }
 }
 
+const uniqueSheetName = (sheets, desired) => {
+  const base = String(desired || '').trim() || '画布'
+  const used = new Set(
+    (Array.isArray(sheets) ? sheets : []).map(sheet => String(sheet.name || ''))
+  )
+  if (!used.has(base)) return base
+  let i = 2
+  while (used.has(`${base} ${i}`)) i += 1
+  return `${base} ${i}`
+}
+
 export const addMindmapSheet = (data, options = {}, liveFullData = null) => {
   const snapshot = snapshotActiveMindmapSheet(data, liveFullData)
   const index = snapshot.sheets.length + 1
   const customRoot =
     options.root && typeof options.root === 'object' ? clone(options.root) : null
+  const desiredName = options.name || `画布 ${index}`
+  const sheetName = uniqueSheetName(snapshot.sheets, desiredName)
   const sheet = createMindmapSheet({
-    name: options.name || `画布 ${index}`,
+    name: sheetName,
     root: customRoot
       ? customRoot
       : options.copyActive
         ? clone(getActiveMindmapSheet(snapshot)?.root || createEmptyRoot())
-        : createEmptyRoot(options.name || `画布 ${index}`),
+        : createEmptyRoot(sheetName),
     theme: getActiveMindmapSheet(snapshot)?.theme || defaultTheme(),
     layout: getActiveMindmapSheet(snapshot)?.layout || 'logicalStructure'
   })
