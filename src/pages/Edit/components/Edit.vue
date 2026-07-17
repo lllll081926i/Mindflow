@@ -101,9 +101,24 @@
     ></div>
     <Count :mindMap="mindMap" v-if="!isZenMode"></Count>
     <div
+      v-if="!isZenMode && selectedPathPreview"
+      class="selectedPathStrip"
+      :class="{ isDark: isDark }"
+      :title="selectedPathPreview"
+      @click="copySelectedPath"
+    >
+      <span class="selectedPathLabel">{{
+        $t('edit.topicPath') || '路径'
+      }}</span>
+      <span class="selectedPathText">{{ selectedPathPreview }}</span>
+      <span class="selectedPathAction">{{
+        $t('contextmenu.copyNodePath') || '复制'
+      }}</span>
+    </div>
+    <div
       v-if="!isZenMode && selectedNotePreview"
       class="selectedNoteStrip"
-      :class="{ isDark: isDark }"
+      :class="{ isDark: isDark, withPath: !!selectedPathPreview }"
       @click="openSelectedNote"
     >
       <span class="selectedNoteLabel">{{ $t('note.title') || '备注' }}</span>
@@ -226,6 +241,8 @@ import {
   hasMindMapViewState,
   restoreMindMapViewState
 } from '@/services/mindmapViewState'
+import { buildMindMapNodePath } from '@/services/mindmapPath'
+import { copy } from '@/utils'
 import { showLoading, hideLoading } from '@/utils/loading'
 import {
   clearCurrentDataGetter,
@@ -670,6 +687,7 @@ export default {
       focusModeUid: '',
       selectedNotePreview: '',
       selectedNoteNode: null,
+      selectedPathPreview: '',
       enableShowLoading: true,
       mindMap: null,
       mindMapData: null,
@@ -1934,6 +1952,7 @@ export default {
       this.mindMapEventForwarders = {}
       this.selectedNotePreview = ''
       this.selectedNoteNode = null
+      this.selectedPathPreview = ''
     },
 
     updateSelectedNotePreview(node, activeList = []) {
@@ -1941,9 +1960,11 @@ export default {
       if (list.length !== 1) {
         this.selectedNotePreview = ''
         this.selectedNoteNode = null
+        this.selectedPathPreview = ''
         return
       }
       const target = list[0]
+      this.selectedPathPreview = buildMindMapNodePath(target)
       const raw = String(target?.getData?.('note') || '').trim()
       if (!raw) {
         this.selectedNotePreview = ''
@@ -1962,6 +1983,14 @@ export default {
         stopPropagation() {},
         preventDefault() {}
       })
+    },
+
+    copySelectedPath() {
+      if (!this.selectedPathPreview) return
+      copy(this.selectedPathPreview)
+      this.$message.success(
+        this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+      )
     },
 
     registerCurrentDataGetter() {
@@ -2579,10 +2608,10 @@ export default {
   cursor: pointer;
   font: inherit;
 }
+.selectedPathStrip,
 .selectedNoteStrip {
   position: fixed;
   left: 50%;
-  bottom: 20px;
   transform: translateX(-50%);
   z-index: 1100;
   max-width: min(560px, calc(100vw - 48px));
@@ -2598,23 +2627,36 @@ export default {
   font-size: 12px;
   color: rgba(15, 23, 42, 0.88);
 }
+.selectedPathStrip {
+  bottom: 20px;
+}
+.selectedNoteStrip {
+  bottom: 20px;
+}
+.selectedNoteStrip.withPath {
+  bottom: 58px;
+}
+.selectedPathStrip.isDark,
 .selectedNoteStrip.isDark {
   background: rgba(28, 33, 40, 0.96);
   border-color: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.92);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.36);
 }
+.selectedPathLabel,
 .selectedNoteLabel {
   flex-shrink: 0;
   font-weight: 600;
   opacity: 0.7;
 }
+.selectedPathText,
 .selectedNoteText {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.selectedPathAction,
 .selectedNoteAction {
   flex-shrink: 0;
   color: #2563eb;

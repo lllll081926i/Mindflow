@@ -512,6 +512,7 @@ const zh = {
     "sheetNodeCount": "{count} 个主题",
     "sheetSwitch": "切换到此画布",
     "sheetRename": "重命名",
+    "topicPath": "路径",
 
     "newFeatureNoticeTitle": "新特性提醒",
     "newFeatureNoticeMessage": "本次更新支持了节点富文本编辑，但是存在一定缺陷，最主要的影响是导出为图片的时间和节点数量成正比，所以对导出需求比较依赖的话可以通过【基础样式】-【其他配置】-【是否开启节点富文本编辑】设置关掉富文本编辑模式。",
