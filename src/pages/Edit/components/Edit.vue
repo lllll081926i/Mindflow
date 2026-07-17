@@ -689,6 +689,7 @@ export default {
       selectedNotePreview: '',
       selectedNoteNode: null,
       selectedPathPreview: '',
+      selectedPathClickTimer: 0,
       enableShowLoading: true,
       mindMap: null,
       mindMapData: null,
@@ -2020,13 +2021,24 @@ export default {
 
     copySelectedPath() {
       if (!this.selectedPathPreview) return
-      copy(this.selectedPathPreview)
-      this.$message.success(
-        this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
-      )
+      // Delay so double-click can cancel copy and fit instead
+      if (this.selectedPathClickTimer) {
+        clearTimeout(this.selectedPathClickTimer)
+      }
+      this.selectedPathClickTimer = window.setTimeout(() => {
+        this.selectedPathClickTimer = 0
+        copy(this.selectedPathPreview)
+        this.$message.success(
+          this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+        )
+      }, 220)
     },
 
     fitSelectedPath() {
+      if (this.selectedPathClickTimer) {
+        clearTimeout(this.selectedPathClickTimer)
+        this.selectedPathClickTimer = 0
+      }
       fitMindMapSelection(this.mindMap)
     },
 
