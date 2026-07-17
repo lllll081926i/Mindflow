@@ -929,6 +929,7 @@ export default {
         this.handleCreateLineFromActiveNode
       )
       this.$bus.$on('startPainter', this.handleStartPainter)
+      this.$bus.$on('endPainter', this.handleEndPainter)
       this.$bus.$on('node_tree_render_end', this.handleHideLoading)
       this.removeShowLoadingListener = onShowLoading(this.handleShowLoading)
       window.addEventListener('resize', this.handleResize)
@@ -963,6 +964,7 @@ export default {
       this.$bus.$off('toggleFocusMode', this.toggleFocusMode)
       this.$bus.$off('createAssociativeLine', this.handleCreateLineFromActiveNode)
       this.$bus.$off('startPainter', this.handleStartPainter)
+      this.$bus.$off('endPainter', this.handleEndPainter)
       this.$bus.$off('node_tree_render_end', this.handleHideLoading)
       this.removeShowLoadingListener && this.removeShowLoadingListener()
       this.removeShowLoadingListener = null
@@ -1118,6 +1120,12 @@ export default {
         return
       }
       this.mindMap?.painter?.startPainter()
+    },
+
+    handleEndPainter() {
+      if (this.mindMap?.painter?.isInPainter) {
+        this.mindMap.painter.onEndPainter()
+      }
     },
 
     handleShowNoteContent(content, left, top, node) {

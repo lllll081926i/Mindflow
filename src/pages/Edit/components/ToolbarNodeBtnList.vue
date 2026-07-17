@@ -289,10 +289,19 @@ export default {
     // 开始格式刷
     onPainterStart() {
       this.isInPainter = true
+      this.$message.info(
+        this.$t('toolbar.painterActiveTip') ||
+          '格式刷已开启：点击目标主题应用样式，Esc 结束'
+      )
     },
 
     // 格式刷结束
     onPainterEnd() {
+      if (this.isInPainter) {
+        this.$message.success(
+          this.$t('toolbar.painterEndedTip') || '格式刷已结束'
+        )
+      }
       this.isInPainter = false
     },
 

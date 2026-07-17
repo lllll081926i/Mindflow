@@ -897,6 +897,13 @@ export default {
           action: () => this.emitEditorCommand('FIT_SELECTION')
         },
         {
+          key: 'painter',
+          label: this.$t('toolbar.painter') || '格式刷',
+          shortcut: 'Ctrl+Shift+P',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.$bus.$emit('startPainter')
+        },
+        {
           key: 'selectBranch',
           label: this.$t('contextmenu.selectBranch') || '选中整支分支',
           shortcut: 'Ctrl+Shift+A',
@@ -1366,6 +1373,10 @@ export default {
         event.preventDefault()
         this.closeCommandPalette()
         return
+      }
+      if (event.key === 'Escape' && !isTypingTarget) {
+        // End format painter if active
+        this.$bus.$emit('endPainter')
       }
       // Shift+F2 renames active workbook sheet
       if (
