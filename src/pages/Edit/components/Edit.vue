@@ -842,6 +842,10 @@ export default {
     this.clearResizeFrame()
     clearTimeout(this.storeRootTimer)
     clearTimeout(this.storeConfigTimer)
+    if (this.selectedPathClickTimer) {
+      clearTimeout(this.selectedPathClickTimer)
+      this.selectedPathClickTimer = 0
+    }
     clearCurrentDataGetter()
     this.unbindMindMapEvents()
   },
