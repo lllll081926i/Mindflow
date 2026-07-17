@@ -63,6 +63,25 @@
       ></div>
     </div>
     <div class="item">
+      <el-tooltip
+        effect="dark"
+        :content="$t('bookmark.openPanel') || '打开书签'"
+        placement="top"
+      >
+        <div
+          class="btn bookmarkNavBtn"
+          role="button"
+          tabindex="0"
+          :aria-label="$t('bookmark.openPanel') || '打开书签'"
+          @click="openBookmarks"
+          @keydown.enter.prevent="openBookmarks"
+          @keydown.space.prevent="openBookmarks"
+        >
+          ★
+        </div>
+      </el-tooltip>
+    </div>
+    <div class="item">
       <MouseAction :isDark="isDark" :mindMap="mindMap"></MouseAction>
     </div>
     <div class="item">
@@ -235,6 +254,10 @@ export default {
       emitShowSearch()
     },
 
+    openBookmarks() {
+      setActiveSidebar('bookmark')
+    },
+
     openShortcutKey() {
       setActiveSidebar('shortcutKey')
     },
@@ -373,6 +396,11 @@ export default {
       }
     }
   }
+}
+
+.bookmarkNavBtn {
+  font-size: 15px !important;
+  color: #d97706 !important;
 }
 
 @media screen and (max-width: 700px) {
