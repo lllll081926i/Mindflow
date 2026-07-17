@@ -10,7 +10,11 @@
         <span class="btnLabel">-</span>
       </div>
     </el-tooltip>
-    <div class="scaleInfo">
+    <div
+      class="scaleInfo"
+      :title="$t('toolbar.fitCanvasAction') || '双击适应画布'"
+      @dblclick.stop="fitCanvas"
+    >
       <input
         ref="inputRef"
         type="text"
@@ -83,6 +87,10 @@ export default {
     // 放大
     enlarge() {
       this.mindMap.view.enlarge()
+    },
+
+    fitCanvas() {
+      this.mindMap?.view?.fit?.()
     },
 
     // 聚焦时缓存当前缩放倍数
