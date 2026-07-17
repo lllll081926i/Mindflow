@@ -819,6 +819,13 @@ export default {
           action: () => this.openNodeNoteDialog(this.getActiveNodesSnapshot())
         },
         {
+          key: 'nodeAttachment',
+          label: this.$t('toolbar.attachment'),
+          shortcut: 'Ctrl+Shift+U',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.onSelectAttachment(this.getActiveNodesSnapshot())
+        },
+        {
           key: 'nodeTag',
           label: this.$t('toolbar.tag'),
           disabled: this.activeNodes.length <= 0,
