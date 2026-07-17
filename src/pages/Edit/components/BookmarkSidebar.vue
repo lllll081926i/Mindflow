@@ -158,11 +158,12 @@ export default {
         )
         return
       }
+      const wasBookmarked = this.selectedBookmarked
       const count = toggleNodesBookmark(this.activeNodes)
       if (count > 0) {
         this.refresh()
         this.$message.success(
-          this.selectedBookmarked
+          wasBookmarked
             ? this.$t('bookmark.removed') || '已取消收藏'
             : this.$t('bookmark.added') || '已收藏主题'
         )

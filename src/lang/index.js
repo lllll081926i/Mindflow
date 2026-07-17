@@ -684,7 +684,7 @@ const zh = {
     "createReplaceConfirmMessage": "AI 整图生成会替换当前思维导图内容，是否继续？",
     "createMindMapTitle": "一键生成思维导图",
     "createTip": "请输入一个主题，AI会根据你的主题生成思维导图，如：杭州周末出游计划。",
-    "importantTip": "重要提示：一键生成会覆盖现有数据，建议先导出当前数据。",
+    "importantTip": "重要提示：生成过程会预览在画布上，完成后可选择「应用结果」或「丢弃并恢复」。",
     "wantModifyAiConfigTip": "想要修改AI配置？请点击：",
     "modifyAIConfiguration": "修改AI配置",
     "chatInputPlaceholder": "Enter 发送，Shift + Enter 换行。",
