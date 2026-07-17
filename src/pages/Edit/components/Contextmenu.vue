@@ -654,6 +654,15 @@ export default {
         case 'EXPAND_ALL':
           this.$bus.$emit('execCommand', key, this.node ? this.node.uid : '')
           break
+        case 'UNEXPAND_TO_LEVEL': {
+          // template: exec('UNEXPAND_TO_LEVEL', false, index + 1)
+          const resolvedLevel = Math.max(1, Math.min(6, Number(args[0]) || 2))
+          this.$bus.$emit('execCommand', key, false, resolvedLevel)
+          applyLocalConfigPatch({
+            lastExpandLevel: resolvedLevel
+          })
+          break
+        }
         default:
           this.$bus.$emit('execCommand', key, ...args)
           break
