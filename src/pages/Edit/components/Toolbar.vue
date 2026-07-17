@@ -770,6 +770,17 @@ export default {
           action: this.openOutlinePanel
         },
         {
+          key: 'outlineBookmarksOnly',
+          label: this.$t('outline.bookmarksOnly') || '大纲仅显示书签',
+          action: () => {
+            this.openOutlinePanel?.()
+            setActiveSidebar('outline')
+            this.$nextTick(() => {
+              this.$bus.$emit('outlineToggleBookmarksOnly')
+            })
+          }
+        },
+        {
           key: 'addSheet',
           label: this.$t('edit.addSheet') || '新建画布',
           action: () => this.$bus.$emit('mindmapAddSheet')
