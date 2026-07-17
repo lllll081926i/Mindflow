@@ -182,6 +182,7 @@ const zh = {
     "copyNodePathDone": "已复制主题路径",
     "copyBranchMarkdown": "复制分支为 Markdown",
     "copyBranchMarkdownDone": "已复制分支 Markdown",
+    "createSheetFromBranch": "分支新建画布",
     "collapseOtherBranches": "折叠其他分支",
     "collapseOtherBranchesDone": "已折叠 {count} 个旁支",
     "sortChildren": "子主题按字母排序",

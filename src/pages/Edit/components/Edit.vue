@@ -938,6 +938,7 @@ export default {
       this.$bus.$on('mindmapMoveSheetRight', () => this.moveActiveMindmapSheet(1))
       this.$bus.$on('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$on('mindmapSwitchSheet', this.switchMindmapSheetById)
+      this.$bus.$on('mindmapCreateSheetFromBranch', this.createSheetFromActiveBranch)
       this.$bus.$on('applyMarkerFilter', this.handleApplyMarkerFilter)
       this.$bus.$on('jumpMarkerFilterMatch', this.handleJumpMarkerFilterMatch)
       this.$bus.$on('focusMarkerFilterMatch', this.handleFocusMarkerFilterMatch)
@@ -976,6 +977,7 @@ export default {
       this.$bus.$off('mindmapMoveSheetRight')
       this.$bus.$off('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$off('mindmapSwitchSheet', this.switchMindmapSheetById)
+      this.$bus.$off('mindmapCreateSheetFromBranch', this.createSheetFromActiveBranch)
       this.$bus.$off('applyMarkerFilter', this.handleApplyMarkerFilter)
       this.$bus.$off('jumpMarkerFilterMatch', this.handleJumpMarkerFilterMatch)
       this.$bus.$off('focusMarkerFilterMatch', this.handleFocusMarkerFilterMatch)
@@ -1499,11 +1501,11 @@ export default {
       this.$message.success(this.$t('edit.sheetSwitched'))
     },
 
-    async addMindmapSheet(copyActive = false) {
+    async addMindmapSheet(copyActive = false, options = {}) {
       this.persistActiveSheetSnapshot()
       const next = addMindmapSheet(
         this.mindMapData || getData(),
-        { copyActive },
+        { copyActive, ...options },
         this.mindMap?.getData?.(true)
       )
       this.mindMapData = next
@@ -1517,6 +1519,28 @@ export default {
         } catch (_error) {}
       })
       this.$message.success(this.$t('edit.sheetAdded'))
+    },
+
+    async createSheetFromActiveBranch(node = null) {
+      const target =
+        node ||
+        this.mindMap?.renderer?.activeNodeList?.[0] ||
+        null
+      if (!target) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const { createSheetFromBranchOptions } = await import(
+        '@/services/mindmapBranchToSheet'
+      )
+      const options = createSheetFromBranchOptions(target)
+      if (!options) return
+      await this.addMindmapSheet(false, {
+        name: options.name,
+        root: options.root
+      })
     },
 
     startRenameMindmapSheet(sheet) {

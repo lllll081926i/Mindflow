@@ -179,11 +179,15 @@ export const switchMindmapSheet = (data, sheetId, liveFullData = null) => {
 export const addMindmapSheet = (data, options = {}, liveFullData = null) => {
   const snapshot = snapshotActiveMindmapSheet(data, liveFullData)
   const index = snapshot.sheets.length + 1
+  const customRoot =
+    options.root && typeof options.root === 'object' ? clone(options.root) : null
   const sheet = createMindmapSheet({
     name: options.name || `画布 ${index}`,
-    root: options.copyActive
-      ? clone(getActiveMindmapSheet(snapshot)?.root || createEmptyRoot())
-      : createEmptyRoot(options.name || `画布 ${index}`),
+    root: customRoot
+      ? customRoot
+      : options.copyActive
+        ? clone(getActiveMindmapSheet(snapshot)?.root || createEmptyRoot())
+        : createEmptyRoot(options.name || `画布 ${index}`),
     theme: getActiveMindmapSheet(snapshot)?.theme || defaultTheme(),
     layout: getActiveMindmapSheet(snapshot)?.layout || 'logicalStructure'
   })

@@ -100,6 +100,15 @@
       </div>
       <div
         class="item"
+        @click="createSheetFromBranch"
+        :class="{ disabled: isGeneralization }"
+      >
+        <span class="name">{{
+          $t('contextmenu.createSheetFromBranch') || '分支新建画布'
+        }}</span>
+      </div>
+      <div
+        class="item"
         @click="collapseOthers"
         :class="{ disabled: isGeneralization }"
       >
@@ -540,6 +549,15 @@ export default {
         this.$t('contextmenu.copyBranchMarkdownDone') ||
           '已复制分支 Markdown'
       )
+      this.hide()
+    },
+
+    createSheetFromBranch() {
+      if (this.isGeneralization || !this.node) {
+        this.hide()
+        return
+      }
+      this.$bus.$emit('mindmapCreateSheetFromBranch', this.node)
       this.hide()
     },
 
