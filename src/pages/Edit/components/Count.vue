@@ -8,12 +8,17 @@
       <span class="name">{{ $t('count.nodes') }}</span>
       <span class="value">{{ num }}</span>
     </div>
+    <div class="item" v-if="bookmarks > 0">
+      <span class="name">{{ $t('count.bookmarks') || '书签' }}</span>
+      <span class="value">{{ bookmarks }}</span>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapState } from 'pinia'
 import { useThemeStore } from '@/stores/theme'
+import { isBookmarkIcon } from '@/services/nodeBookmarks'
 
 const COUNT_UPDATE_DEBOUNCE_MS = 120
 
@@ -28,6 +33,7 @@ export default {
     return {
       words: 0,
       num: 0,
+      bookmarks: 0,
       countUpdateFrame: 0,
       countUpdateTimer: 0,
       pendingCountData: null,
@@ -94,16 +100,22 @@ export default {
       this.pendingCountData = null
       this.words = stats.words
       this.num = stats.num
+      this.bookmarks = stats.bookmarks
     },
 
     countStats(data) {
       const stats = {
         words: 0,
-        num: 0
+        num: 0,
+        bookmarks: 0
       }
       this.walk(data, node => {
         stats.num += 1
         stats.words += this.extractText(node?.data?.text).length
+        const icons = Array.isArray(node?.data?.icon) ? node.data.icon : []
+        if (icons.some(isBookmarkIcon)) {
+          stats.bookmarks += 1
+        }
       })
       return stats
     },

@@ -183,7 +183,8 @@ const zh = {
   },
   "count": {
     "words": "字数",
-    "nodes": "节点"
+    "nodes": "节点",
+    "bookmarks": "书签"
   },
   "dialog": {
     "cancel": "取消",
@@ -529,7 +530,7 @@ const zh = {
     "usageHint": "可用 Enter、Shift + Enter 或上下箭头快速跳转结果",
     "prevResult": "上一条",
     "nextResult": "下一条",
-    "idleHint": "输入关键词后按回车开始搜索",
+    "idleHint": "支持搜索标题、备注、标签与批注，回车开始",
     "fieldTitle": "标题",
     "fieldNote": "备注",
     "fieldTag": "标签",
