@@ -58,3 +58,23 @@ test('单选备注迷你预览条', () => {
   assert.match(edit, /updateSelectedNotePreview/)
   assert.match(edit, /openSelectedNote/)
 })
+
+test('支持从分支新建画布', () => {
+  const service = fs.readFileSync(path.join(root, 'src/services/mindmapBranchToSheet.js'), 'utf8')
+  const menu = fs.readFileSync(path.join(root, 'src/pages/Edit/components/Contextmenu.vue'), 'utf8')
+  const edit = fs.readFileSync(path.join(root, 'src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.match(service, /createSheetFromBranchOptions/)
+  assert.match(menu, /createSheetFromBranch/)
+  assert.match(edit, /createSheetFromActiveBranch/)
+  assert.match(lang, /"createSheetFromBranch"/)
+})
+
+test('支持折叠其他分支与子主题排序', () => {
+  const focus = fs.readFileSync(path.join(root, 'src/services/mindmapFocusBranch.js'), 'utf8')
+  const sort = fs.readFileSync(path.join(root, 'src/services/mindmapSortSiblings.js'), 'utf8')
+  const menu = fs.readFileSync(path.join(root, 'src/pages/Edit/components/Contextmenu.vue'), 'utf8')
+  assert.match(focus, /collapseSiblingBranches/)
+  assert.match(sort, /sortChildrenAlphabetically/)
+  assert.match(menu, /collapseOthers/)
+  assert.match(menu, /sortChildren/)
+})
