@@ -1964,6 +1964,30 @@ export default {
         this.emitEditorCommand('FIT_CANVAS')
         return
       }
+      // Ctrl+0 fit canvas (browser zoom uses ctrl+0 too; app-level when not typing)
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        !event.altKey &&
+        event.key === '0' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('FIT_CANVAS')
+        return
+      }
+      // Ctrl+1 return center
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.shiftKey &&
+        !event.altKey &&
+        event.key === '1' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.emitEditorCommand('RETURN_CENTER')
+        return
+      }
       // Alt+Shift+F fit selection
       if (
         !isTypingTarget &&
