@@ -90,11 +90,13 @@ export default {
     this.$bus.$on('printOutline', this.onPrint)
     this.$bus.$on('outlineSetKeyword', this.onOutlineSetKeyword)
     this.$bus.$on('applyMarkerFilter', this.onMarkerFilter)
+    this.$bus.$on('outlineToggleBookmarksOnly', this.toggleBookmarksOnly)
   },
   beforeUnmount() {
     this.$bus.$off('printOutline', this.onPrint)
     this.$bus.$off('outlineSetKeyword', this.onOutlineSetKeyword)
     this.$bus.$off('applyMarkerFilter', this.onMarkerFilter)
+    this.$bus.$off('outlineToggleBookmarksOnly', this.toggleBookmarksOnly)
   },
   data() {
     return {
