@@ -521,6 +521,7 @@ import { selectMindMapBranch } from '@/services/mindmapSelection'
 import { buildMindMapNodePath } from '@/services/mindmapPath'
 import { collapseSiblingBranches } from '@/services/mindmapFocusBranch'
 import { branchToMarkdown } from '@/services/mindmapBranchMarkdown'
+import { sortChildrenAlphabetically } from '@/services/mindmapSortSiblings'
 import { copy } from '@/utils'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
@@ -935,6 +936,12 @@ export default {
           shortcut: 'Alt+Shift+C',
           disabled: this.activeNodes.length <= 0,
           action: () => this.collapseOtherBranches()
+        },
+        {
+          key: 'sortChildren',
+          label: this.$t('contextmenu.sortChildren') || '子主题按字母排序',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.sortActiveChildren()
         },
         {
           key: 'expandToLevelLast',
@@ -2974,6 +2981,26 @@ export default {
       this.$message.success(
         this.$t('contextmenu.collapseOtherBranchesDone', { count }) ||
           `已折叠 ${count} 个旁支`
+      )
+    },
+
+    sortActiveChildren() {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      const node = nodes[0]
+      if (!node) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const mindMap = node.mindMap || this.mindMap
+      const ok = sortChildrenAlphabetically(mindMap, node)
+      this.$message.success(
+        ok
+          ? this.$t('contextmenu.sortChildrenDone') || '已按字母排序子主题'
+          : this.$t('contextmenu.sortChildrenUnchanged') || '子主题顺序未变化'
       )
     },
 
