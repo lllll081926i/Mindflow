@@ -1999,6 +1999,10 @@ export default {
       }
       const target = list[0]
       this.selectedPathPreview = buildMindMapNodePath(target)
+      const uid = target?.uid || target?.getData?.('uid')
+      if (uid && this.activeSidebar === 'outline') {
+        this.$bus.$emit('outlineRevealUid', uid)
+      }
       const raw = String(target?.getData?.('note') || '').trim()
       if (!raw) {
         this.selectedNotePreview = ''

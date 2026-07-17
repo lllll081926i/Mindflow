@@ -286,6 +286,7 @@ export default {
 
   .toolbarRow {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 10px;
   }
