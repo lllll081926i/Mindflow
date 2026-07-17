@@ -2095,6 +2095,39 @@ export default {
         setActiveSidebar('bookmark')
         return
       }
+      // Alt+ArrowUp/Down parent/first-child navigation
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        !event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+      ) {
+        const nodes = this.getActiveNodesSnapshot
+          ? this.getActiveNodesSnapshot()
+          : this.activeNodes || []
+        const current = nodes[0]
+        if (!current) return
+        const target =
+          event.key === 'ArrowUp'
+            ? current.parent
+            : current.children && current.children[0]
+        if (target) {
+          event.preventDefault()
+          const mindMap = target.mindMap || current.mindMap
+          if (mindMap?.renderer?.clearActiveNodeList) {
+            mindMap.renderer.clearActiveNodeList()
+          }
+          if (mindMap?.renderer?.addNodeToActiveList) {
+            mindMap.renderer.addNodeToActiveList(target)
+            mindMap.renderer.emitNodeActiveEvent?.(target, [target])
+          }
+          mindMap?.renderer?.moveNodeToCenter?.(target)
+        }
+        return
+      }
       // Ctrl+Shift+B back to root center
       if (
         (event.ctrlKey || event.metaKey) &&
