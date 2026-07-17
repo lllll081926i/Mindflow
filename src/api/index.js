@@ -35,19 +35,31 @@ export const storeData = data => {
       Array.isArray(originData.sheets) &&
       originData.sheets.length &&
       data &&
-      data.root &&
       !Array.isArray(data.sheets)
     ) {
-      originData.sheets = originData.sheets.map(sheet => {
-        if (sheet.id !== originData.activeSheetId) return sheet
-        return {
-          ...sheet,
-          root: data.root,
-          theme: data.theme || sheet.theme,
-          layout: data.layout || sheet.layout,
-          view: data.view !== undefined ? data.view : sheet.view
-        }
-      })
+      // When root is present, refresh the active sheet fully.
+      // When only view (or other top-level fields) changes, still sync active sheet.view
+      // so multi-canvas reopen / switch keeps pan-zoom memory.
+      if (data.root) {
+        originData.sheets = originData.sheets.map(sheet => {
+          if (sheet.id !== originData.activeSheetId) return sheet
+          return {
+            ...sheet,
+            root: data.root,
+            theme: data.theme || sheet.theme,
+            layout: data.layout || sheet.layout,
+            view: data.view !== undefined ? data.view : sheet.view
+          }
+        })
+      } else if (data.view !== undefined) {
+        originData.sheets = originData.sheets.map(sheet => {
+          if (sheet.id !== originData.activeSheetId) return sheet
+          return {
+            ...sheet,
+            view: data.view
+          }
+        })
+      }
     }
     void saveBootstrapStatePatch({
       mindMapData: originData

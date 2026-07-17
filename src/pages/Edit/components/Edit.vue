@@ -171,6 +171,12 @@ import {
   moveMindmapSheet,
   snapshotActiveMindmapSheet
 } from '@/services/mindmapWorkbook'
+import {
+  applyMindMapViewAfterLoad,
+  ensureExplicitExpandFlags,
+  hasMindMapViewState,
+  restoreMindMapViewState
+} from '@/services/mindmapViewState'
 import { showLoading, hideLoading } from '@/utils/loading'
 import {
   clearCurrentDataGetter,
@@ -1396,8 +1402,11 @@ export default {
       storeData(next)
       await this.setData(next, { skipSave: true, configData: this.mindMapConfig })
       this.$nextTick(() => {
+        // Restore saved pan/zoom when present; only fit brand-new sheets without view.
         try {
-          this.mindMap?.view?.fit?.()
+          applyMindMapViewAfterLoad(this.mindMap, next.view, {
+            fitIfEmpty: true
+          })
         } catch (_error) {}
       })
       this.$message.success(this.$t('edit.sheetSwitched'))
@@ -1415,7 +1424,9 @@ export default {
       await this.setData(next, { skipSave: true, configData: this.mindMapConfig })
       this.$nextTick(() => {
         try {
-          this.mindMap?.view?.fit?.()
+          applyMindMapViewAfterLoad(this.mindMap, next.view, {
+            fitIfEmpty: true
+          })
         } catch (_error) {}
       })
       this.$message.success(this.$t('edit.sheetAdded'))
@@ -1989,6 +2000,10 @@ export default {
       const normalized = this.normalizeMindMapData(
         data?.root ? data : { root: data, theme: this.mindMapData?.theme, layout: this.mindMapData?.layout }
       )
+      // Keep expand flags explicit so reopen is deterministic (XMind-like fold memory).
+      if (normalized.root) {
+        ensureExplicitExpandFlags(normalized.root)
+      }
       // Keep workbook sheet registry on editor state even though renderer only needs active root.
       this.mindMapData = normalized
       if (hasExtendedNodeIcons(normalized)) {
@@ -1998,17 +2013,26 @@ export default {
         await this.ensureRichTextPluginReady()
       }
       const rootNodeData = normalized.root || normalized
+      const hasSavedView = hasMindMapViewState(normalized.view)
       if (normalized.root) {
         this.mindMap.setFullData({
           root: normalized.root,
           theme: normalized.theme,
           layout: normalized.layout,
-          view: normalized.view
+          // Only pass view when present; avoid setFullData then wipe with reset.
+          ...(hasSavedView ? { view: normalized.view } : {})
         })
       } else {
         this.mindMap.setData(normalized)
       }
-      this.mindMap?.view?.reset?.()
+      // Do not reset after setFullData when a saved view exists — that was wiping
+      // pan/zoom memory on every open / sheet switch.
+      if (hasSavedView) {
+        restoreMindMapViewState(this.mindMap, normalized.view)
+      } else if (options.fitIfEmpty !== false) {
+        // Fresh map or no transform: keep previous behavior (reset to origin).
+        this.mindMap?.view?.reset?.()
+      }
       if ('configData' in options) {
         this.mindMapConfig = options.configData || {}
         storeConfig(options.configData || null)
