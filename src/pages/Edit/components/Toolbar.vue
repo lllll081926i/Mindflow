@@ -519,6 +519,7 @@ import {
 } from '@/services/nodeBookmarks'
 import { selectMindMapBranch } from '@/services/mindmapSelection'
 import { buildMindMapNodePath } from '@/services/mindmapPath'
+import { collapseSiblingBranches } from '@/services/mindmapFocusBranch'
 import { copy } from '@/utils'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
@@ -906,6 +907,14 @@ export default {
           label: this.$t('contextmenu.copyNodePath') || '复制主题路径',
           disabled: this.activeNodes.length <= 0,
           action: () => this.copyActiveNodePath()
+        },
+        {
+          key: 'collapseOtherBranches',
+          label:
+            this.$t('contextmenu.collapseOtherBranches') || '折叠其他分支',
+          shortcut: 'Alt+Shift+C',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.collapseOtherBranches()
         },
         {
           key: 'expandToLevelLast',
@@ -1973,6 +1982,20 @@ export default {
         this.expandToPreferredLevel(Number(event.key))
         return
       }
+      // Alt+Shift+C collapse other branches
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'c'
+      ) {
+        event.preventDefault()
+        this.collapseOtherBranches()
+        return
+      }
       // Ctrl+Shift+B back to root center
       if (
         (event.ctrlKey || event.metaKey) &&
@@ -2865,6 +2888,25 @@ export default {
       copy(pathText)
       this.$message.success(
         this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+      )
+    },
+
+    collapseOtherBranches() {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      const node = nodes[0]
+      if (!node) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const mindMap = node.mindMap || this.mindMap
+      const count = collapseSiblingBranches(mindMap, node)
+      this.$message.success(
+        this.$t('contextmenu.collapseOtherBranchesDone', { count }) ||
+          `已折叠 ${count} 个旁支`
       )
     },
 

@@ -89,6 +89,16 @@
           $t('contextmenu.copyNodePath') || '复制主题路径'
         }}</span>
       </div>
+      <div
+        class="item"
+        @click="collapseOthers"
+        :class="{ disabled: isGeneralization }"
+      >
+        <span class="name">{{
+          $t('contextmenu.collapseOtherBranches') || '折叠其他分支'
+        }}</span>
+        <span class="desc">Alt+Shift+C</span>
+      </div>
       <div class="item" @click="fitSelection">
         <span class="name">{{
           $t('toolbar.fitSelectionAction') || '缩放到选中'
@@ -278,6 +288,7 @@ import {
 } from '@/services/nodeBookmarks'
 import { selectMindMapBranch } from '@/services/mindmapSelection'
 import { buildMindMapNodePath } from '@/services/mindmapPath'
+import { collapseSiblingBranches } from '@/services/mindmapFocusBranch'
 
 // 右键菜单
 export default {
@@ -487,6 +498,19 @@ export default {
       copy(pathText)
       this.$message.success(
         this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+      )
+      this.hide()
+    },
+
+    collapseOthers() {
+      if (this.isGeneralization || !this.node) {
+        this.hide()
+        return
+      }
+      const count = collapseSiblingBranches(this.mindMap, this.node)
+      this.$message.success(
+        this.$t('contextmenu.collapseOtherBranchesDone', { count }) ||
+          `已折叠 ${count} 个旁支`
       )
       this.hide()
     },
