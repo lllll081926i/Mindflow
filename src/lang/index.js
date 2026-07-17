@@ -520,7 +520,11 @@ const zh = {
     "usageHint": "可用 Enter、Shift + Enter 或上下箭头快速跳转结果",
     "prevResult": "上一条",
     "nextResult": "下一条",
-    "idleHint": "输入关键词后按回车开始搜索"
+    "idleHint": "输入关键词后按回车开始搜索",
+    "fieldTitle": "标题",
+    "fieldNote": "备注",
+    "fieldTag": "标签",
+    "fieldComment": "批注"
   },
   "documentConvert": {
     "previewHint": "默认转换全部页面。可取消部分页面后仅转换勾选项。",

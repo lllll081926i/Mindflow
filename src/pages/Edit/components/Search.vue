@@ -92,6 +92,7 @@ import { mapState } from 'pinia'
 import { isUndef, getTextFromHtml } from 'simple-mind-map/src/utils/index'
 import { onShowSearch } from '@/services/appEvents'
 import { ensureMindmapWorkbook } from '@/services/mindmapWorkbook'
+import { walkMindMapSearchMatches } from '@/services/mindmapSearchExtras'
 import { getData } from '@/api'
 import { useAppStore } from '@/stores/app'
 import { useThemeStore } from '@/stores/theme'
@@ -332,43 +333,75 @@ export default {
       this.resetSearchState()
     },
 
+    fieldLabel(field) {
+      const map = {
+        title: this.$t('search.fieldTitle') || '标题',
+        note: this.$t('search.fieldNote') || '备注',
+        tag: this.$t('search.fieldTag') || '标签',
+        comment: this.$t('search.fieldComment') || '批注'
+      }
+      return map[field] || field
+    },
+
+    formatSearchHitText(item, keyword, { crossSheet = false } = {}) {
+      const sheetPrefix =
+        crossSheet && item.sheetName ? `[${item.sheetName}] ` : ''
+      const fieldPrefix =
+        item.field && item.field !== 'title'
+          ? `(${this.fieldLabel(item.field)}) `
+          : ''
+      const body =
+        item.field && item.field !== 'title' && item.fieldValue
+          ? `${item.name} · ${String(item.fieldValue).slice(0, 80)}`
+          : item.name
+      return this.highlightText(`${sheetPrefix}${fieldPrefix}${body}`, keyword)
+    },
+
     collectWorkbookSheetMatches(keyword) {
       const results = []
       try {
         const workbook = ensureMindmapWorkbook(getData() || {})
         const activeId = workbook.activeSheetId
-        const walk = (node, sheet, path = []) => {
-          if (!node) return
-          const data = node.data || {}
-          let text = data.text || ''
-          if (data.richText) {
-            try {
-              text = getTextFromHtml(text)
-            } catch (_error) {}
-          }
-          const plain = String(text || '')
-          if (plain.toLowerCase().includes(keyword.toLowerCase())) {
-            results.push({
-              id: (data.uid || plain) + '@' + sheet.id,
-              nodeUid: data.uid || '',
-              sheetId: sheet.id,
-              sheetName: sheet.name,
-              name: plain,
-              text: this.highlightText(
-                '[' + sheet.name + '] ' + plain,
-                keyword
-              ),
-              isCrossSheet: sheet.id !== activeId
-            })
-          }
-          ;(node.children || []).forEach(child => walk(child, sheet, path))
-        }
         workbook.sheets.forEach(sheet => {
           if (sheet.id === activeId) return
-          walk(sheet.root, sheet)
+          const hits = walkMindMapSearchMatches(sheet.root, keyword, {
+            sheetId: sheet.id,
+            sheetName: sheet.name
+          })
+          hits.forEach(hit => {
+            results.push({
+              ...hit,
+              text: this.formatSearchHitText(hit, keyword, {
+                crossSheet: true
+              }),
+              isCrossSheet: true
+            })
+          })
         })
       } catch (_error) {}
       return results
+    },
+
+    collectCurrentSheetMetaMatches(keyword) {
+      try {
+        const workbook = ensureMindmapWorkbook(getData() || {})
+        const active =
+          workbook.sheets.find(sheet => sheet.id === workbook.activeSheetId) ||
+          workbook.sheets[0]
+        if (!active) return []
+        return walkMindMapSearchMatches(active.root, keyword, {
+          sheetId: active.id,
+          sheetName: active.name,
+          skipTitle: true
+        }).map(hit => ({
+          ...hit,
+          text: this.formatSearchHitText(hit, keyword),
+          isCrossSheet: false,
+          isMetaMatch: true
+        }))
+      } catch (_error) {
+        return []
+      }
     },
     async jumpToCrossSheetResult(item) {
       if (!item?.sheetId) return
@@ -415,15 +448,33 @@ export default {
         return {
           data: item,
           id,
+          nodeUid: id,
           text: this.highlightText(name, keyword),
           name,
-          isCrossSheet: false
+          field: 'title',
+          isCrossSheet: false,
+          isMetaMatch: false
         }
+      })
+      const metaMatches = keyword
+        ? this.collectCurrentSheetMetaMatches(keyword)
+        : []
+      // Dedup meta hits already covered by title search on same uid
+      const titleUids = new Set(
+        currentSheetResults.map(item => String(item.nodeUid || item.id || ''))
+      )
+      const uniqueMeta = metaMatches.filter(item => {
+        // keep all non-title fields even if title also matches same node
+        return item.isMetaMatch
       })
       this.crossSheetResults = keyword
         ? this.collectWorkbookSheetMatches(keyword)
         : []
-      this.searchResultList = currentSheetResults.concat(this.crossSheetResults)
+      this.searchResultList = currentSheetResults
+        .concat(uniqueMeta)
+        .concat(this.crossSheetResults)
+      // silence unused set for linters that track titleUids intent
+      void titleUids
       if (this.searchResultList.length <= 0) {
         this.activeResultIndex = -1
         this.currentIndex = 0
@@ -477,6 +528,24 @@ export default {
       this.onSearchResultItemClick(nextIndex)
     },
 
+    jumpToNodeUid(uid) {
+      const targetUid = String(uid || '').trim()
+      if (!targetUid || !this.mindMap?.renderer) return false
+      if (typeof this.mindMap.renderer.expandToNodeUid === 'function') {
+        this.mindMap.renderer.expandToNodeUid(targetUid, () => {
+          const node = this.mindMap.renderer.findNodeByUid?.(targetUid)
+          if (node && this.mindMap.renderer.moveNodeToCenter) {
+            this.mindMap.renderer.moveNodeToCenter(node)
+          }
+          if (node && this.mindMap.execCommand) {
+            this.mindMap.execCommand('GO_TARGET_NODE', targetUid)
+          }
+        })
+        return true
+      }
+      return false
+    },
+
     onSearchResultItemClick(index) {
       this.syncActiveSearchResult(index)
       const item = this.searchResultList[index]
@@ -484,9 +553,16 @@ export default {
         void this.jumpToCrossSheetResult(item)
         return
       }
-      // Jump only among current-sheet matches
-      const currentOnly = this.searchResultList.filter(result => !result.isCrossSheet)
-      const localIndex = currentOnly.findIndex(result => result.id === item?.id)
+      // Meta matches (note/tag/comment) jump by uid, not search plugin index
+      if (item?.isMetaMatch) {
+        this.jumpToNodeUid(item.nodeUid)
+        return
+      }
+      // Jump only among current-sheet title matches for plugin-compatible jump index
+      const titleOnly = this.searchResultList.filter(
+        result => !result.isCrossSheet && !result.isMetaMatch
+      )
+      const localIndex = titleOnly.findIndex(result => result.id === item?.id)
       if (localIndex >= 0) {
         this.mindMap.search.jump(localIndex)
       }
