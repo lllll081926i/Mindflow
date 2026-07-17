@@ -1526,7 +1526,9 @@ export default {
           })
         } catch (_error) {}
       })
-      this.$message.success(this.$t('edit.sheetAdded'))
+      if (!options.silentToast) {
+        this.$message.success(this.$t('edit.sheetAdded'))
+      }
     },
 
     async createSheetFromActiveBranch(node = null) {
@@ -1547,8 +1549,13 @@ export default {
       if (!options) return
       await this.addMindmapSheet(false, {
         name: options.name,
-        root: options.root
+        root: options.root,
+        silentToast: true
       })
+      this.$message.success(
+        this.$t('edit.sheetFromBranchDone', { name: options.name }) ||
+          `已从分支创建画布「${options.name}」`
+      )
     },
 
     startRenameMindmapSheet(sheet) {

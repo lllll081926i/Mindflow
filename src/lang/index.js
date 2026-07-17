@@ -508,6 +508,7 @@ const zh = {
     "sheets": "画布",
     "addSheet": "新建画布",
     "sheetAdded": "已新建画布",
+    "sheetFromBranchDone": "已从分支创建画布「{name}」",
     "sheetDeleted": "已删除画布",
     "sheetDeleteLast": "至少保留一个画布",
     "sheetDeleteConfirm": "确定删除该画布吗？",
