@@ -752,6 +752,11 @@ export const sidebarTriggerList = [
     icon: 'iconbiaoqian'
   },
   {
+    name: '书签',
+    value: 'bookmark',
+    icon: 'iconstar'
+  },
+  {
     name: '设置',
     value: 'setting',
     icon: 'iconshezhi'

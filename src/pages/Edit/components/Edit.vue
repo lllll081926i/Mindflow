@@ -114,6 +114,10 @@
       v-if="mindMap && activeSidebar === 'markerLegend'"
       :mindMap="mindMap"
     ></MarkerLegendSidebar>
+    <BookmarkSidebar
+      v-if="mindMap && activeSidebar === 'bookmark'"
+      :mindMap="mindMap"
+    ></BookmarkSidebar>
     <SummaryRangeBar v-if="mindMap && !isZenMode" :mindMap="mindMap" />
     <DocumentConvertPreviewDialog />
     <NodeIconToolbar
@@ -220,6 +224,9 @@ const NodeIconSidebar = defineAsyncComponent(() =>
 )
 const MarkerLegendSidebar = defineAsyncComponent(() =>
   import('./MarkerLegendSidebar.vue')
+)
+const BookmarkSidebar = defineAsyncComponent(() =>
+  import('./BookmarkSidebar.vue')
 )
 const SummaryRangeBar = defineAsyncComponent(() =>
   import('./SummaryRangeBar.vue')
@@ -585,6 +592,7 @@ export default {
     Search,
     NodeIconSidebar,
     MarkerLegendSidebar,
+    BookmarkSidebar,
     SummaryRangeBar,
     DocumentConvertPreviewDialog,
     NodeIconToolbar,

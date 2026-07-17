@@ -511,6 +511,10 @@ import {
   clearAttachmentFromNodes,
   getAttachmentFromNode
 } from '@/services/nodeAttachment'
+import {
+  isNodeBookmarked,
+  toggleNodesBookmark
+} from '@/services/nodeBookmarks'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
 const NodeHyperlink = defineAsyncComponent(() => import('./NodeHyperlink.vue'))
@@ -841,6 +845,18 @@ export default {
           key: 'markerLegend',
           label: this.$t('markerLegend.title') || '标记图例',
           action: () => setActiveSidebar('markerLegend')
+        },
+        {
+          key: 'bookmarkPanel',
+          label: this.$t('bookmark.openPanel') || '打开书签',
+          action: () => setActiveSidebar('bookmark')
+        },
+        {
+          key: 'toggleBookmark',
+          label: this.$t('bookmark.toggle') || '切换收藏',
+          shortcut: 'Alt+Shift+B',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.toggleSelectedBookmark()
         },
         {
           key: 'fitCanvas',
@@ -1328,11 +1344,26 @@ export default {
         this.$bus.$emit('toggleHandDrawn')
         return
       }
+      // toggle bookmark Alt+Shift+B
+      if (
+        !isTypingTarget &&
+        !this.commandPaletteVisible &&
+        event.altKey &&
+        event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        event.key.toLowerCase() === 'b'
+      ) {
+        event.preventDefault()
+        this.toggleSelectedBookmark()
+        return
+      }
       // toggle blank mode Alt+B
       if (
         !isTypingTarget &&
         !this.commandPaletteVisible &&
         event.altKey &&
+        !event.shiftKey &&
         !event.metaKey &&
         !event.ctrlKey &&
         event.key.toLowerCase() === 'b'
@@ -2657,6 +2688,28 @@ export default {
           node
         })
       })
+    },
+
+    toggleSelectedBookmark() {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      if (!nodes.length) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const allBookmarked = nodes.every(node => isNodeBookmarked(node))
+      const count = toggleNodesBookmark(nodes)
+      if (count > 0) {
+        this.$bus.$emit('bookmarkRefresh')
+        this.$message.success(
+          allBookmarked
+            ? this.$t('bookmark.removed') || '已取消收藏'
+            : this.$t('bookmark.added') || '已收藏主题'
+        )
+      }
     },
 
     async onSelectAttachment(activeNodes = []) {

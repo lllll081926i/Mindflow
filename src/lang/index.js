@@ -557,6 +557,20 @@ const zh = {
     "openOutline": "大纲中查看",
     "matchStats": "筛选命中 {matched} / {total}"
   },
+  "bookmark": {
+    "title": "书签",
+    "hint": "收藏主题后可在此快速跳转。快捷键 Alt+Shift+B 切换收藏。",
+    "addSelected": "收藏所选",
+    "removeSelected": "取消所选书签",
+    "refresh": "刷新",
+    "count": "共 {count} 个书签",
+    "empty": "还没有收藏的主题",
+    "needSelection": "请先选择主题",
+    "added": "已收藏主题",
+    "removed": "已取消收藏",
+    "openPanel": "打开书签",
+    "toggle": "切换收藏"
+  },
   "nodeIconSidebar": {
     "title": "图标/贴纸",
     "icon": "图标",
