@@ -18,6 +18,23 @@
       </el-tooltip>
     </div>
     <div class="item">
+      <el-tooltip
+        effect="dark"
+        :content="$t('toolbar.fitSelectionAction') || '缩放到选中'"
+        placement="top"
+      >
+        <div
+          class="btn iconfont iconquanping"
+          role="button"
+          tabindex="0"
+          :aria-label="$t('toolbar.fitSelectionAction') || '缩放到选中'"
+          @click="fitSelection"
+          @keydown.enter.prevent="fitSelection"
+          @keydown.space.prevent="fitSelection"
+        ></div>
+      </el-tooltip>
+    </div>
+    <div class="item">
       <div
         class="btn iconfont iconsousuo"
         role="button"
@@ -212,6 +229,9 @@ export default {
 
     backToRoot() {
       this.mindMap.renderer.setRootNodeCenter()
+    },
+    fitSelection() {
+      this.$bus.$emit('execCommand', 'FIT_SELECTION')
     },
     openSourceCodeEdit() {
       this.$bus.$emit('openSourceCodeEdit')
