@@ -133,10 +133,12 @@ export default {
   created() {
     this.$bus.$on('bookmarkRefresh', this.refresh)
     this.$bus.$on('toggleBookmarkSelected', this.toggleSelected)
+    this.$bus.$on('bookmarkClearAll', this.clearAllBookmarks)
   },
   beforeUnmount() {
     this.$bus.$off('bookmarkRefresh', this.refresh)
     this.$bus.$off('toggleBookmarkSelected', this.toggleSelected)
+    this.$bus.$off('bookmarkClearAll', this.clearAllBookmarks)
     if (this.mindMap) {
       this.mindMap.off?.('data_change', this.refresh)
       this.mindMap.off?.('node_active', this.onNodeActive)

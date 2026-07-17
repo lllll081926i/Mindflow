@@ -866,6 +866,11 @@ export default {
           action: () => this.toggleSelectedBookmark()
         },
         {
+          key: 'clearAllBookmarks',
+          label: this.$t('bookmark.clearAll') || '清空书签',
+          action: () => this.$bus.$emit('bookmarkClearAll')
+        },
+        {
           key: 'outerFrame',
           label: this.$t('toolbar.outerFrame') || '外框',
           disabled: this.activeNodes.length <= 0,
