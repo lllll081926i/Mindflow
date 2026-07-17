@@ -862,6 +862,25 @@ export default {
           action: () => this.toggleSelectedBookmark()
         },
         {
+          key: 'outerFrame',
+          label: this.$t('toolbar.outerFrame') || '外框',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('ADD_OUTER_FRAME')
+        },
+        {
+          key: 'summary',
+          label: this.$t('toolbar.summary') || '概要',
+          shortcut: 'Ctrl+G',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('ADD_GENERALIZATION')
+        },
+        {
+          key: 'associativeLine',
+          label: this.$t('toolbar.associativeLine') || '关联线',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.emitEditorCommand('ADD_ASSOCIATIVE_LINE')
+        },
+        {
           key: 'fitCanvas',
           label: this.$t('toolbar.fitCanvasAction'),
           action: () => this.emitEditorCommand('FIT_CANVAS')
