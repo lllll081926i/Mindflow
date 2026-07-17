@@ -540,6 +540,16 @@ export const shortcutKeyList = [
         value: 'Alt + Shift + C'
       },
       {
+        icon: 'iconstar',
+        name: '上一个/下一个书签',
+        value: 'Alt + Shift + [ / ]'
+      },
+      {
+        icon: 'iconjiantou',
+        name: '主题树导航',
+        value: 'Alt + ↑↓←→'
+      },
+      {
         icon: 'iconzhankai',
         name: '折叠到指定层级',
         value: ctrl + ' + Shift + 1~4'
