@@ -911,6 +911,12 @@ export default {
           action: () => this.$bus.$emit('startPainter')
         },
         {
+          key: 'selectAll',
+          label: this.$t('toolbar.selectAll') || '全选主题',
+          shortcut: 'Ctrl+A',
+          action: () => this.emitEditorCommand('SELECT_ALL')
+        },
+        {
           key: 'selectBranch',
           label: this.$t('contextmenu.selectBranch') || '选中整支分支',
           shortcut: 'Ctrl+Shift+A',

@@ -392,6 +392,7 @@ const zh = {
     "painter": "格式刷",
     "painterActiveTip": "格式刷已开启：点击目标主题应用样式，Esc 结束",
     "painterEndedTip": "格式刷已结束",
+    "selectAll": "全选主题",
     "formula": "公式",
     "attachment": "附件",
     "outerFrame": "外框",
