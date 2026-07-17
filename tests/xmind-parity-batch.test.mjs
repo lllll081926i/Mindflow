@@ -43,3 +43,18 @@ test('支持复制主题路径', () => {
   assert.match(menu, /copyNodePath/)
   assert.match(lang, /"copyNodePath"/)
 })
+
+test('可复制分支为 Markdown', () => {
+  const service = fs.readFileSync(path.join(root, 'src/services/mindmapBranchMarkdown.js'), 'utf8')
+  const menu = fs.readFileSync(path.join(root, 'src/pages/Edit/components/Contextmenu.vue'), 'utf8')
+  assert.match(service, /branchToMarkdown/)
+  assert.match(menu, /copyBranchMarkdown/)
+  assert.match(lang, /"copyBranchMarkdown"/)
+})
+
+test('单选备注迷你预览条', () => {
+  const edit = fs.readFileSync(path.join(root, 'src/pages/Edit/components/Edit.vue'), 'utf8')
+  assert.match(edit, /selectedNoteStrip/)
+  assert.match(edit, /updateSelectedNotePreview/)
+  assert.match(edit, /openSelectedNote/)
+})
