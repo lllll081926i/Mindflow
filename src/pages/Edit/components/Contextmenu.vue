@@ -100,6 +100,15 @@
       </div>
       <div
         class="item"
+        @click="exportBranchMarkdown"
+        :class="{ disabled: isGeneralization }"
+      >
+        <span class="name">{{
+          $t('contextmenu.exportBranchMarkdown') || '导出分支为 Markdown'
+        }}</span>
+      </div>
+      <div
+        class="item"
         @click="createSheetFromBranch"
         :class="{ disabled: isGeneralization }"
       >
@@ -305,6 +314,7 @@ import { getTextFromHtml, imgToDataUrl } from 'simple-mind-map/src/utils'
 import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown'
 import { transformToTxt } from 'simple-mind-map/src/parse/toTxt'
 import { setDataToClipboard, setImgToClipboard, copy } from '@/utils'
+import platform from '@/platform'
 import { numberTypeList, numberLevelList } from '@/config'
 import { useSettingsStore } from '@/stores/settings'
 import { useThemeStore } from '@/stores/theme'
@@ -549,6 +559,48 @@ export default {
         this.$t('contextmenu.copyBranchMarkdownDone') ||
           '已复制分支 Markdown'
       )
+      this.hide()
+    },
+
+    async exportBranchMarkdown() {
+      if (!this.node) {
+        this.hide()
+        return
+      }
+      const md = branchToMarkdown(this.node)
+      if (!md) {
+        this.hide()
+        return
+      }
+      const title =
+        (typeof this.node.getData === 'function'
+          ? this.node.getData('text')
+          : '') || 'branch'
+      const plain = String(title)
+        .replace(/<[^>]+>/g, '')
+        .replace(/[\\/:*?"<>|]+/g, '_')
+        .trim() || 'branch'
+      try {
+        const saved = await platform.saveTextFileAs({
+          suggestedName: plain + '.md',
+          content: md,
+          extension: 'md',
+          name: 'Markdown'
+        })
+        if (saved) {
+          this.$message.success(
+            this.$t('contextmenu.exportBranchMarkdownDone') ||
+              '已导出分支 Markdown'
+          )
+        }
+      } catch (error) {
+        if (!String(error || '').includes('aborted')) {
+          console.error('exportBranchMarkdown failed', error)
+          this.$message.error(
+            this.$t('edit.exportError') || '导出失败'
+          )
+        }
+      }
       this.hide()
     },
 
