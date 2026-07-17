@@ -956,6 +956,14 @@ export default {
           action: () => this.copyActiveBranchMarkdown()
         },
         {
+          key: 'exportBranchMarkdown',
+          label:
+            this.$t('contextmenu.exportBranchMarkdown') ||
+            '导出分支为 Markdown',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.exportActiveBranchMarkdown()
+        },
+        {
           key: 'createSheetFromBranch',
           label:
             this.$t('contextmenu.createSheetFromBranch') || '分支新建画布',
@@ -3121,6 +3129,48 @@ export default {
       this.$message.success(
         this.$t('contextmenu.copyBranchMarkdownDone') || '已复制分支 Markdown'
       )
+    },
+
+    async exportActiveBranchMarkdown() {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      const node = nodes[0]
+      if (!node) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const md = branchToMarkdown(node)
+      if (!md) return
+      const title =
+        (typeof node.getData === 'function' ? node.getData('text') : '') ||
+        'branch'
+      const plain =
+        String(title)
+          .replace(/<[^>]+>/g, '')
+          .replace(/[\\/:*?"<>|]+/g, '_')
+          .trim() || 'branch'
+      try {
+        const saved = await platform.saveTextFileAs({
+          suggestedName: plain + '.md',
+          content: md,
+          extension: 'md',
+          name: 'Markdown'
+        })
+        if (saved) {
+          this.$message.success(
+            this.$t('contextmenu.exportBranchMarkdownDone') ||
+              '已导出分支 Markdown'
+          )
+        }
+      } catch (error) {
+        if (!String(error || '').includes('aborted')) {
+          console.error('exportActiveBranchMarkdown failed', error)
+          this.$message.error(this.$t('edit.exportError') || '导出失败')
+        }
+      }
     },
 
     collapseOtherBranches() {
