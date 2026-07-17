@@ -70,6 +70,12 @@
       <div class="item" @click="exec('EXPAND_ALL')">
         <span class="name">{{ $t('contextmenu.expandNodeChild') }}</span>
       </div>
+      <div class="item" @click="fitSelection">
+        <span class="name">{{
+          $t('toolbar.fitSelectionAction') || '缩放到选中'
+        }}</span>
+        <span class="desc">Alt+Shift+F</span>
+      </div>
       <div class="splitLine"></div>
       <div
         class="item"
@@ -424,6 +430,11 @@ export default {
             : this.$t('bookmark.added') || '已收藏主题'
         )
       }
+      this.hide()
+    },
+
+    fitSelection() {
+      this.$bus.$emit('execCommand', 'FIT_SELECTION')
       this.hide()
     },
 
