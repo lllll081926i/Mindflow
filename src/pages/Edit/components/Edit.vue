@@ -100,6 +100,16 @@
       :class="mindMapContainerClasses"
     ></div>
     <Count :mindMap="mindMap" v-if="!isZenMode"></Count>
+    <div
+      v-if="!isZenMode && selectedNotePreview"
+      class="selectedNoteStrip"
+      :class="{ isDark: isDark }"
+      @click="openSelectedNote"
+    >
+      <span class="selectedNoteLabel">{{ $t('note.title') || '备注' }}</span>
+      <span class="selectedNoteText">{{ selectedNotePreview }}</span>
+      <span class="selectedNoteAction">{{ $t('note.edit') || '编辑' }}</span>
+    </div>
     <Navigator
       v-if="mindMap && secondaryUiReady"
       :mindMap="mindMap"
@@ -658,6 +668,8 @@ export default {
       markerFilterMatchIndex: -1,
       focusModeActive: false,
       focusModeUid: '',
+      selectedNotePreview: '',
+      selectedNoteNode: null,
       enableShowLoading: true,
       mindMap: null,
       mindMapData: null,
@@ -1890,7 +1902,15 @@ export default {
         },
         {}
       )
+      // also track selection note preview
+      this.mindMapEventForwarders.node_active_note = (...args) => {
+        this.updateSelectedNotePreview(...args)
+      }
       Object.entries(this.mindMapEventForwarders).forEach(([eventName, handler]) => {
+        if (eventName === 'node_active_note') {
+          this.mindMap.on('node_active', handler)
+          return
+        }
         this.mindMap.on(eventName, handler)
       })
     },
@@ -1899,10 +1919,41 @@ export default {
       if (!this.mindMap || !this.mindMapEventForwarders) return
       Object.entries(this.mindMapEventForwarders).forEach(([eventName, handler]) => {
         if (typeof this.mindMap.off === 'function') {
-          this.mindMap.off(eventName, handler)
+          const name = eventName === 'node_active_note' ? 'node_active' : eventName
+          this.mindMap.off(name, handler)
         }
       })
       this.mindMapEventForwarders = {}
+      this.selectedNotePreview = ''
+      this.selectedNoteNode = null
+    },
+
+    updateSelectedNotePreview(node, activeList = []) {
+      const list = Array.isArray(activeList) ? activeList : []
+      if (list.length !== 1) {
+        this.selectedNotePreview = ''
+        this.selectedNoteNode = null
+        return
+      }
+      const target = list[0]
+      const raw = String(target?.getData?.('note') || '').trim()
+      if (!raw) {
+        this.selectedNotePreview = ''
+        this.selectedNoteNode = null
+        return
+      }
+      const plain = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+      this.selectedNotePreview =
+        plain.length > 120 ? plain.slice(0, 120) + '…' : plain
+      this.selectedNoteNode = target
+    },
+
+    openSelectedNote() {
+      if (!this.selectedNoteNode) return
+      this.$bus.$emit('node_note_dblclick', this.selectedNoteNode, {
+        stopPropagation() {},
+        preventDefault() {}
+      })
     },
 
     registerCurrentDataGetter() {
@@ -2519,5 +2570,46 @@ export default {
   color: inherit;
   cursor: pointer;
   font: inherit;
+}
+.selectedNoteStrip {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 1100;
+  max-width: min(560px, calc(100vw - 48px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.88);
+}
+.selectedNoteStrip.isDark {
+  background: rgba(28, 33, 40, 0.96);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.36);
+}
+.selectedNoteLabel {
+  flex-shrink: 0;
+  font-weight: 600;
+  opacity: 0.7;
+}
+.selectedNoteText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.selectedNoteAction {
+  flex-shrink: 0;
+  color: #2563eb;
+  font-weight: 600;
 }
 </style>
