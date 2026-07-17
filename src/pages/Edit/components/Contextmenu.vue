@@ -108,6 +108,15 @@
         }}</span>
         <span class="desc">Alt+Shift+C</span>
       </div>
+      <div
+        class="item"
+        @click="sortChildren"
+        :class="{ disabled: isGeneralization || !hasChildren }"
+      >
+        <span class="name">{{
+          $t('contextmenu.sortChildren') || '子主题按字母排序'
+        }}</span>
+      </div>
       <div class="item" @click="fitSelection">
         <span class="name">{{
           $t('toolbar.fitSelectionAction') || '缩放到选中'
@@ -299,6 +308,7 @@ import { selectMindMapBranch } from '@/services/mindmapSelection'
 import { buildMindMapNodePath } from '@/services/mindmapPath'
 import { collapseSiblingBranches } from '@/services/mindmapFocusBranch'
 import { branchToMarkdown } from '@/services/mindmapBranchMarkdown'
+import { sortChildrenAlphabetically } from '@/services/mindmapSortSiblings'
 
 // 右键菜单
 export default {
@@ -410,6 +420,9 @@ export default {
     },
     nodeBookmarked() {
       return isNodeBookmarked(this.node)
+    },
+    hasChildren() {
+      return !!(this.node?.children && this.node.children.length > 1)
     },
     numberTypeList() {
       return numberTypeList[this.$i18n.locale] || numberTypeList.zh
@@ -539,6 +552,20 @@ export default {
       this.$message.success(
         this.$t('contextmenu.collapseOtherBranchesDone', { count }) ||
           `已折叠 ${count} 个旁支`
+      )
+      this.hide()
+    },
+
+    sortChildren() {
+      if (this.isGeneralization || !this.node || !this.hasChildren) {
+        this.hide()
+        return
+      }
+      const ok = sortChildrenAlphabetically(this.mindMap, this.node)
+      this.$message.success(
+        ok
+          ? this.$t('contextmenu.sortChildrenDone') || '已按字母排序子主题'
+          : this.$t('contextmenu.sortChildrenUnchanged') || '子主题顺序未变化'
       )
       this.hide()
     },
