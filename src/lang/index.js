@@ -596,7 +596,10 @@ const zh = {
     "added": "已收藏主题",
     "removed": "已取消收藏",
     "openPanel": "打开书签",
-    "toggle": "切换收藏"
+    "toggle": "切换收藏",
+    "clearAll": "清空书签",
+    "clearAllConfirm": "确定清除当前画布全部书签标记吗？",
+    "clearAllDone": "已清除 {count} 个书签"
   },
   "nodeIconSidebar": {
     "title": "图标/贴纸",

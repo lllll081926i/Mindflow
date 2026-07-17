@@ -16,6 +16,13 @@
         <el-button size="small" @click="refresh">
           {{ $t('bookmark.refresh') || '刷新' }}
         </el-button>
+        <el-button
+          size="small"
+          :disabled="bookmarks.length <= 0"
+          @click="clearAllBookmarks"
+        >
+          {{ $t('bookmark.clearAll') || '清空书签' }}
+        </el-button>
       </div>
       <div class="hint">
         {{
@@ -67,6 +74,7 @@ import {
   isNodeBookmarked,
   toggleNodesBookmark
 } from '@/services/nodeBookmarks'
+import { clearAllMindMapBookmarks } from '@/services/mindmapClearBookmarks'
 
 export default {
   name: 'BookmarkSidebar',
@@ -168,6 +176,26 @@ export default {
             : this.$t('bookmark.added') || '已收藏主题'
         )
       }
+    },
+
+    async clearAllBookmarks() {
+      if (!this.bookmarks.length || !this.mindMap) return
+      try {
+        await this.$confirm(
+          this.$t('bookmark.clearAllConfirm') ||
+            '确定清除当前画布全部书签标记吗？',
+          this.$t('bookmark.clearAll') || '清空书签',
+          { type: 'warning' }
+        )
+      } catch (_error) {
+        return
+      }
+      const count = clearAllMindMapBookmarks(this.mindMap)
+      this.refresh()
+      this.$message.success(
+        this.$t('bookmark.clearAllDone', { count }) ||
+          `已清除 ${count} 个书签`
+      )
     },
 
     jumpTo(item) {
