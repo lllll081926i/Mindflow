@@ -191,10 +191,12 @@ export const switchMindmapSheet = (data, sheetId, liveFullData = null) => {
   }
 }
 
-const uniqueSheetName = (sheets, desired) => {
+const uniqueSheetName = (sheets, desired, excludeId = '') => {
   const base = String(desired || '').trim() || '画布'
   const used = new Set(
-    (Array.isArray(sheets) ? sheets : []).map(sheet => String(sheet.name || ''))
+    (Array.isArray(sheets) ? sheets : [])
+      .filter(sheet => !excludeId || sheet.id !== excludeId)
+      .map(sheet => String(sheet.name || ''))
   )
   if (!used.has(base)) return base
   let i = 2
@@ -233,7 +235,11 @@ export const addMindmapSheet = (data, options = {}, liveFullData = null) => {
 
 export const renameMindmapSheet = (data, sheetId, name, liveFullData = null) => {
   const snapshot = snapshotActiveMindmapSheet(data, liveFullData)
-  const nextName = String(name || '').trim() || '画布'
+  const nextName = uniqueSheetName(
+    snapshot.sheets,
+    String(name || '').trim() || '画布',
+    sheetId
+  )
   const sheets = snapshot.sheets.map(sheet =>
     sheet.id === sheetId ? { ...sheet, name: nextName } : sheet
   )
