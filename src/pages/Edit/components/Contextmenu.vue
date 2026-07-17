@@ -141,6 +141,11 @@
         }}</span>
         <span class="desc">Alt+Shift+F</span>
       </div>
+      <div class="item" @click="centerSelection">
+        <span class="name">{{
+          $t('toolbar.centerSelectionAction') || '居中选中'
+        }}</span>
+      </div>
       <div class="splitLine"></div>
       <div
         class="item"
@@ -509,6 +514,11 @@ export default {
 
     fitSelection() {
       this.$bus.$emit('execCommand', 'FIT_SELECTION')
+      this.hide()
+    },
+
+    centerSelection() {
+      this.$bus.$emit('execCommand', 'CENTER_SELECTION')
       this.hide()
     },
 
