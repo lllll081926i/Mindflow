@@ -106,6 +106,7 @@
       :class="{ isDark: isDark }"
       :title="selectedPathPreview"
       @click="copySelectedPath"
+      @dblclick.stop="fitSelectedPath"
     >
       <span class="selectedPathLabel">{{
         $t('edit.topicPath') || '路径'
@@ -2015,6 +2016,10 @@ export default {
       this.$message.success(
         this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
       )
+    },
+
+    fitSelectedPath() {
+      fitMindMapSelection(this.mindMap)
     },
 
     registerCurrentDataGetter() {
