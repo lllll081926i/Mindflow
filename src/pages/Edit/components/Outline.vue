@@ -66,6 +66,10 @@ export default {
       type: String,
       default: ''
     },
+    bookmarksOnly: {
+      type: Boolean,
+      default: false
+    },
     mindMap: {
       type: Object
     }
@@ -118,13 +122,21 @@ export default {
   },
   watch: {
     keyword(value) {
-      this.$refs.tree?.filter?.(value)
+      this.$refs.tree?.filter?.(value || ' ')
+    },
+    bookmarksOnly() {
+      this.$nextTick(() => {
+        this.$refs.tree?.filter?.(this.keyword || ' ')
+      })
     }
   },
   methods: {
     filterOutlineNode(value, data) {
       const keyword = String(value || this.keyword || '').trim().toLowerCase()
       const marker = String(this.markerFilterToken || '').trim()
+      if (this.bookmarksOnly && !this.hasBookmarkedDescendant(data)) {
+        return false
+      }
       // marker-only filter (icons / has:* tokens)
       if (marker && (marker.includes('_') || marker.startsWith('has:'))) {
         return this.nodeMatchesMarker(data, marker)
@@ -133,6 +145,12 @@ export default {
       const text = String(data?.label || data?.data?.text || data?.text || '')
         .toLowerCase()
       return text.includes(keyword)
+    },
+    hasBookmarkedDescendant(data) {
+      if (!data) return false
+      if (data.bookmarked) return true
+      const children = data.children || []
+      return children.some(child => this.hasBookmarkedDescendant(child))
     },
     setMarkerFilter(token = '') {
       this.markerFilterToken = String(token || '')

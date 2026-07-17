@@ -284,7 +284,8 @@ const zh = {
     "title": "大纲",
     "nodeDefaultText": "分支节点",
     "print": "打印",
-    "fullscreen": "全屏"
+    "fullscreen": "全屏",
+    "bookmarksOnly": "仅显示书签"
   },
   "scale": {
     "zoomIn": "放大",

@@ -29,22 +29,49 @@
           <span class="icon iconfont iconquanping1"></span>
         </div>
       </el-tooltip>
+      <el-tooltip
+        class="item"
+        effect="dark"
+        :content="$t('outline.bookmarksOnly') || '仅显示书签'"
+        placement="top"
+      >
+        <div
+          class="btn"
+          :class="{ isDark: isDark, active: bookmarksOnly }"
+          @click="toggleBookmarksOnly"
+        >
+          <span class="starBtn">★</span>
+        </div>
+      </el-tooltip>
     </div>
-          <input
-        v-model.trim="outlineKeyword"
-        class="outlineSearch"
-        type="search"
-        :placeholder="$t('outline.searchPlaceholder')"
-      />
-      <div v-if="markerFilterToken" class="filterChip">
-        <span>{{ $t('outline.markerFilter') || '标记筛选' }}: {{ markerFilterToken }}</span>
-        <button type="button" class="chipClear" @click="clearMarkerFilter">×</button>
-      </div>
-      <Outline
+    <input
+      v-model.trim="outlineKeyword"
+      class="outlineSearch"
+      type="search"
+      :placeholder="$t('outline.searchPlaceholder')"
+    />
+    <div v-if="markerFilterToken" class="filterChip">
+      <span
+        >{{ $t('outline.markerFilter') || '标记筛选' }}:
+        {{ markerFilterToken }}</span
+      >
+      <button type="button" class="chipClear" @click="clearMarkerFilter">
+        ×
+      </button>
+    </div>
+    <div v-if="bookmarksOnly" class="filterChip">
+      <span>{{ $t('outline.bookmarksOnly') || '仅显示书签' }}</span>
+      <button type="button" class="chipClear" @click="toggleBookmarksOnly">
+        ×
+      </button>
+    </div>
+    <Outline
       :mindMap="mindMap"
       @scrollTo="onScrollTo"
       ref="outlineRef"
-     :keyword="outlineKeyword"></Outline>
+      :keyword="outlineKeyword"
+      :bookmarks-only="bookmarksOnly"
+    ></Outline>
   </Sidebar>
 </template>
 
@@ -72,7 +99,8 @@ export default {
   data() {
     return {
       outlineKeyword: '',
-      markerFilterToken: ''
+      markerFilterToken: '',
+      bookmarksOnly: false
     }
   },
   components: {
@@ -104,6 +132,10 @@ export default {
       this.$bus.$emit('applyMarkerFilter', '')
       this.$bus.$emit('outlineSetMarkerFilter', '')
       this.outlineKeyword = ''
+    },
+
+    toggleBookmarksOnly() {
+      this.bookmarksOnly = !this.bookmarksOnly
     },
 
     onChangeToOutlineEdit() {
@@ -174,6 +206,15 @@ export default {
 
     &.isDark {
       color: #fff;
+    }
+
+    &.active {
+      color: #f59e0b;
+    }
+
+    .starBtn {
+      font-size: 14px;
+      line-height: 1;
     }
   }
 }
