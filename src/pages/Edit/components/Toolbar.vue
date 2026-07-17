@@ -520,6 +520,7 @@ import {
 import { selectMindMapBranch } from '@/services/mindmapSelection'
 import { buildMindMapNodePath } from '@/services/mindmapPath'
 import { collapseSiblingBranches } from '@/services/mindmapFocusBranch'
+import { branchToMarkdown } from '@/services/mindmapBranchMarkdown'
 import { copy } from '@/utils'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
@@ -907,6 +908,13 @@ export default {
           label: this.$t('contextmenu.copyNodePath') || '复制主题路径',
           disabled: this.activeNodes.length <= 0,
           action: () => this.copyActiveNodePath()
+        },
+        {
+          key: 'copyBranchMarkdown',
+          label:
+            this.$t('contextmenu.copyBranchMarkdown') || '复制分支为 Markdown',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.copyActiveBranchMarkdown()
         },
         {
           key: 'collapseOtherBranches',
@@ -2888,6 +2896,25 @@ export default {
       copy(pathText)
       this.$message.success(
         this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+      )
+    },
+
+    copyActiveBranchMarkdown() {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      const node = nodes[0]
+      if (!node) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const md = branchToMarkdown(node)
+      if (!md) return
+      copy(md)
+      this.$message.success(
+        this.$t('contextmenu.copyBranchMarkdownDone') || '已复制分支 Markdown'
       )
     },
 

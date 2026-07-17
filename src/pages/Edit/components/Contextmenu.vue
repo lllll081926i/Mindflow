@@ -91,6 +91,15 @@
       </div>
       <div
         class="item"
+        @click="copyBranchMarkdown"
+        :class="{ disabled: isGeneralization }"
+      >
+        <span class="name">{{
+          $t('contextmenu.copyBranchMarkdown') || '复制分支为 Markdown'
+        }}</span>
+      </div>
+      <div
+        class="item"
         @click="collapseOthers"
         :class="{ disabled: isGeneralization }"
       >
@@ -289,6 +298,7 @@ import {
 import { selectMindMapBranch } from '@/services/mindmapSelection'
 import { buildMindMapNodePath } from '@/services/mindmapPath'
 import { collapseSiblingBranches } from '@/services/mindmapFocusBranch'
+import { branchToMarkdown } from '@/services/mindmapBranchMarkdown'
 
 // 右键菜单
 export default {
@@ -498,6 +508,24 @@ export default {
       copy(pathText)
       this.$message.success(
         this.$t('contextmenu.copyNodePathDone') || '已复制主题路径'
+      )
+      this.hide()
+    },
+
+    copyBranchMarkdown() {
+      if (!this.node) {
+        this.hide()
+        return
+      }
+      const md = branchToMarkdown(this.node)
+      if (!md) {
+        this.hide()
+        return
+      }
+      copy(md)
+      this.$message.success(
+        this.$t('contextmenu.copyBranchMarkdownDone') ||
+          '已复制分支 Markdown'
       )
       this.hide()
     },

@@ -180,6 +180,8 @@ const zh = {
     "selectBranchDone": "已选中 {count} 个主题",
     "copyNodePath": "复制主题路径",
     "copyNodePathDone": "已复制主题路径",
+    "copyBranchMarkdown": "复制分支为 Markdown",
+    "copyBranchMarkdownDone": "已复制分支 Markdown",
     "collapseOtherBranches": "折叠其他分支",
     "collapseOtherBranchesDone": "已折叠 {count} 个旁支",
     "aiCreate": "AI续写",
