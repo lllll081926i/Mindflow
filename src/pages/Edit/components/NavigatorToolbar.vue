@@ -20,6 +20,23 @@
     <div class="item">
       <el-tooltip
         effect="dark"
+        :content="$t('toolbar.fitCanvasAction') || '适应画布'"
+        placement="top"
+      >
+        <div
+          class="btn iconfont iconquanping1"
+          role="button"
+          tabindex="0"
+          :aria-label="$t('toolbar.fitCanvasAction') || '适应画布'"
+          @click="fitCanvas"
+          @keydown.enter.prevent="fitCanvas"
+          @keydown.space.prevent="fitCanvas"
+        ></div>
+      </el-tooltip>
+    </div>
+    <div class="item">
+      <el-tooltip
+        effect="dark"
         :content="$t('toolbar.fitSelectionAction') || '缩放到选中'"
         placement="top"
       >
@@ -229,6 +246,9 @@ export default {
 
     backToRoot() {
       this.mindMap.renderer.setRootNodeCenter()
+    },
+    fitCanvas() {
+      this.$bus.$emit('execCommand', 'FIT_CANVAS')
     },
     fitSelection() {
       this.$bus.$emit('execCommand', 'FIT_SELECTION')
