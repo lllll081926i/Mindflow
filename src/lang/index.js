@@ -176,6 +176,8 @@ const zh = {
     "number": "编号其子节点",
     "expandNodeChild": "展开所有下级节点",
     "unExpandNodeChild": "收起所有下级节点",
+    "selectBranch": "选中整支分支",
+    "selectBranchDone": "已选中 {count} 个主题",
     "aiCreate": "AI续写",
     "modifyNodeLink": "修改节点链接",
     "linkToNode": "链接到指定节点",

@@ -517,6 +517,7 @@ import {
   isNodeBookmarked,
   toggleNodesBookmark
 } from '@/services/nodeBookmarks'
+import { selectMindMapBranch } from '@/services/mindmapSelection'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
 const NodeHyperlink = defineAsyncComponent(() => import('./NodeHyperlink.vue'))
@@ -871,6 +872,13 @@ export default {
           shortcut: 'Alt+Shift+F',
           disabled: this.activeNodes.length <= 0,
           action: () => this.emitEditorCommand('FIT_SELECTION')
+        },
+        {
+          key: 'selectBranch',
+          label: this.$t('contextmenu.selectBranch') || '选中整支分支',
+          shortcut: 'Ctrl+Shift+A',
+          disabled: this.activeNodes.length <= 0,
+          action: () => this.selectActiveBranch()
         },
         {
           key: 'expandToLevelLast',
@@ -1915,6 +1923,17 @@ export default {
         this.emitEditorCommand('FIT_SELECTION')
         return
       }
+      // Ctrl+Shift+A select whole branch
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        event.key?.toLowerCase() === 'a' &&
+        !isTypingTarget
+      ) {
+        event.preventDefault()
+        this.selectActiveBranch()
+        return
+      }
       // Ctrl+Shift+B back to root center
       if (
         (event.ctrlKey || event.metaKey) &&
@@ -2768,6 +2787,27 @@ export default {
         this.$t('toolbar.expandToLevelDone', { level: nextLevel }) ||
           `已折叠到第 ${nextLevel} 级`
       )
+    },
+
+    selectActiveBranch() {
+      const nodes = this.getActiveNodesSnapshot
+        ? this.getActiveNodesSnapshot()
+        : this.activeNodes || []
+      const root = nodes[0]
+      if (!root) {
+        this.$message.warning(
+          this.$t('bookmark.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      const mindMap = root.mindMap || this.mindMap
+      const count = selectMindMapBranch(mindMap, root)
+      if (count > 0) {
+        this.$message.success(
+          this.$t('contextmenu.selectBranchDone', { count }) ||
+            `已选中 ${count} 个主题`
+        )
+      }
     },
 
     async onSelectAttachment(activeNodes = []) {

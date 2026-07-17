@@ -70,6 +70,16 @@
       <div class="item" @click="exec('EXPAND_ALL')">
         <span class="name">{{ $t('contextmenu.expandNodeChild') }}</span>
       </div>
+      <div
+        class="item"
+        @click="selectBranch"
+        :class="{ disabled: isGeneralization }"
+      >
+        <span class="name">{{
+          $t('contextmenu.selectBranch') || '选中整支分支'
+        }}</span>
+        <span class="desc">Ctrl+Shift+A</span>
+      </div>
       <div class="item" @click="fitSelection">
         <span class="name">{{
           $t('toolbar.fitSelectionAction') || '缩放到选中'
@@ -257,6 +267,7 @@ import {
   isNodeBookmarked,
   toggleNodesBookmark
 } from '@/services/nodeBookmarks'
+import { selectMindMapBranch } from '@/services/mindmapSelection'
 
 // 右键菜单
 export default {
@@ -435,6 +446,21 @@ export default {
 
     fitSelection() {
       this.$bus.$emit('execCommand', 'FIT_SELECTION')
+      this.hide()
+    },
+
+    selectBranch() {
+      if (this.isGeneralization || !this.node) {
+        this.hide()
+        return
+      }
+      const count = selectMindMapBranch(this.mindMap, this.node)
+      if (count > 0) {
+        this.$message.success(
+          this.$t('contextmenu.selectBranchDone', { count }) ||
+            `已选中 ${count} 个主题`
+        )
+      }
       this.hide()
     },
 
