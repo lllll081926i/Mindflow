@@ -249,6 +249,7 @@ import {
   restoreMindMapViewState
 } from '@/services/mindmapViewState'
 import { buildMindMapNodePath } from '@/services/mindmapPath'
+import { jumpToAdjacentBookmark } from '@/services/mindmapBookmarkNav'
 import { copy } from '@/utils'
 import { showLoading, hideLoading } from '@/utils/loading'
 import {
@@ -952,6 +953,7 @@ export default {
       this.$bus.$on('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$on('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$on('mindmapCreateSheetFromBranch', this.createSheetFromActiveBranch)
+      this.$bus.$on('mindmapJumpBookmark', this.handleJumpBookmark)
       this.$bus.$on('applyMarkerFilter', this.handleApplyMarkerFilter)
       this.$bus.$on('jumpMarkerFilterMatch', this.handleJumpMarkerFilterMatch)
       this.$bus.$on('focusMarkerFilterMatch', this.handleFocusMarkerFilterMatch)
@@ -991,6 +993,7 @@ export default {
       this.$bus.$off('mindmapRenameActiveSheet', this.handleMindmapRenameActiveSheet)
       this.$bus.$off('mindmapSwitchSheet', this.switchMindmapSheetById)
       this.$bus.$off('mindmapCreateSheetFromBranch', this.createSheetFromActiveBranch)
+      this.$bus.$off('mindmapJumpBookmark', this.handleJumpBookmark)
       this.$bus.$off('applyMarkerFilter', this.handleApplyMarkerFilter)
       this.$bus.$off('jumpMarkerFilterMatch', this.handleJumpMarkerFilterMatch)
       this.$bus.$off('focusMarkerFilterMatch', this.handleFocusMarkerFilterMatch)
@@ -1561,6 +1564,15 @@ export default {
         this.$t('edit.sheetFromBranchDone', { name: options.name }) ||
           `已从分支创建画布「${options.name}」`
       )
+    },
+
+    handleJumpBookmark(direction = 1) {
+      if (!this.mindMap) return
+      const current = this.mindMap.renderer?.activeNodeList?.[0] || null
+      const target = jumpToAdjacentBookmark(this.mindMap, current, direction)
+      if (!target) {
+        this.$message.info(this.$t('bookmark.empty') || '还没有收藏的主题')
+      }
     },
 
     startRenameMindmapSheet(sheet) {

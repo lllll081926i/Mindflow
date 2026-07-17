@@ -522,7 +522,6 @@ import { buildMindMapNodePath } from '@/services/mindmapPath'
 import { collapseSiblingBranches } from '@/services/mindmapFocusBranch'
 import { branchToMarkdown } from '@/services/mindmapBranchMarkdown'
 import { sortChildrenAlphabetically } from '@/services/mindmapSortSiblings'
-import { jumpToAdjacentBookmark } from '@/services/mindmapBookmarkNav'
 import { copy } from '@/utils'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
@@ -2153,25 +2152,11 @@ export default {
         !event.ctrlKey &&
         (event.code === 'BracketLeft' || event.code === 'BracketRight')
       ) {
-        const nodes = this.getActiveNodesSnapshot
-          ? this.getActiveNodesSnapshot()
-          : this.activeNodes || []
-        const current = nodes[0]
-        // Prefer mindMap from selection; fallback via bus/exec if unavailable
-        const mindMap = current?.mindMap
-        if (mindMap) {
-          event.preventDefault()
-          const target = jumpToAdjacentBookmark(
-            mindMap,
-            current,
-            event.code === 'BracketRight' ? 1 : -1
-          )
-          if (!target) {
-            this.$message.info(
-              this.$t('bookmark.empty') || '还没有收藏的主题'
-            )
-          }
-        }
+        event.preventDefault()
+        this.$bus.$emit(
+          'mindmapJumpBookmark',
+          event.code === 'BracketRight' ? 1 : -1
+        )
         return
       }
       // Alt+Arrow navigation: Up parent, Down first child, Left/Right siblings
