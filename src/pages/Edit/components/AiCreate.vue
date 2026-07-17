@@ -81,6 +81,26 @@
         $t('ai.stopGenerating')
       }}</el-button>
     </div>
+    <!-- 生成完成：预览后应用 / 丢弃 -->
+    <div
+      class="aiPreviewBar"
+      :class="{ isDark: isDark }"
+      v-show="previewApplyVisible"
+    >
+      <div class="aiPreviewBarInner">
+        <span class="aiPreviewTip">{{
+          $t('ai.previewReadyTip') || '生成完成，请确认是否应用结果'
+        }}</span>
+        <div class="aiPreviewActions">
+          <el-button size="small" @click="discardAiPreview">{{
+            $t('ai.discardPreview') || '丢弃并恢复'
+          }}</el-button>
+          <el-button type="primary" size="small" @click="applyAiPreview">{{
+            $t('ai.applyPreview') || '应用结果'
+          }}</el-button>
+        </div>
+      </div>
+    </div>
     <AiConfigDialog v-model="aiConfigDialogVisible"></AiConfigDialog>
     <!-- AI续写 -->
     <el-dialog
@@ -175,7 +195,9 @@ export default {
       aiPartInput: '',
       beingCreatePartNode: null,
       renderEndHandler: null,
-      renderRetryTimer: null
+      renderRetryTimer: null,
+      previewApplyVisible: false,
+      pendingPreviewKind: ''
     }
   },
   computed: {
@@ -186,7 +208,7 @@ export default {
       isDark: 'isDark'
     }),
     hasActiveAiRequest() {
-      return !!this.activeAiRequestKind
+      return !!this.activeAiRequestKind || this.previewApplyVisible
     },
     isGeneratingMindMapRequest() {
       return (
@@ -466,8 +488,7 @@ export default {
             return
           }
           this.aiCreatingContent = content
-          // 成功完成：丢弃回滚缓存
-          this.mindMapDataCache = ''
+          // 保留 mindMapDataCache，等待用户预览确认
           this.resetOnAiCreatingStop({
             invalidateRequest: false
           })
@@ -478,7 +499,7 @@ export default {
           }
           this.resetOnAiCreatingStop()
           this.restoreMindMapSnapshot({ notify: true })
-          this.resetOnRenderEnd()
+          this.resetOnRenderEnd({ clearCache: true })
           this.$message.error(error?.message || this.$t('ai.generationFailed'))
         }
       )
@@ -493,18 +514,58 @@ export default {
     },
 
     // 渲染结束后需要复位的数据
-    resetOnRenderEnd() {
+    resetOnRenderEnd({ clearCache = true } = {}) {
       this.detachRenderEndListener()
       this.isLoopRendering = false
       this.uidMap = {}
       this.latestUid = ''
       this.aiCreatingContent = ''
+      if (clearCache) {
+        this.mindMapDataCache = ''
+      }
+      this.beingAiCreateNodeUid = ''
+    },
+
+    openAiPreviewApply(kind = '') {
+      this.pendingPreviewKind = kind || this.activeAiRequestKind || ''
+      this.previewApplyVisible = true
+      this.aiCreatingMaskVisible = false
+      this.isLoopRendering = false
+      this.detachRenderEndListener()
+      this.aiCreatingContent = ''
+      this.resetAiRequestState({ invalidate: true })
+      this.$message.info(
+        this.$t('ai.previewReadyTip') || '生成完成，请确认是否应用结果'
+      )
+    },
+
+    applyAiPreview() {
+      this.previewApplyVisible = false
+      this.pendingPreviewKind = ''
       this.mindMapDataCache = ''
       this.beingAiCreateNodeUid = ''
+      this.uidMap = {}
+      this.latestUid = ''
+      this.$message.success(this.$t('ai.aiGenerationSuccess'))
+    },
+
+    discardAiPreview() {
+      this.previewApplyVisible = false
+      this.pendingPreviewKind = ''
+      this.restoreMindMapSnapshot({ notify: true })
+      this.resetOnRenderEnd({ clearCache: true })
+      this.resetAiCreatePartDialog()
+      this.$message.success(
+        this.$t('ai.discardedPreview') || '已丢弃生成结果并恢复原导图'
+      )
     },
 
     // 停止生成：整图/续写均回滚到生成前快照
     stopCreate() {
+      if (this.previewApplyVisible) {
+        this.discardAiPreview()
+        return
+      }
       const shouldRestore =
         this.activeAiRequestKind === 'create-all' ||
         this.activeAiRequestKind === 'create-part'
@@ -536,22 +597,38 @@ export default {
 
       // 在当前渲染完成时再进行下一次渲染
       const onRenderEnd = () => {
-        if (!this.isCurrentAiRequest(requestId)) {
-          this.resetOnRenderEnd()
+        if (!this.isCurrentAiRequest(requestId) && !this.previewApplyVisible) {
+          // request ended without preview path — keep cache for apply bar
+          if (this.mindMapDataCache && !this.previewApplyVisible) {
+            // fall through only when still streaming same request
+          }
+        }
+        if (!this.isCurrentAiRequest(requestId) && this.previewApplyVisible) {
+          return
+        }
+        if (!this.isCurrentAiRequest(requestId) && !this.aiCreatingContent) {
+          // stream finished: finalize preview if we still hold a snapshot
+          if (this.mindMapDataCache && !this.previewApplyVisible) {
+            this.openAiPreviewApply('create-all')
+          } else {
+            this.resetOnRenderEnd({ clearCache: !this.mindMapDataCache })
+          }
           return
         }
         // 处理超出画布的节点
         this.checkNodeOuter()
 
-        // 如果生成结束数据渲染完毕，那么解绑事件
+        // 如果生成结束数据渲染完毕，进入预览确认
         if (!this.isGeneratingMindMapRequest && !this.aiCreatingContent) {
-          this.resetOnRenderEnd()
+          this.openAiPreviewApply('create-all')
           return
         }
 
         const nextSnapshot = this.createAiTreeSnapshot()
         if (!nextSnapshot) {
-          this.resetOnRenderEnd()
+          if (!this.isGeneratingMindMapRequest) {
+            this.openAiPreviewApply('create-all')
+          }
           return
         }
         const treeData = nextSnapshot.treeData
@@ -566,11 +643,9 @@ export default {
           lastTreeData = curTreeData
           this.mindMap.updateData(treeData)
         } else {
-          // 已经生成结束
-          // 还要触发一遍渲染，否则会丢失数据
+          // 已经生成结束：保留缓存，弹出预览确认
           this.mindMap.updateData(treeData)
-          this.resetOnRenderEnd()
-          this.$message.success(this.$t('ai.aiGenerationSuccess'))
+          this.openAiPreviewApply('create-all')
         }
       }
       this.detachRenderEndListener()
@@ -701,10 +776,10 @@ export default {
               return
             }
             this.aiCreatingContent = content
+            // 保留缓存，等渲染结束进入预览确认
             this.resetOnAiCreatingStop({
               invalidateRequest: false
             })
-            this.resetAiCreatePartDialog()
           },
           error => {
             if (!this.isCurrentAiRequest(requestId)) {
@@ -713,7 +788,7 @@ export default {
             this.resetOnAiCreatingStop()
             this.resetAiCreatePartDialog()
             this.restoreMindMapSnapshot({ notify: true })
-            this.resetOnRenderEnd()
+            this.resetOnRenderEnd({ clearCache: true })
             this.$message.error(
               error?.message || this.$t('ai.generationFailed')
             )
@@ -757,22 +832,31 @@ export default {
 
       // 在当前渲染完成时再进行下一次渲染
       const onRenderEnd = () => {
-        if (!this.isCurrentAiRequest(requestId)) {
-          this.resetOnRenderEnd()
+        if (!this.isCurrentAiRequest(requestId) && this.previewApplyVisible) {
+          return
+        }
+        if (!this.isCurrentAiRequest(requestId) && !this.aiCreatingContent) {
+          if (this.mindMapDataCache && !this.previewApplyVisible) {
+            this.openAiPreviewApply('create-part')
+          } else {
+            this.resetOnRenderEnd({ clearCache: !this.mindMapDataCache })
+          }
           return
         }
         // 处理超出画布的节点
         this.checkNodeOuter()
 
-        // 如果生成结束数据渲染完毕，那么解绑事件
+        // 生成结束：进入预览确认
         if (!this.isGeneratingMindMapRequest && !this.aiCreatingContent) {
-          this.resetOnRenderEnd()
+          this.openAiPreviewApply('create-part')
           return
         }
 
         const nextSnapshot = this.createAiTreeSnapshot()
         if (!nextSnapshot) {
-          this.resetOnRenderEnd()
+          if (!this.isGeneratingMindMapRequest) {
+            this.openAiPreviewApply('create-part')
+          }
           return
         }
         const partData = nextSnapshot.treeData
@@ -789,8 +873,7 @@ export default {
           this.mindMap.updateData(treeData)
         } else {
           this.mindMap.updateData(treeData)
-          this.resetOnRenderEnd()
-          this.$message.success(this.$t('ai.aiGenerationSuccess'))
+          this.openAiPreviewApply('create-part')
         }
       }
       this.detachRenderEndListener()
@@ -858,6 +941,47 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.aiPreviewBar {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 4000;
+  max-width: min(560px, calc(100vw - 32px));
+
+  .aiPreviewBarInner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+  }
+
+  .aiPreviewTip {
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.86);
+  }
+
+  .aiPreviewActions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &.isDark .aiPreviewBarInner {
+    background: rgba(24, 28, 34, 0.96);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4);
+  }
+
+  &.isDark .aiPreviewTip {
+    color: rgba(255, 255, 255, 0.92);
+  }
+}
+
 .clientTipDialog,
 .createDialog {
   &.isDark {

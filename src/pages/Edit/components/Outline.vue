@@ -22,6 +22,12 @@
     <template #default="{ node, data }">
       <span class="customNode" :data-id="data.uid" @click="onClick(data)">
         <span
+          v-if="data.bookmarked"
+          class="bookmarkStar"
+          :title="$t('bookmark.title') || '书签'"
+          >★</span
+        >
+        <span
           class="nodeEdit"
           :contenteditable="!isReadonly"
           :key="`${data.uid}-${outlineVersion}`"
@@ -49,6 +55,7 @@ import { sanitizeRichTextFragment } from '@/utils'
 import { useAppStore } from '@/stores/app'
 import { useThemeStore } from '@/stores/theme'
 import { setIsDragOutlineTreeNode } from '@/stores/runtime'
+import { isBookmarkIcon } from '@/services/nodeBookmarks'
 
 const OUTLINE_INSERT_ACTIONS = new Set(['insertNode', 'insertChildNode', 'moveUp'])
 
@@ -225,6 +232,8 @@ export default {
         root.textCache = text // 保存一份修改前的数据，用于对比是否修改了
         root.label = text
         root.uid = root.data.uid
+        const icons = Array.isArray(root.data.icon) ? root.data.icon : []
+        root.bookmarked = icons.some(isBookmarkIcon)
         if (root.children && root.children.length > 0) {
           root.children.forEach(item => {
             walk(item)
@@ -420,11 +429,23 @@ export default {
   width: 100%;
   color: rgba(0, 0, 0, 0.85);
   font-weight: bold;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+
+  .bookmarkStar {
+    color: #f59e0b;
+    flex-shrink: 0;
+    line-height: 1.4;
+    font-size: 12px;
+  }
 
   .nodeEdit {
     outline: none;
     white-space: normal;
     padding-right: 20px;
+    flex: 1;
+    min-width: 0;
   }
 }
 </style>

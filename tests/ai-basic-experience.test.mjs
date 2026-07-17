@@ -84,3 +84,13 @@ test('AI 整图/续写会在生成前快照，停止或失败时回滚', () => {
   )
   assert.match(langSource, /"restoredPreviousMindMap": "已恢复生成前的导图内容"/)
 })
+
+test('AI 生成完成后需预览确认再应用或丢弃', () => {
+  assert.match(aiCreateSource, /openAiPreviewApply\(/)
+  assert.match(aiCreateSource, /applyAiPreview\(/)
+  assert.match(aiCreateSource, /discardAiPreview\(/)
+  assert.match(aiCreateSource, /previewApplyVisible/)
+  assert.match(langSource, /"previewReadyTip"/)
+  assert.match(langSource, /"applyPreview"/)
+  assert.match(langSource, /"discardPreview"/)
+})

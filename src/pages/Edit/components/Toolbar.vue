@@ -457,7 +457,9 @@ import {
   parseToolbarLocalFileContent,
   createLocalWriteTaskData,
   hasPendingLocalWriteState,
-  serializeMindMapWriteContent
+  serializeMindMapWriteContent,
+  performLocalMindMapWrite,
+  buildRecoveryDraftWriteArgs
 } from './editorLocalFileSession'
 import ToolbarNodeBtnList from './ToolbarNodeBtnList.vue'
 import { throttle, isMobile } from 'simple-mind-map/src/utils/index'
@@ -2236,16 +2238,15 @@ export default {
     },
 
     async writeRecoveryDraft(writeTask) {
-      if (!writeTask?.fileRef || !writeTask.content) {
+      const args = buildRecoveryDraftWriteArgs({
+        writeTask,
+        config: getConfig()
+      })
+      if (!args) {
         return
       }
       try {
-        await writeRecoveryDraftForFile({
-          fileRef: writeTask.fileRef,
-          data: writeTask.content,
-          config: getConfig(),
-          isFullDataFile: writeTask.isFullDataFile
-        })
+        await writeRecoveryDraftForFile(args)
       } catch (error) {
         console.error('writeRecoveryDraft failed', error)
       }
@@ -2550,34 +2551,45 @@ export default {
       })
     },
 
-    // 写入本地文件
+    // 写入本地文件（核心链路见 editorLocalFileSession.performLocalMindMapWrite）
     async writeLocalFile(writeTask) {
       if (!writeTask) {
         this.waitingWriteToLocalFile = this.hasPendingLocalWrite()
         return
       }
-      let writeSucceeded = false
       this.currentLocalFileWriteRequestId = writeTask.id
       try {
-        const string = serializeMindMapWriteContent({
-          content: writeTask.content,
-          configData: writeTask.configData,
-          isFullDataFile: writeTask.isFullDataFile
+        const result = await performLocalMindMapWrite({
+          writeTask,
+          writeMindMapFile: (fileRef, string) =>
+            platform.writeMindMapFile(fileRef, string),
+          recordRecentFile,
+          clearRecoveryDraft: async fileRef => {
+            if (this.recoveryTimer) {
+              clearTimeout(this.recoveryTimer)
+              this.recoveryTimer = null
+            }
+            await clearRecoveryDraftForFile(fileRef)
+            this.recoveredDraftLoaded = false
+          },
+          markDocumentDirty,
+          onSuccess: () => {
+            this.refreshRecentFiles()
+            this.lastSuccessfulSaveAt = Date.now()
+            this.lastLocalSaveErrorMessage = ''
+          },
+          onError: error => {
+            console.error('writeLocalFile failed', error)
+            const fileError = createDesktopFsError(error)
+            this.lastLocalSaveErrorMessage =
+              fileError.message || this.$t('toolbar.fileSaveFailed')
+            this.$message.error(this.lastLocalSaveErrorMessage)
+          },
+          fileSaveFailedMessage: this.$t('toolbar.fileSaveFailed')
         })
-        await platform.writeMindMapFile(writeTask.fileRef, string)
-        await recordRecentFile(writeTask.fileRef)
-        this.refreshRecentFiles()
-        this.lastSuccessfulSaveAt = Date.now()
-        this.lastLocalSaveErrorMessage = ''
-        writeSucceeded = true
-      } catch (error) {
-        console.error('writeLocalFile failed', error)
-        const fileError = createDesktopFsError(error)
-        this.lastLocalSaveErrorMessage =
-          fileError.message || this.$t('toolbar.fileSaveFailed')
-        this.$message.error(
-          this.lastLocalSaveErrorMessage
-        )
+        if (result.writeSucceeded) {
+          this.lastLocalSaveErrorMessage = ''
+        }
       } finally {
         if (this.currentLocalFileWriteRequestId === writeTask.id) {
           this.currentLocalFileWriteRequestId = 0
@@ -2586,22 +2598,7 @@ export default {
           this.completedLocalFileWriteRequestId,
           writeTask.id
         )
-        const hasPendingLocalWrite = this.hasPendingLocalWrite(writeTask.id)
-        this.waitingWriteToLocalFile = hasPendingLocalWrite
-        if (!hasPendingLocalWrite && writeSucceeded) {
-          if (this.recoveryTimer) {
-            clearTimeout(this.recoveryTimer)
-            this.recoveryTimer = null
-          }
-          try {
-            await clearRecoveryDraftForFile(writeTask.fileRef)
-          } catch (error) {
-            console.error('clearRecoveryDraftForFile failed', error)
-          }
-          this.recoveredDraftLoaded = false
-          markDocumentDirty(false)
-          this.lastLocalSaveErrorMessage = ''
-        }
+        this.waitingWriteToLocalFile = this.hasPendingLocalWrite(writeTask.id)
       }
     },
 

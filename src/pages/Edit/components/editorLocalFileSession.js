@@ -138,3 +138,80 @@ export const serializeMindMapWriteContent = ({
     isFullDataFile: !!isFullDataFile
   })
 }
+
+/**
+ * Core local mind-map write pipeline extracted from Toolbar.
+ * Keeps recovery draft cleanup and dirty-flag transitions centralized.
+ *
+ * Note: recovery cleanup runs on successful write of THIS task. Callers should
+ * still recompute waitingWriteToLocalFile after updating request id counters.
+ */
+export const performLocalMindMapWrite = async ({
+  writeTask,
+  writeMindMapFile,
+  recordRecentFile,
+  clearRecoveryDraft,
+  markDocumentDirty,
+  onSuccess,
+  onError,
+  fileSaveFailedMessage = '保存失败'
+} = {}) => {
+  if (!writeTask) {
+    return {
+      writeSucceeded: false
+    }
+  }
+
+  let writeSucceeded = false
+  try {
+    const string = serializeMindMapWriteContent({
+      content: writeTask.content,
+      configData: writeTask.configData,
+      isFullDataFile: writeTask.isFullDataFile
+    })
+    await writeMindMapFile(writeTask.fileRef, string)
+    if (typeof recordRecentFile === 'function') {
+      await recordRecentFile(writeTask.fileRef)
+    }
+    writeSucceeded = true
+    if (typeof onSuccess === 'function') {
+      onSuccess(writeTask)
+    }
+    try {
+      if (typeof clearRecoveryDraft === 'function') {
+        await clearRecoveryDraft(writeTask.fileRef)
+      }
+    } catch (_error) {
+      // recovery cleanup failure should not mark save as failed
+    }
+    if (typeof markDocumentDirty === 'function') {
+      markDocumentDirty(false)
+    }
+  } catch (error) {
+    if (typeof onError === 'function') {
+      onError(error, writeTask)
+    } else {
+      throw error
+    }
+  }
+
+  return {
+    writeSucceeded,
+    fileSaveFailedMessage
+  }
+}
+
+export const buildRecoveryDraftWriteArgs = ({
+  writeTask,
+  config = null
+} = {}) => {
+  if (!writeTask?.fileRef || !writeTask.content) {
+    return null
+  }
+  return {
+    fileRef: writeTask.fileRef,
+    data: writeTask.content,
+    config,
+    isFullDataFile: writeTask.isFullDataFile
+  }
+}

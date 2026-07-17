@@ -71,6 +71,19 @@
         <span class="name">{{ $t('contextmenu.expandNodeChild') }}</span>
       </div>
       <div class="splitLine"></div>
+      <div
+        class="item"
+        @click="toggleBookmark"
+        :class="{ disabled: isGeneralization }"
+      >
+        <span class="name">{{
+          nodeBookmarked
+            ? $t('bookmark.removeSelected') || '取消收藏'
+            : $t('bookmark.addSelected') || '收藏主题'
+        }}</span>
+        <span class="desc">Alt+Shift+B</span>
+      </div>
+      <div class="splitLine"></div>
       <div class="item danger" @click="exec('REMOVE_NODE')">
         <span class="name">{{ $t('contextmenu.deleteNode') }}</span>
         <span class="desc">Delete</span>
@@ -234,6 +247,10 @@ import { numberTypeList, numberLevelList } from '@/config'
 import { useSettingsStore } from '@/stores/settings'
 import { useThemeStore } from '@/stores/theme'
 import { applyLocalConfigPatch } from '@/stores/runtime'
+import {
+  isNodeBookmarked,
+  toggleNodesBookmark
+} from '@/services/nodeBookmarks'
 
 // 右键菜单
 export default {
@@ -343,6 +360,9 @@ export default {
     hasNote() {
       return !!this.node?.getData('note')
     },
+    nodeBookmarked() {
+      return isNodeBookmarked(this.node)
+    },
     numberTypeList() {
       return numberTypeList[this.$i18n.locale] || numberTypeList.zh
     },
@@ -385,6 +405,28 @@ export default {
     this.$bus.$off('node_mousedown', this.onNodeMousedown)
   },
   methods: {
+    toggleBookmark() {
+      if (this.isGeneralization || !this.node) {
+        this.hide()
+        return
+      }
+      const nodes =
+        this.mindMap?.renderer?.activeNodeList?.length > 0
+          ? this.mindMap.renderer.activeNodeList
+          : [this.node]
+      const wasBookmarked = nodes.every(node => isNodeBookmarked(node))
+      const count = toggleNodesBookmark(nodes)
+      if (count > 0) {
+        this.$bus.$emit('bookmarkRefresh')
+        this.$message.success(
+          wasBookmarked
+            ? this.$t('bookmark.removed') || '已取消收藏'
+            : this.$t('bookmark.added') || '已收藏主题'
+        )
+      }
+      this.hide()
+    },
+
     // 计算右键菜单元素的显示位置
     getShowPosition(x, y) {
       const rect = this.$refs.contextmenuRef.getBoundingClientRect()
