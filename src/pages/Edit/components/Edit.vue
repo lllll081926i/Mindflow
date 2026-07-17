@@ -696,6 +696,7 @@ export default {
       selectedNoteNode: null,
       selectedPathPreview: '',
       selectedPathClickTimer: 0,
+      selectedPathIsMulti: false,
       enableShowLoading: true,
       mindMap: null,
       mindMapData: null,
@@ -2000,9 +2001,11 @@ export default {
         this.selectedNotePreview = ''
         this.selectedNoteNode = null
         this.selectedPathPreview = ''
+        this.selectedPathIsMulti = false
         return
       }
       if (list.length > 1) {
+        this.selectedPathIsMulti = true
         this.selectedPathPreview =
           this.$t('edit.selectedCount', { count: list.length }) ||
           `已选 ${list.length} 个主题`
@@ -2011,6 +2014,7 @@ export default {
         return
       }
       const target = list[0]
+      this.selectedPathIsMulti = false
       this.selectedPathPreview = buildMindMapNodePath(target)
       const uid = target?.uid || target?.getData?.('uid')
       if (uid && this.activeSidebar === 'outline') {
@@ -2038,6 +2042,11 @@ export default {
 
     copySelectedPath() {
       if (!this.selectedPathPreview) return
+      // Multi-select strip: single click fits selection instead of copying label text
+      if (this.selectedPathIsMulti) {
+        fitMindMapSelection(this.mindMap)
+        return
+      }
       // Delay so double-click can cancel copy and fit instead
       if (this.selectedPathClickTimer) {
         clearTimeout(this.selectedPathClickTimer)
