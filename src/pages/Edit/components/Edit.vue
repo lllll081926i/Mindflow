@@ -1982,10 +1982,18 @@ export default {
 
     updateSelectedNotePreview(node, activeList = []) {
       const list = Array.isArray(activeList) ? activeList : []
-      if (list.length !== 1) {
+      if (list.length === 0) {
         this.selectedNotePreview = ''
         this.selectedNoteNode = null
         this.selectedPathPreview = ''
+        return
+      }
+      if (list.length > 1) {
+        this.selectedPathPreview =
+          this.$t('edit.selectedCount', { count: list.length }) ||
+          `已选 ${list.length} 个主题`
+        this.selectedNotePreview = ''
+        this.selectedNoteNode = null
         return
       }
       const target = list[0]
