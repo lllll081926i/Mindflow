@@ -1,19 +1,27 @@
 <template>
-  <div
-    class="countContainer"
-    :class="{ isDark: isDark }"
-    :title="$t('outline.title') || '大纲'"
-    @click="openOutline"
-  >
-    <div class="item">
+  <div class="countContainer" :class="{ isDark: isDark }">
+    <div
+      class="item isClickable"
+      :title="$t('outline.title') || '大纲'"
+      @click="openOutline"
+    >
       <span class="name">{{ $t('count.words') }}</span>
       <span class="value">{{ words }}</span>
     </div>
-    <div class="item">
+    <div
+      class="item isClickable"
+      :title="$t('outline.title') || '大纲'"
+      @click="openOutline"
+    >
       <span class="name">{{ $t('count.nodes') }}</span>
       <span class="value">{{ num }}</span>
     </div>
-    <div class="item" v-if="bookmarks > 0">
+    <div
+      class="item isClickable"
+      v-if="bookmarks > 0"
+      :title="$t('bookmark.openPanel') || '打开书签'"
+      @click="openBookmarks"
+    >
       <span class="name">{{ $t('count.bookmarks') || '书签' }}</span>
       <span class="value">{{ bookmarks }}</span>
     </div>
@@ -144,6 +152,10 @@ export default {
 
     openOutline() {
       setActiveSidebar('outline')
+    },
+
+    openBookmarks() {
+      setActiveSidebar('bookmark')
     }
   }
 }
@@ -161,7 +173,12 @@ export default {
   height: 22px;
   line-height: 22px;
   font-size: 12px;
-  cursor: pointer;
+  .item.isClickable {
+    cursor: pointer;
+  }
+  .item.isClickable:hover .value {
+    text-decoration: underline;
+  }
   display: flex;
 
   &.isDark {
