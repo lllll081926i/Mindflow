@@ -1,5 +1,10 @@
 <template>
-  <div class="countContainer" :class="{ isDark: isDark }">
+  <div
+    class="countContainer"
+    :class="{ isDark: isDark }"
+    :title="$t('outline.title') || '大纲'"
+    @click="openOutline"
+  >
     <div class="item">
       <span class="name">{{ $t('count.words') }}</span>
       <span class="value">{{ words }}</span>
@@ -19,6 +24,7 @@
 import { mapState } from 'pinia'
 import { useThemeStore } from '@/stores/theme'
 import { isBookmarkIcon } from '@/services/nodeBookmarks'
+import { setActiveSidebar } from '@/stores/runtime'
 
 const COUNT_UPDATE_DEBOUNCE_MS = 120
 
@@ -134,6 +140,10 @@ export default {
           this.walk(item, visit)
         })
       }
+    },
+
+    openOutline() {
+      setActiveSidebar('outline')
     }
   }
 }
@@ -151,6 +161,7 @@ export default {
   height: 22px;
   line-height: 22px;
   font-size: 12px;
+  cursor: pointer;
   display: flex;
 
   &.isDark {
