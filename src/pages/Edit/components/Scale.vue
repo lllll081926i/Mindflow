@@ -13,7 +13,7 @@
     <div
       class="scaleInfo"
       :title="$t('toolbar.fitCanvasAction') || '双击适应画布'"
-      @dblclick.stop="fitCanvas"
+      @dblclick.stop="onScaleDblClick"
     >
       <input
         ref="inputRef"
@@ -91,6 +91,14 @@ export default {
 
     fitCanvas() {
       this.mindMap?.view?.fit?.()
+    },
+
+    onScaleDblClick(event) {
+      if (event?.shiftKey) {
+        this.$bus?.$emit('execCommand', 'FIT_SELECTION')
+        return
+      }
+      this.fitCanvas()
     },
 
     // 聚焦时缓存当前缩放倍数
