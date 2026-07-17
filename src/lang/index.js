@@ -514,6 +514,7 @@ const zh = {
     "sheetDelete": "删除画布",
     "sheetDuplicate": "复制当前画布",
     "sheetNodeCount": "{count} 个主题",
+    "sheetBookmarkCount": "{count} 个书签",
     "sheetSwitch": "切换到此画布",
     "sheetRename": "重命名",
     "topicPath": "路径",

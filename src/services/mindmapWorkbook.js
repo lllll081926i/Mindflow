@@ -116,13 +116,28 @@ const countMindmapNodes = root => {
   return count
 }
 
+const countMindmapBookmarks = root => {
+  let count = 0
+  const walk = node => {
+    if (!node) return
+    const icons = Array.isArray(node.data?.icon) ? node.data.icon : []
+    if (icons.some(icon => String(icon || '').startsWith('star_'))) {
+      count += 1
+    }
+    ;(node.children || []).forEach(walk)
+  }
+  walk(root)
+  return count
+}
+
 export const listMindmapSheets = data => {
   const workbook = ensureMindmapWorkbook(data)
   return workbook.sheets.map(sheet => ({
     id: sheet.id,
     name: sheet.name,
     active: sheet.id === workbook.activeSheetId,
-    nodeCount: countMindmapNodes(sheet.root)
+    nodeCount: countMindmapNodes(sheet.root),
+    bookmarkCount: countMindmapBookmarks(sheet.root)
   }))
 }
 

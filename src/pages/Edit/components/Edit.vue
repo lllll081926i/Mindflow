@@ -49,6 +49,12 @@
               :title="$t('edit.sheetNodeCount', { count: sheet.nodeCount }) || `${sheet.nodeCount} 个主题`"
               >{{ sheet.nodeCount }}</small
             >
+            <small
+              v-if="sheet.bookmarkCount > 0"
+              class="mindmapSheetBookmark"
+              :title="$t('edit.sheetBookmarkCount', { count: sheet.bookmarkCount }) || `${sheet.bookmarkCount} 个书签`"
+              >★{{ sheet.bookmarkCount }}</small
+            >
           </span>
           <em
             v-if="mindmapSheets.length > 1"
@@ -2577,7 +2583,8 @@ export default {
   gap: 4px;
   min-width: 0;
 }
-.mindmapSheetCount {
+.mindmapSheetCount,
+.mindmapSheetBookmark {
   flex-shrink: 0;
   min-width: 16px;
   height: 16px;
@@ -2589,9 +2596,17 @@ export default {
   line-height: 16px;
   text-align: center;
 }
+.mindmapSheetBookmark {
+  background: rgba(245, 158, 11, 0.16);
+  color: #d97706;
+}
 .editContainer.isDark .mindmapSheetCount {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.72);
+}
+.editContainer.isDark .mindmapSheetBookmark {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fbbf24;
 }
 .mindmapSheetClose {
   font-style: normal;
