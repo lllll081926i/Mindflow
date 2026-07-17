@@ -119,7 +119,9 @@
       }}</span>
       <span class="selectedPathText">{{ selectedPathPreview }}</span>
       <span class="selectedPathAction">{{
-        $t('contextmenu.copyNodePath') || '复制'
+        selectedPathIsMulti
+          ? $t('toolbar.fitSelectionAction') || '缩放'
+          : $t('contextmenu.copyNodePath') || '复制'
       }}</span>
     </div>
     <div
