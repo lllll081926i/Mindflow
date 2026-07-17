@@ -221,7 +221,8 @@ const zh = {
     "fullscreenEdit": "全屏编辑"
   },
   "demonstrate": {
-    "demonstrate": "进入演示模式"
+    "demonstrate": "进入演示模式",
+    "speakerNotes": "演讲者备注"
   },
   "import": {
     "title": "导入",
@@ -433,6 +434,12 @@ const zh = {
     "outlineAction": "大纲",
     "fitCanvasAction": "适应画布",
     "fitSelectionAction": "缩放到选中",
+    "expandToLevelLast": "折叠到上次层级",
+    "expandToLevel1": "折叠到第 1 级",
+    "expandToLevel2": "折叠到第 2 级",
+    "expandToLevel3": "折叠到第 3 级",
+    "expandToLevel4": "折叠到第 4 级",
+    "expandToLevelDone": "已折叠到第 {level} 级",
     "expandAllAction": "展开全部",
     "collapseAllAction": "收起全部",
     "pasteOutlineAction": "粘贴大纲",
@@ -621,6 +628,7 @@ const zh = {
     "attachFailed": "添加附件失败",
     "empty": "当前主题没有附件",
     "openFailed": "打开附件失败：{name}",
+    "missingFile": "附件不存在或已被移动：{name}",
     "deleteConfirmMessage": "确定删除附件「{name}」吗？",
     "deleted": "已删除附件"
   },

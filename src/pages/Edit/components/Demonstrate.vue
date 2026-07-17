@@ -49,6 +49,19 @@
         />
       </div>
     </div>
+    <div
+      class="speakerNotes"
+      ref="speakerNotesRef"
+      v-if="isEnterDemonstrate && speakerNote"
+      @mousedown.stop
+      @mousemove.stop
+      @mouseup.stop
+    >
+      <div class="speakerNotesTitle">
+        {{ $t('demonstrate.speakerNotes') || '演讲者备注' }}
+      </div>
+      <div class="speakerNotesBody">{{ speakerNote }}</div>
+    </div>
   </div>
 </template>
 
@@ -67,7 +80,8 @@ export default {
       isEnterDemonstrate: false,
       curStepIndex: 0,
       totalStep: 0,
-      inputStep: ''
+      inputStep: '',
+      speakerNote: ''
     }
   },
   created() {
@@ -109,10 +123,14 @@ export default {
     },
     enterDemoMode() {
       this.isEnterDemonstrate = true
+      this.speakerNote = ''
       this.$nextTick(() => {
         const el = document.querySelector('#mindMapContainer')
         el.appendChild(this.$refs.exitDemonstrateBtnRef)
         el.appendChild(this.$refs.stepBoxRef)
+        if (this.$refs.speakerNotesRef) {
+          el.appendChild(this.$refs.speakerNotesRef)
+        }
       })
       this.mindMap.demonstrate.enter()
     },
@@ -125,6 +143,7 @@ export default {
       this.isEnterDemonstrate = false
       this.curStepIndex = 0
       this.totalStep = 0
+      this.speakerNote = ''
       this.$nextTick(() => {
         const el = document.querySelector('#mindMapContainer')
         if (el && this.$refs.exitDemonstrateBtnRef?.parentNode === el) {
@@ -133,12 +152,53 @@ export default {
         if (el && this.$refs.stepBoxRef?.parentNode === el) {
           el.removeChild(this.$refs.stepBoxRef)
         }
+        if (el && this.$refs.speakerNotesRef?.parentNode === el) {
+          el.removeChild(this.$refs.speakerNotesRef)
+        }
       })
+    },
+
+    resolveSpeakerNote(index) {
+      try {
+        const demo = this.mindMap?.demonstrate
+        const step = demo?.stepList?.[index]
+        const nodeData = step?.node
+        if (!nodeData) return ''
+        // Prefer live canvas node note when instance exists
+        const uid = nodeData.data?.uid || nodeData.getData?.('uid')
+        const live =
+          uid && this.mindMap.renderer?.findNodeByUid
+            ? this.mindMap.renderer.findNodeByUid(uid)
+            : null
+        const raw =
+          live?.getData?.('note') ||
+          nodeData.getData?.('note') ||
+          nodeData.data?.note ||
+          ''
+        return String(raw || '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+      } catch (_error) {
+        return ''
+      }
     },
 
     onJump(index, total) {
       this.curStepIndex = index
       this.totalStep = total
+      this.speakerNote = this.resolveSpeakerNote(index)
+      this.$nextTick(() => {
+        const el = document.querySelector('#mindMapContainer')
+        if (
+          el &&
+          this.$refs.speakerNotesRef &&
+          this.speakerNote &&
+          this.$refs.speakerNotesRef.parentNode !== el
+        ) {
+          el.appendChild(this.$refs.speakerNotesRef)
+        }
+      })
     },
 
     prev() {
@@ -245,6 +305,37 @@ export default {
       outline: none;
       color: #fff;
     }
+  }
+}
+
+.speakerNotes {
+  position: absolute;
+  left: 40px;
+  bottom: 20px;
+  z-index: 10001;
+  pointer-events: all;
+  max-width: min(360px, calc(100vw - 220px));
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  color: #fff;
+
+  .speakerNotesTitle {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.8;
+    margin-bottom: 6px;
+  }
+
+  .speakerNotesBody {
+    font-size: 13px;
+    line-height: 1.5;
+    max-height: 140px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 }
 </style>

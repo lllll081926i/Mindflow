@@ -16,7 +16,9 @@ export const DEFAULT_LOCAL_CONFIG = {
   lastLightTheme: 'default',
   enableAi: false,
   // Keep drag-import on by default so open/import stays one gesture away.
-  enableDragImport: true
+  enableDragImport: true,
+  // Last used expand-to-level for command palette quick action (1-6).
+  lastExpandLevel: 2
 }
 
 export const createDefaultMindMapData = (

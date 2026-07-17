@@ -873,6 +873,34 @@ export default {
           action: () => this.emitEditorCommand('FIT_SELECTION')
         },
         {
+          key: 'expandToLevelLast',
+          label:
+            (this.$t('toolbar.expandToLevelLast') || '折叠到上次层级') +
+            ` (${this.localConfig?.lastExpandLevel || 2})`,
+          action: () =>
+            this.expandToPreferredLevel(this.localConfig?.lastExpandLevel || 2)
+        },
+        {
+          key: 'expandToLevel1',
+          label: this.$t('toolbar.expandToLevel1') || '折叠到第 1 级',
+          action: () => this.expandToPreferredLevel(1)
+        },
+        {
+          key: 'expandToLevel2',
+          label: this.$t('toolbar.expandToLevel2') || '折叠到第 2 级',
+          action: () => this.expandToPreferredLevel(2)
+        },
+        {
+          key: 'expandToLevel3',
+          label: this.$t('toolbar.expandToLevel3') || '折叠到第 3 级',
+          action: () => this.expandToPreferredLevel(3)
+        },
+        {
+          key: 'expandToLevel4',
+          label: this.$t('toolbar.expandToLevel4') || '折叠到第 4 级',
+          action: () => this.expandToPreferredLevel(4)
+        },
+        {
           key: 'returnCenter',
           label: this.$t('contextmenu.backToRoot'),
           action: () => this.emitEditorCommand('RETURN_CENTER')
@@ -2730,6 +2758,18 @@ export default {
       }
     },
 
+    expandToPreferredLevel(level = 2) {
+      const nextLevel = Math.max(1, Math.min(6, Number(level) || 2))
+      this.emitEditorCommand('UNEXPAND_TO_LEVEL', false, nextLevel)
+      applyLocalConfigPatch({
+        lastExpandLevel: nextLevel
+      })
+      this.$message.success(
+        this.$t('toolbar.expandToLevelDone', { level: nextLevel }) ||
+          `已折叠到第 ${nextLevel} 级`
+      )
+    },
+
     async onSelectAttachment(activeNodes = []) {
       const nodes = Array.isArray(activeNodes)
         ? activeNodes.filter(Boolean)
@@ -2780,10 +2820,18 @@ export default {
         }
       } catch (error) {
         console.error('onAttachmentClick failed', error)
+        const message = String(error?.message || '')
+        const missing =
+          /不存在|找不到|ENOENT|not found|No such file/i.test(message)
         this.$message.error(
-          error?.message ||
-            this.$t('attachment.openFailed', { name: name || url }) ||
-            '打开附件失败'
+          missing
+            ? this.$t('attachment.missingFile', {
+                name: name || url,
+                path: url
+              }) || `附件不存在或已被移动：${name || url}`
+            : error?.message ||
+                this.$t('attachment.openFailed', { name: name || url }) ||
+                '打开附件失败'
         )
       }
     },
