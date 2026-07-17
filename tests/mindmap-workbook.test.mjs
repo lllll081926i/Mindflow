@@ -90,3 +90,28 @@ test('可使用自定义 root 新建画布', async () => {
   assert.equal(data.sheets[1].root.children[0].data.text, '子节点')
   assert.equal(data.activeSheetId, data.sheets[1].id)
 })
+
+test('新建画布名称自动去重', async () => {
+  const {
+    ensureMindmapWorkbook,
+    addMindmapSheet,
+    createMindmapSheet
+  } = await import('../src/services/mindmapWorkbook.js')
+  let data = ensureMindmapWorkbook(
+    createMindmapSheet({
+      name: '专题',
+      root: { data: { text: 'root' }, children: [] }
+    })
+  )
+  data = addMindmapSheet(data, {
+    name: '专题',
+    root: { data: { text: 'a' }, children: [] }
+  })
+  data = addMindmapSheet(data, {
+    name: '专题',
+    root: { data: { text: 'b' }, children: [] }
+  })
+  const names = data.sheets.map(sheet => sheet.name)
+  assert.equal(new Set(names).size, names.length)
+  assert.ok(names.includes('专题') || names.some(n => n.startsWith('专题')))
+})
