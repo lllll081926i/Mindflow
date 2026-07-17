@@ -937,6 +937,18 @@ export default {
           action: () => this.copyActiveBranchMarkdown()
         },
         {
+          key: 'createSheetFromBranch',
+          label:
+            this.$t('contextmenu.createSheetFromBranch') || '分支新建画布',
+          disabled: this.activeNodes.length <= 0,
+          action: () => {
+            const nodes = this.getActiveNodesSnapshot
+              ? this.getActiveNodesSnapshot()
+              : this.activeNodes || []
+            this.$bus.$emit('mindmapCreateSheetFromBranch', nodes[0] || null)
+          }
+        },
+        {
           key: 'collapseOtherBranches',
           label:
             this.$t('contextmenu.collapseOtherBranches') || '折叠其他分支',
