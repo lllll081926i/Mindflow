@@ -2095,7 +2095,8 @@ export default {
         setActiveSidebar('bookmark')
         return
       }
-      // Alt+ArrowUp/Down parent/first-child navigation
+      // Alt+Arrow navigation: Up parent, Down first child, Left/Right siblings
+      // Note: Alt+Left/Right without selection still reorders sheets (handled later).
       if (
         !isTypingTarget &&
         !this.commandPaletteVisible &&
@@ -2103,30 +2104,46 @@ export default {
         !event.shiftKey &&
         !event.metaKey &&
         !event.ctrlKey &&
-        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+        ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)
       ) {
         const nodes = this.getActiveNodesSnapshot
           ? this.getActiveNodesSnapshot()
           : this.activeNodes || []
         const current = nodes[0]
-        if (!current) return
-        const target =
-          event.key === 'ArrowUp'
-            ? current.parent
-            : current.children && current.children[0]
-        if (target) {
-          event.preventDefault()
-          const mindMap = target.mindMap || current.mindMap
-          if (mindMap?.renderer?.clearActiveNodeList) {
-            mindMap.renderer.clearActiveNodeList()
+        if (current) {
+          let target = null
+          if (event.key === 'ArrowUp') {
+            target = current.parent
+          } else if (event.key === 'ArrowDown') {
+            target = current.children && current.children[0]
+          } else if (current.parent && Array.isArray(current.parent.children)) {
+            const siblings = current.parent.children
+            const index = siblings.indexOf(current)
+            if (index >= 0) {
+              target =
+                event.key === 'ArrowLeft'
+                  ? siblings[index - 1]
+                  : siblings[index + 1]
+            }
           }
-          if (mindMap?.renderer?.addNodeToActiveList) {
-            mindMap.renderer.addNodeToActiveList(target)
-            mindMap.renderer.emitNodeActiveEvent?.(target, [target])
+          if (target) {
+            event.preventDefault()
+            const mindMap = target.mindMap || current.mindMap
+            if (mindMap?.renderer?.clearActiveNodeList) {
+              mindMap.renderer.clearActiveNodeList()
+            }
+            if (mindMap?.renderer?.addNodeToActiveList) {
+              mindMap.renderer.addNodeToActiveList(target)
+              mindMap.renderer.emitNodeActiveEvent?.(target, [target])
+            }
+            mindMap?.renderer?.moveNodeToCenter?.(target)
+            return
           }
-          mindMap?.renderer?.moveNodeToCenter?.(target)
+          // no sibling/parent target: for Left/Right fall through to sheet reorder
+          if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            return
+          }
         }
-        return
       }
       // Ctrl+Shift+B back to root center
       if (
