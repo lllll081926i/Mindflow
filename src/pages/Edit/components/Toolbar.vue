@@ -1010,12 +1010,24 @@ export default {
         {
           key: 'expandAll',
           label: this.$t('toolbar.expandAllAction'),
-          action: () => this.emitEditorCommand('EXPAND_ALL')
+          action: () => {
+            const nodes = this.getActiveNodesSnapshot
+              ? this.getActiveNodesSnapshot()
+              : this.activeNodes || []
+            const uid = nodes[0]?.uid || nodes[0]?.getData?.('uid') || ''
+            this.emitEditorCommand('EXPAND_ALL', uid)
+          }
         },
         {
           key: 'collapseAll',
           label: this.$t('toolbar.collapseAllAction'),
-          action: () => this.emitEditorCommand('UNEXPAND_ALL', true, '')
+          action: () => {
+            const nodes = this.getActiveNodesSnapshot
+              ? this.getActiveNodesSnapshot()
+              : this.activeNodes || []
+            const uid = nodes[0]?.uid || nodes[0]?.getData?.('uid') || ''
+            this.emitEditorCommand('UNEXPAND_ALL', !uid, uid)
+          }
         },
         {
           key: 'theme',
@@ -1974,7 +1986,7 @@ export default {
         }
         return
       }
-      // Ctrl+Shift+E expand all
+      // Ctrl+Shift+E expand all (or from selected node)
       if (
         (event.ctrlKey || event.metaKey) &&
         event.shiftKey &&
@@ -1982,10 +1994,16 @@ export default {
         !isTypingTarget
       ) {
         event.preventDefault()
-        this.emitEditorCommand('EXPAND_ALL')
+        {
+          const nodes = this.getActiveNodesSnapshot
+            ? this.getActiveNodesSnapshot()
+            : this.activeNodes || []
+          const uid = nodes[0]?.uid || nodes[0]?.getData?.('uid') || ''
+          this.emitEditorCommand('EXPAND_ALL', uid)
+        }
         return
       }
-      // Ctrl+Shift+W collapse all
+      // Ctrl+Shift+W collapse all (or from selected node)
       if (
         (event.ctrlKey || event.metaKey) &&
         event.shiftKey &&
@@ -1993,7 +2011,13 @@ export default {
         !isTypingTarget
       ) {
         event.preventDefault()
-        this.emitEditorCommand('UNEXPAND_ALL', true, '')
+        {
+          const nodes = this.getActiveNodesSnapshot
+            ? this.getActiveNodesSnapshot()
+            : this.activeNodes || []
+          const uid = nodes[0]?.uid || nodes[0]?.getData?.('uid') || ''
+          this.emitEditorCommand('UNEXPAND_ALL', !uid, uid)
+        }
         return
       }
       // Ctrl+Shift+H fit canvas
