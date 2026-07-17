@@ -26,6 +26,7 @@
           :class="{ isActive: sheet.active }"
           @click="switchMindmapSheetById(sheet.id)"
           @dblclick.stop="startRenameMindmapSheet(sheet)"
+          @contextmenu.prevent.stop="openSheetContextMenu(sheet, $event)"
           @dragstart.stop="onSheetDragStart(sheet, $event)"
           @dragover.prevent
           @drop.stop.prevent="onSheetDrop(sheet, $event)"
@@ -65,6 +66,31 @@
           :title="$t('edit.sheetDuplicate')"
           @click="addMindmapSheet(true)"
         >⧉</button>
+      </div>
+      <div
+        v-if="sheetMenu.visible"
+        class="mindmapSheetMenu"
+        :class="{ isDark: isDark }"
+        :style="{ left: sheetMenu.x + 'px', top: sheetMenu.y + 'px' }"
+        @mousedown.stop
+      >
+        <button type="button" @click="onSheetMenuAction('switch')">
+          {{ $t('edit.sheetSwitch') || '切换到此画布' }}
+        </button>
+        <button type="button" @click="onSheetMenuAction('rename')">
+          {{ $t('edit.sheetRename') || '重命名' }}
+        </button>
+        <button type="button" @click="onSheetMenuAction('duplicate')">
+          {{ $t('edit.sheetDuplicate') || '复制画布' }}
+        </button>
+        <button
+          type="button"
+          class="danger"
+          :disabled="mindmapSheets.length <= 1"
+          @click="onSheetMenuAction('delete')"
+        >
+          {{ $t('edit.sheetDelete') || '删除画布' }}
+        </button>
       </div>
     </div>
     <div
@@ -621,6 +647,12 @@ export default {
     return {
       sheetRenameDraft: '',
       sheetEditingId: '',
+      sheetMenu: {
+        visible: false,
+        x: 0,
+        y: 0,
+        sheetId: ''
+      },
       activeMarkerFilter: '',
       markerFilterMatchedUids: [],
       markerFilterMatchIndex: -1,
@@ -1450,6 +1482,7 @@ export default {
     },
 
     startRenameMindmapSheet(sheet) {
+      this.closeSheetContextMenu()
       this.sheetEditingId = sheet?.id || ''
       this.sheetRenameDraft = sheet?.name || ''
       this.$nextTick(() => {
@@ -1458,6 +1491,61 @@ export default {
         el?.focus?.()
         el?.select?.()
       })
+    },
+
+    openSheetContextMenu(sheet, event) {
+      if (!sheet?.id) return
+      this.sheetMenu = {
+        visible: true,
+        x: Math.min(event.clientX, window.innerWidth - 180),
+        y: Math.min(event.clientY, window.innerHeight - 160),
+        sheetId: sheet.id
+      }
+      const close = () => {
+        this.closeSheetContextMenu()
+        window.removeEventListener('click', close, true)
+        window.removeEventListener('keydown', onKey, true)
+      }
+      const onKey = e => {
+        if (e.key === 'Escape') close()
+      }
+      window.addEventListener('click', close, true)
+      window.addEventListener('keydown', onKey, true)
+    },
+
+    closeSheetContextMenu() {
+      this.sheetMenu = {
+        visible: false,
+        x: 0,
+        y: 0,
+        sheetId: ''
+      }
+    },
+
+    async onSheetMenuAction(action) {
+      const sheetId = this.sheetMenu.sheetId
+      const sheet = (this.mindmapSheets || []).find(item => item.id === sheetId)
+      this.closeSheetContextMenu()
+      if (!sheet) return
+      if (action === 'switch') {
+        await this.switchMindmapSheetById(sheet.id)
+        return
+      }
+      if (action === 'rename') {
+        this.startRenameMindmapSheet(sheet)
+        return
+      }
+      if (action === 'duplicate') {
+        // Duplicate by switching to sheet then addSheet(copyActive)
+        if (sheet.id !== this.activeMindmapSheetId) {
+          await this.switchMindmapSheetById(sheet.id)
+        }
+        await this.addMindmapSheet(true)
+        return
+      }
+      if (action === 'delete') {
+        await this.deleteMindmapSheetById(sheet.id)
+      }
     },
 
     async commitRenameMindmapSheet() {
@@ -2381,6 +2469,46 @@ export default {
 .mindmapSheetActions {
   display: flex;
   gap: 4px;
+}
+.mindmapSheetMenu {
+  position: fixed;
+  z-index: 5000;
+  min-width: 148px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mindmapSheetMenu.isDark {
+  background: #1f242b;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+}
+.mindmapSheetMenu button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  color: inherit;
+  cursor: pointer;
+}
+.mindmapSheetMenu button:hover {
+  background: rgba(37, 99, 235, 0.1);
+}
+.mindmapSheetMenu button.danger {
+  color: #dc2626;
+}
+.mindmapSheetMenu button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .mindmapSheetActionBtn {
   width: 28px;
