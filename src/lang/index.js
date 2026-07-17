@@ -596,7 +596,14 @@ const zh = {
   },
   "attachment": {
     "deleteAttachment": "删除附件",
-    "tip": "附件功能仅在客户端可用"
+    "tip": "可将本地文件挂到主题上，点击图标用系统默认程序打开",
+    "needSelection": "请先选择要添加附件的主题",
+    "attached": "已添加附件",
+    "attachFailed": "添加附件失败",
+    "empty": "当前主题没有附件",
+    "openFailed": "打开附件失败：{name}",
+    "deleteConfirmMessage": "确定删除附件「{name}」吗？",
+    "deleted": "已删除附件"
   },
   "annotation": {
     "mark": "标记",
@@ -958,7 +965,8 @@ const zh = {
     "templateReplaceConfirmMessage": "套用模版会替换当前页面内容，确认后将覆盖现有节点与连线。"
   },
   "note": {
-    "title": "备注"
+    "title": "备注",
+    "edit": "编辑"
   },
   "nodeLink": {
     "linkToNode": "链接到指定节点",

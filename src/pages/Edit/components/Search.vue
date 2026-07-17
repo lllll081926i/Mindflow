@@ -350,6 +350,7 @@ export default {
           if (plain.toLowerCase().includes(keyword.toLowerCase())) {
             results.push({
               id: (data.uid || plain) + '@' + sheet.id,
+              nodeUid: data.uid || '',
               sheetId: sheet.id,
               sheetName: sheet.name,
               name: plain,
@@ -371,11 +372,34 @@ export default {
     },
     async jumpToCrossSheetResult(item) {
       if (!item?.sheetId) return
+      const targetUid = String(item.nodeUid || '').trim()
+      const keyword = this.searchText.trim()
       this.$bus.$emit('mindmapSwitchSheet', item.sheetId)
-      // After sheet switch, re-search current sheet for the same keyword and jump first match.
+      // After sheet switch, re-search and prefer the same node uid when available.
       this.$nextTick(() => {
         setTimeout(() => {
           this.executeSearch({ restart: true })
+          if (!targetUid || !this.mindMap?.search) return
+          const tryJumpByUid = () => {
+            const list = this.searchResultList.filter(result => !result.isCrossSheet)
+            const hitIndex = list.findIndex(result => String(result.id || '') === targetUid)
+            if (hitIndex >= 0) {
+              this.syncActiveSearchResult(
+                this.searchResultList.findIndex(result => result.id === list[hitIndex].id)
+              )
+              this.mindMap.search.jump(hitIndex)
+              return true
+            }
+            return false
+          }
+          if (!tryJumpByUid()) {
+            // Wait one more tick for search match list to settle.
+            setTimeout(() => {
+              if (!tryJumpByUid() && keyword) {
+                this.executeSearch({ restart: true })
+              }
+            }, 120)
+          }
         }, 80)
       })
     },

@@ -123,3 +123,56 @@ pub async fn open_external_url(url: String) -> Result<(), String> {
   #[allow(unreachable_code)]
   Err("当前平台暂不支持打开外部链接".to_string())
 }
+
+/// Open a local filesystem path with the OS default application.
+/// Used by mind-map node attachments (XMind-like local file references).
+#[tauri::command]
+pub async fn open_local_path(path: String) -> Result<(), String> {
+  let trimmed = path.trim();
+  if trimmed.is_empty() {
+    return Err("路径不能为空".to_string());
+  }
+  if trimmed.starts_with("http://") || trimmed.starts_with("https://") {
+    return open_external_url(trimmed.to_string()).await;
+  }
+
+  let candidate = std::path::PathBuf::from(trimmed);
+  if !candidate.is_absolute() {
+    return Err("仅支持打开绝对路径的本地文件".to_string());
+  }
+  if !candidate.exists() {
+    return Err("文件不存在或已被移动".to_string());
+  }
+
+  let path_str = candidate.to_string_lossy().to_string();
+
+  #[cfg(target_os = "windows")]
+  {
+    Command::new("rundll32")
+      .args(["url.dll,FileProtocolHandler", &path_str])
+      .spawn()
+      .map_err(|error| error.to_string())?;
+    return Ok(());
+  }
+
+  #[cfg(target_os = "macos")]
+  {
+    Command::new("open")
+      .arg(&path_str)
+      .spawn()
+      .map_err(|error| error.to_string())?;
+    return Ok(());
+  }
+
+  #[cfg(target_os = "linux")]
+  {
+    Command::new("xdg-open")
+      .arg(&path_str)
+      .spawn()
+      .map_err(|error| error.to_string())?;
+    return Ok(());
+  }
+
+  #[allow(unreachable_code)]
+  Err("当前平台暂不支持打开本地文件".to_string())
+}

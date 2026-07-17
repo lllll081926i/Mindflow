@@ -35,6 +35,7 @@ fn main() {
       commands::config::record_recent_file,
       commands::config::take_pending_associated_files,
       commands::config::open_external_url,
+      commands::config::open_local_path,
       commands::recovery::read_recovery_state,
       commands::recovery::read_recovery_draft,
       commands::recovery::write_recovery_draft,

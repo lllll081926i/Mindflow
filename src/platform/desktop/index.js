@@ -828,6 +828,54 @@ export const desktopPlatform = {
     )
   },
 
+  async openLocalPath(path) {
+    const target = String(path || '').trim()
+    if (!target) {
+      throw new Error('路径不能为空')
+    }
+    if (/^https?:\/\//i.test(target)) {
+      return this.openExternalUrl(target)
+    }
+    return invokeCommand(
+      'open_local_path',
+      {
+        path: target
+      },
+      '打开本地文件失败'
+    )
+  },
+
+  async pickOpenFile(options = {}) {
+    if (!isDesktopRuntime()) {
+      const file = await pickBrowserFile({
+        accept: options.accept || ''
+      })
+      if (!file) return null
+      return {
+        mode: 'browser',
+        path: createBrowserFilePath(file.name),
+        name: file.name,
+        file
+      }
+    }
+    const { open } = await loadTauriModules()
+    const selectedPath = await open({
+      multiple: false,
+      directory: false,
+      defaultPath: options.defaultPath || undefined,
+      filters: Array.isArray(options.filters) ? options.filters : undefined
+    })
+    if (!selectedPath || Array.isArray(selectedPath)) {
+      return null
+    }
+    await rememberPickedPath(selectedPath)
+    return {
+      mode: 'desktop',
+      path: selectedPath,
+      name: getFileName(selectedPath)
+    }
+  },
+
   async startAiProxyRequest({ requestId, request }) {
     return invokeCommand(
       'start_ai_proxy_request',

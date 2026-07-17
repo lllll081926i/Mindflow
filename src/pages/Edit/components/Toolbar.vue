@@ -506,6 +506,11 @@ import {
   resolveFileContentWithRecovery,
   writeRecoveryDraftForFile
 } from '@/services/recoveryStorage'
+import {
+  applyAttachmentToNodes,
+  clearAttachmentFromNodes,
+  getAttachmentFromNode
+} from '@/services/nodeAttachment'
 
 const NodeImage = defineAsyncComponent(() => import('./NodeImage.vue'))
 const NodeHyperlink = defineAsyncComponent(() => import('./NodeHyperlink.vue'))
@@ -530,6 +535,7 @@ const defaultBtnList = [
   'icon',
   'link',
   'note',
+  'attachment',
   'tag',
   'summary',
   'associativeLine',
@@ -962,6 +968,9 @@ export default {
     window.addEventListener('keydown', this.onCommandPaletteKeydown)
     this.$bus.$on('node_active', this.onNodeActive)
     this.$bus.$on('node_note_dblclick', this.onNodeNoteDblclick)
+    this.$bus.$on('selectAttachment', this.onSelectAttachment)
+    this.$bus.$on('node_attachmentClick', this.onAttachmentClick)
+    this.$bus.$on('node_attachmentContextmenu', this.onAttachmentContextmenu)
     this.removeBootstrapStateReadyListener = onBootstrapStateReady(
       this.handleBootstrapStateReady
     )
@@ -975,6 +984,9 @@ export default {
     window.removeEventListener('keydown', this.onCommandPaletteKeydown)
     this.$bus.$off('node_active', this.onNodeActive)
     this.$bus.$off('node_note_dblclick', this.onNodeNoteDblclick)
+    this.$bus.$off('selectAttachment', this.onSelectAttachment)
+    this.$bus.$off('node_attachmentClick', this.onAttachmentClick)
+    this.$bus.$off('node_attachmentContextmenu', this.onAttachmentContextmenu)
     clearTimeout(this.timer)
     clearTimeout(this.recoveryTimer)
   },
@@ -2638,6 +2650,90 @@ export default {
           node
         })
       })
+    },
+
+    async onSelectAttachment(activeNodes = []) {
+      const nodes = Array.isArray(activeNodes)
+        ? activeNodes.filter(Boolean)
+        : this.activeNodes || []
+      if (nodes.length <= 0) {
+        this.$message.warning(
+          this.$t('attachment.needSelection') || '请先选择主题'
+        )
+        return
+      }
+      try {
+        const picked = await platform.pickOpenFile({
+          defaultPath: getLastDirectory() || undefined
+        })
+        if (!picked?.path) {
+          return
+        }
+        applyAttachmentToNodes(nodes, {
+          url: picked.path,
+          name: picked.name || picked.path.split(/[\\/]/).pop() || 'attachment'
+        })
+        this.$message.success(
+          this.$t('attachment.attached') || '已添加附件'
+        )
+      } catch (error) {
+        console.error('onSelectAttachment failed', error)
+        this.$message.error(
+          error?.message || this.$t('attachment.attachFailed') || '添加附件失败'
+        )
+      }
+    },
+
+    async onAttachmentClick(node, e) {
+      if (e?.stopPropagation) e.stopPropagation()
+      if (e?.preventDefault) e.preventDefault()
+      const { url, name } = getAttachmentFromNode(node)
+      if (!url) {
+        this.$message.warning(
+          this.$t('attachment.empty') || '当前主题没有附件'
+        )
+        return
+      }
+      try {
+        if (typeof platform.openLocalPath === 'function') {
+          await platform.openLocalPath(url)
+        } else {
+          await platform.openExternalUrl(url)
+        }
+      } catch (error) {
+        console.error('onAttachmentClick failed', error)
+        this.$message.error(
+          error?.message ||
+            this.$t('attachment.openFailed', { name: name || url }) ||
+            '打开附件失败'
+        )
+      }
+    },
+
+    async onAttachmentContextmenu(node, e) {
+      if (e?.stopPropagation) e.stopPropagation()
+      if (e?.preventDefault) e.preventDefault()
+      const { name, url } = getAttachmentFromNode(node)
+      if (!url) return
+      try {
+        await this.$confirm(
+          this.$t('attachment.deleteConfirmMessage', {
+            name: name || url
+          }) || `确定删除附件「${name || url}」吗？`,
+          this.$t('attachment.deleteAttachment') || '删除附件',
+          {
+            type: 'warning',
+            confirmButtonText: this.$t('ai.confirm') || '确认',
+            cancelButtonText: this.$t('ai.cancel') || '取消'
+          }
+        )
+      } catch (_error) {
+        return
+      }
+      clearAttachmentFromNodes([node])
+      this.$message.success(
+        this.$t('attachment.deleted') || '已删除附件'
+      )
     }
   }
 }
